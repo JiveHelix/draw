@@ -36,10 +36,6 @@ class DrawConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["draw"]
 
-        if self.settings.os == 'Windows' \
-                and self.settings.build_type != 'Debug':
-            self.cpp_info.defines.append('NDEBUG')
-
     def build_requirements(self):
         self.test_requires("catch2/2.13.8")
 

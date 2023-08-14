@@ -1,0 +1,3 @@
+[submodule "cmake_includes"]
+	path = cmake_includes
+	url = http://github.com/JiveHelix/cmake_includes.git
