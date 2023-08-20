@@ -1,10 +1,15 @@
 #pragma once
 
 #include <mutex>
-#include <wx/scrolwin.h>
 #include <pex/value.h>
 #include <pex/endpoint.h>
 #include <tau/view.h>
+
+#include <wxpex/ignores.h>
+
+WXSHIM_PUSH_IGNORES
+#include <wx/scrolwin.h>
+WXSHIM_POP_IGNORES
 
 #include "draw/scale.h"
 #include "draw/pixels.h"

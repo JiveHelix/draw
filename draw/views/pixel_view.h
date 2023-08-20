@@ -3,8 +3,12 @@
 
 #include <mutex>
 #include <pex/value.h>
-#include <wxpex/wxshim.h>
+
+#include <wxpex/ignores.h>
+
+WXSHIM_PUSH_IGNORES
 #include <wx/scrolwin.h>
+WXSHIM_POP_IGNORES
 
 #include "draw/views/pixel_canvas.h"
 #include "draw/views/pixel_view_settings.h"

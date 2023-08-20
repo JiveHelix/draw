@@ -1,7 +1,6 @@
 #pragma once
 
 
-#include <wx/listctrl.h>
 #include <pex/endpoint.h>
 #include <wxpex/labeled_widget.h>
 #include <wxpex/slider.h>
@@ -9,6 +8,12 @@
 #include <wxpex/knob.h>
 #include <wxpex/converter.h>
 #include <wxpex/static_box.h>
+
+#include <wxpex/ignores.h>
+
+WXSHIM_PUSH_IGNORES
+#include <wx/listctrl.h>
+WXSHIM_POP_IGNORES
 
 #include "draw/views/point_view.h"
 #include "draw/polygon.h"

@@ -1,6 +1,11 @@
 #include "draw/views/pixel_canvas.h"
 
+#include <wxpex/ignores.h>
+
+WXSHIM_PUSH_IGNORES
 #include <wx/dcbuffer.h>
+WXSHIM_POP_IGNORES
+
 #include <wxpex/button.h>
 #include <wxpex/check_box.h>
 

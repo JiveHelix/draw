@@ -39,9 +39,6 @@ size_t CreateShapesId()
     }
 
     // We got to the end of the set without finding any holes.
-#ifndef NDEBUG
-#error Haha, suckers
-#endif
     assert(first != shapesIds.end());
     assert(first == shapesIds.rbegin().base());
     assert(first != shapesIds.rend().base());
