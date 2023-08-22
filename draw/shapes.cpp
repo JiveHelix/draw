@@ -40,8 +40,9 @@ size_t CreateShapesId()
 
     // We got to the end of the set without finding any holes.
     assert(first != shapesIds.end());
-    assert(first == shapesIds.rbegin().base());
-    assert(first != shapesIds.rend().base());
+
+    // std::set lacks a back() function.
+    assert(*first == *shapesIds.rbegin());
 
     result = *first + 1;
     shapesIds.insert(result);
