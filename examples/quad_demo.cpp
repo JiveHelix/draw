@@ -145,10 +145,9 @@ public:
     void CreatePixelView_()
     {
         this->pixelView_ = {
-            new draw::PixelView(
-                nullptr,
+            new draw::PixelFrame(
                 this->demoControl_.pixelView,
-                "Quad View"),
+                "Quad"),
             MakeShortcuts(this->GetUserControls())};
 
         this->pixelView_.Get()->Show();

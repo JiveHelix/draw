@@ -18,7 +18,7 @@ namespace draw
 {
 
 
-class PixelView: public wxFrame
+class PixelView: public wxPanel
 {
     static constexpr int margin = 5;
     static constexpr int gridSpacing = 3;
@@ -28,8 +28,7 @@ public:
 
     PixelView(
         wxWindow *parent,
-        PixelViewControl controls,
-        const std::string &title);
+        PixelViewControl control);
 
     wxSize DoGetBestSize() const override;
 
@@ -45,6 +44,13 @@ private:
     wxWindow *verticalZoom_;
     wxBoxSizer *controlsSizer_;
     PixelCanvas *canvas_;
+};
+
+
+class PixelFrame: public wxFrame
+{
+public:
+    PixelFrame(PixelViewControl control, const std::string &title);
 };
 
 

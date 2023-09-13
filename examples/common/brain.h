@@ -44,6 +44,11 @@ public:
         return UserControl(this->user_);
     }
 
+    void CreateFrame()
+    {
+        this->LayoutWindows();
+    }
+
     void LayoutWindows()
     {
         if (!this->controlFrame_)
@@ -139,10 +144,9 @@ protected:
     void CreatePixelView_()
     {
         this->pixelView_ = {
-            new draw::PixelView(
-                nullptr,
+            new draw::PixelFrame(
                 draw::PixelViewControl(this->user_.pixelView),
-                "View"),
+                "Pixels"),
             MakeShortcuts(this->GetUserControls())};
 
         this->pixelView_.Get()->Show();

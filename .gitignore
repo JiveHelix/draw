@@ -1,0 +1,8 @@
+.*
+*.pyc
+*.o
+*.a
+build
+CMakeFiles/
+bin/
+lib/

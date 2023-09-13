@@ -4,7 +4,7 @@ from conans import ConanFile, CMake, tools
 
 class DrawConan(ConanFile):
     name = "draw"
-    version = "0.1.1"
+    version = "0.1.2"
 
     scm = {
         "type": "git",

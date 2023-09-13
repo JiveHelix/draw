@@ -162,10 +162,9 @@ public:
     void CreatePixelView_()
     {
         this->pixelView_ = {
-            new draw::PixelView(
-                nullptr,
+            new draw::PixelFrame(
                 draw::PixelViewControl(this->demoModel_.pixelView),
-                "Ellipse View"),
+                "Ellipse"),
             MakeShortcuts(this->GetUserControls())};
 
         this->pixelView_.Get()->Show();

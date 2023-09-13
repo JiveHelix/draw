@@ -9,10 +9,9 @@ namespace draw
 
 PixelView::PixelView(
     wxWindow *parent,
-    PixelViewControl controls,
-    const std::string &title)
+    PixelViewControl controls)
     :
-    wxFrame(parent, wxID_ANY, title),
+    wxPanel(parent, wxID_ANY),
     imageSizeEndpoint_(
         this,
         controls.viewSettings.imageSize,
@@ -102,6 +101,18 @@ Size PixelView::GetWindowSize_(const Size &canvasSize) const
     size += extra;
 
     return size;
+}
+
+
+PixelFrame::PixelFrame(PixelViewControl control, const std::string &title)
+    :
+    wxFrame(nullptr, wxID_ANY, title)
+{
+    auto pixelView = new PixelView(this, control);
+    auto sizer = std::make_unique<wxBoxSizer>(wxVERTICAL);
+    sizer->Add(pixelView, 1, wxEXPAND);
+
+    this->SetSizerAndFit(sizer.release());
 }
 
 
