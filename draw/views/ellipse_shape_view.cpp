@@ -20,13 +20,13 @@ EllipseShapeView::EllipseShapeView(
 
     auto ellipse =
         new EllipseView(
-            this->GetPane(),
+            this->GetPanel(),
             "Ellipse",
             control.ellipse,
             layoutOptions);
 
     auto look =
-        new LookView(this->GetPane(), "Look", control.look, layoutOptions);
+        new LookView(this->GetPanel(), "Look", control.look, layoutOptions);
 
     auto sizer = wxpex::LayoutItems(
         wxpex::verticalItems,

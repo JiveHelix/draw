@@ -86,12 +86,12 @@ void WaveformColormap::Filter(
             column < rescaled.cols();
             ++column)
         {
-            auto beginHighlight = tau::Index(
+            auto beginHighlight = FloatToIndex(
                 std::round(
                     highlightsPerColumn
                     * static_cast<float>(column)));
 
-            auto endHighlight = tau::Index(
+            auto endHighlight = FloatToIndex(
                 std::round(
                     highlightsPerColumn
                     * static_cast<float>(column + 1)));

@@ -52,7 +52,6 @@ target_sources(
     waveform_generator.h
     waveform_settings.h
     views/affine_view.h
-    views/defaults.h
     views/ellipse_shape_view.h
     views/ellipse_view.h
     views/font_look_view.h

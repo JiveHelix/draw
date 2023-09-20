@@ -1,10 +1,16 @@
 #include "waveform_settings_view.h"
-#include "draw/views/defaults.h"
 
 #include <wxpex/labeled_widget.h>
 #include <wxpex/slider.h>
 #include <wxpex/check_box.h>
 #include <wxpex/color_picker.h>
+
+
+#ifdef __WXMSW__
+static const long borderStyle = wxBORDER_NONE;
+#else
+static const long borderStyle = wxBORDER_SIMPLE;
+#endif
 
 
 namespace draw
@@ -16,41 +22,41 @@ WaveformColorView::WaveformColorView(
     WaveformColorControl control,
     const LayoutOptions &layoutOptions)
     :
-    wxpex::Collapsible(parent, "Waveform Color")
+    wxpex::Collapsible(parent, "Waveform Color", borderStyle)
 {
-    auto pane = this->GetBorderPane(borderStyle);
-    
+    auto panel = this->GetPanel();
+
     auto color = new wxpex::HsvPicker(
-        pane,
+        panel,
         "Color",
         control.color);
 
     auto highlight = new wxpex::HsvPicker(
-        pane,
+        panel,
         "Highlight",
         control.highlightColor);
 
     auto low = wxpex::LabeledWidget(
-        pane,
+        panel,
         "Low",
         new wxpex::ValueSlider(
-            pane,
+            panel,
             control.range.low,
             control.range.low.value));
 
     auto high = wxpex::LabeledWidget(
-        pane,
+        panel,
         "High",
         new wxpex::ValueSlider(
-            pane,
+            panel,
             control.range.high,
             control.range.high.value));
 
     auto count = wxpex::LabeledWidget(
-        pane,
+        panel,
         "Count",
         new wxpex::ValueSlider(
-            pane,
+            panel,
             control.count,
             control.count.value));
 
@@ -66,7 +72,7 @@ WaveformColorView::WaveformColorView(
         highlight,
         sliderSizer.release());
 
-    this->ConfigureBorderPane(5, std::move(sizer));
+    this->ConfigureTopSizer(std::move(sizer));
 }
 
 
@@ -75,42 +81,42 @@ WaveformSettingsView::WaveformSettingsView(
     WaveformControl control,
     const LayoutOptions &layoutOptions)
     :
-    wxpex::Collapsible(parent, "Waveform")
+    wxpex::Collapsible(parent, "Waveform", wxBORDER_SIMPLE)
 {
-    auto pane = this->GetBorderPane(borderStyle);
+    auto panel = this->GetPanel();
 
     auto enable =
         new wxpex::CheckBox(
-            pane,
+            panel,
             "Enable",
             control.enable);
 
     auto levelCount = wxpex::LabeledWidget(
-        pane,
+        panel,
         "Level count",
         new wxpex::ValueSlider(
-            pane,
+            panel,
             control.levelCount,
             control.levelCount.value));
 
     auto columnCount = wxpex::LabeledWidget(
-        pane,
+        panel,
         "Column count",
         new wxpex::ValueSlider(
-            pane,
+            panel,
             control.columnCount,
             control.columnCount.value));
 
     auto verticalScale = wxpex::LabeledWidget(
-        pane,
+        panel,
         "Vertical Scale",
         new wxpex::ValueSlider(
-            pane,
+            panel,
             control.verticalScale,
             control.verticalScale.value));
 
     auto color = new WaveformColorView(
-        pane,
+        panel,
         control.color,
         layoutOptions);
 
@@ -126,7 +132,7 @@ WaveformSettingsView::WaveformSettingsView(
         sliderSizer.release(),
         color);
 
-    this->ConfigureBorderPane(5, std::move(sizer));
+    this->ConfigureTopSizer(std::move(sizer));
 }
 
 

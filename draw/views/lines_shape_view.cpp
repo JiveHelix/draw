@@ -20,20 +20,20 @@ LinesShapeView::LinesShapeView(
 {
     auto infinite =
         new wxpex::CheckBox(
-            this->GetPane(),
+            this->GetPanel(),
             "infinite",
             controls.infinite);
 
     auto length = wxpex::LabeledWidget(
-        this->GetPane(),
+        this->GetPanel(),
         "length",
         new wxpex::ValueSlider(
-            this->GetPane(),
+            this->GetPanel(),
             controls.length,
             controls.length.value));
 
     auto look =
-        new LookView(this->GetPane(), "Look", controls.look, layoutOptions);
+        new LookView(this->GetPanel(), "Look", controls.look, layoutOptions);
 
     auto sizer = wxpex::LayoutItems(
         wxpex::verticalItems,

@@ -17,13 +17,13 @@ PolygonShapeView::PolygonShapeView(
 
     auto polygon =
         new PolygonView(
-            this->GetPane(),
+            this->GetPanel(),
             "Polygon",
             control.polygon,
             layoutOptions);
 
     auto look =
-        new LookView(this->GetPane(), "Look", control.look, layoutOptions);
+        new LookView(this->GetPanel(), "Look", control.look, layoutOptions);
 
     auto sizer = wxpex::LayoutItems(
         wxpex::verticalItems,

@@ -17,6 +17,13 @@ template<typename T>
 using Data = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
 
 
+template<typename T>
+Eigen::Index FloatToIndex(T value)
+{
+    return static_cast<Eigen::Index>(value);
+}
+
+
 Waveform Resize(
     const Waveform &source,
     const Size &displaySize,
@@ -63,7 +70,7 @@ Waveform DoGenerateWaveform(
             // Value 0 must go in the last row, and maximum in row zero.
             result(
                 maximum - value,
-                tau::Index(float(column) * columnMultiplier)) += 1;
+                FloatToIndex(float(column) * columnMultiplier)) += 1;
         }
     }
 

@@ -4,7 +4,7 @@ from conans import ConanFile, CMake, tools
 
 class DrawConan(ConanFile):
     name = "draw"
-    version = "0.1.2"
+    version = "0.1.3"
 
     scm = {
         "type": "git",
@@ -43,5 +43,5 @@ class DrawConan(ConanFile):
         self.requires("jive/[~1.1]")
         self.requires("fields/[~1.3]")
         self.requires("pex/[0.9.4]")
-        self.requires("tau/[~1.9]")
-        self.requires("wxpex/[~0.9]")
+        self.requires("tau/[~1.10]")
+        self.requires("wxpex/[0.9.4]")

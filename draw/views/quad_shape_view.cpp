@@ -17,10 +17,10 @@ QuadShapeView::QuadShapeView(
     wxpex::Collapsible(parent, name)
 {
     auto quad =
-        new QuadView(this->GetPane(), "Quad", control.quad, layoutOptions);
+        new QuadView(this->GetPanel(), "Quad", control.quad, layoutOptions);
 
     auto look =
-        new LookView(this->GetPane(), "Look", control.look, layoutOptions);
+        new LookView(this->GetPanel(), "Look", control.look, layoutOptions);
 
     auto sizer = wxpex::LayoutItems(
         wxpex::verticalItems,

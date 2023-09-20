@@ -18,15 +18,15 @@ PointsShapeView::PointsShapeView(
     wxpex::Collapsible(parent, name)
 {
     auto radius = wxpex::LabeledWidget(
-        this->GetPane(),
+        this->GetPanel(),
         "radius",
         new wxpex::ValueSlider(
-            this->GetPane(),
+            this->GetPanel(),
             controls.radius,
             controls.radius.value)).Layout(wxHORIZONTAL);
 
     auto look =
-        new LookView(this->GetPane(), "Look", controls.look, layoutOptions);
+        new LookView(this->GetPanel(), "Look", controls.look, layoutOptions);
 
     auto sizer = wxpex::LayoutItems(
         wxpex::verticalItems,
