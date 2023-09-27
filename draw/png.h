@@ -27,22 +27,21 @@ Gray<uint8_t> ReadPngGray8(const std::string &fileName);
 Gray<uint16_t> ReadPngGray16(const std::string &fileName);
 
 
-void WritePng(const PlanarRgb<uint8_t> &planarRgb, const std::string &fileName);
+void WritePng(
+    const std::string &fileName,
+    const PlanarRgb<uint8_t> &planarRgb);
 
-#if 0
-// TODO
 void WritePng48(
-    const PlanarRgb<uint16_t> &planarRgb,
-    const std::string &fileName);
+    const std::string &fileName,
+    const PlanarRgb<uint16_t> &planarRgb);
 
-void WriteGray8(
-    const Gray<uint8_t> &gray,
-    const std::string &fileName);
+void WritePngGray8(
+    const std::string &fileName,
+    const Gray<uint8_t> &gray);
 
-void WriteGray16(
-    const Gray<uint16_t> &gray,
-    const std::string &fileName);
-#endif
+void WritePngGray16(
+    const std::string &fileName,
+    const Gray<uint16_t> &gray);
 
 
 template<typename Pixel>
@@ -79,9 +78,16 @@ public:
         }
     }
 
-    void Write(const std::string &fileName)
+    void Write(const std::string &fileName, bool high)
     {
-        WritePng(*this->rgb_, fileName);
+        if (high)
+        {
+            WritePng48(fileName, this->rgb_->template Cast<uint16_t>());
+        }
+        else
+        {
+            WritePng(fileName, this->rgb_->template Cast<uint8_t>());
+        }
     }
 
     operator bool ()
@@ -214,6 +220,18 @@ public:
         assert(columns <= std::numeric_limits<SizeType>::max());
 
         return Size{{SizeType(columns), SizeType(rows)}};
+    }
+
+    void Write(const std::string &fileName, bool high)
+    {
+        if (high)
+        {
+            WritePngGray16(fileName, this->values_->template cast<uint16_t>());
+        }
+        else
+        {
+            WritePngGray8(fileName, this->values_->template cast<uint8_t>());
+        }
     }
 
     std::optional<Values> values_;

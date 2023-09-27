@@ -1,5 +1,6 @@
 #include "draw/png.h"
 #include <jive/overflow.h>
+#include <iostream>
 
 
 namespace draw
@@ -127,19 +128,23 @@ Gray<uint16_t> ReadPngGray16(const std::string &fileName)
 }
 
 
-void WritePng(const PlanarRgb<uint8_t> &planarRgb, const std::string &fileName)
+template<typename Pixel, typename Format>
+void DoWritePng(
+    const std::string &fileName,
+    const PlanarRgb<Pixel> &planarRgb,
+    Format pngFormat)
 {
     using Eigen::Index;
 
     png_image image;
     memset(&image, 0, sizeof(image));
     image.version = PNG_IMAGE_VERSION;
-    image.format = PNG_FORMAT_RGB;
+    image.format = pngFormat;
     image.width = ToPngInt(planarRgb.GetColumnCount());
     image.height = ToPngInt(planarRgb.GetRowCount());
 
     using Interleaved =
-        Eigen::Matrix<uint8_t, Eigen::Dynamic, 3, Eigen::RowMajor>;
+        Eigen::Matrix<Pixel, Eigen::Dynamic, 3, Eigen::RowMajor>;
 
     Interleaved interleaved = planarRgb.GetInterleaved<Eigen::RowMajor>();
 
@@ -165,6 +170,88 @@ void WritePng(const PlanarRgb<uint8_t> &planarRgb, const std::string &fileName)
     {
         std::cerr << "PNG Warning: " << image.message << std::endl;
     }
+
+    if (pngResult != 1)
+    {
+        throw PngError(std::string("Failed to write to ") + fileName);
+    }
+}
+
+
+void WritePng(
+    const std::string &fileName,
+    const PlanarRgb<uint8_t> &planarRgb)
+{
+    DoWritePng<uint8_t>(fileName, planarRgb, PNG_FORMAT_RGB);
+}
+
+
+void WritePng48(
+    const std::string &fileName,
+    const PlanarRgb<uint16_t> &planarRgb)
+{
+    DoWritePng<uint16_t>(fileName, planarRgb, PNG_FORMAT_LINEAR_RGB);
+}
+
+
+template<typename Pixel, typename Format>
+void DoWritePngGray(
+    const std::string &fileName,
+    const Gray<Pixel> &values,
+    Format pngFormat)
+{
+    using Eigen::Index;
+
+    png_image image;
+    memset(&image, 0, sizeof(image));
+    image.version = PNG_IMAGE_VERSION;
+    image.format = pngFormat;
+    image.width = ToPngInt(values.cols());
+    image.height = ToPngInt(values.rows());
+
+    int pngResult = png_image_write_to_file(
+        &image,
+        fileName.c_str(),
+        0,
+        values.data(),
+        0,
+        nullptr);
+
+    if (image.opaque)
+    {
+        png_image_free(&image);
+    }
+
+    if (image.warning_or_error > 2)
+    {
+        throw PngError(image.message);
+    }
+
+    if (image.warning_or_error == 1)
+    {
+        std::cerr << "PNG Warning: " << image.message << std::endl;
+    }
+
+    if (pngResult != 1)
+    {
+        throw PngError(std::string("Failed to write to ") + fileName);
+    }
+}
+
+
+void WritePngGray8(
+    const std::string &fileName,
+    const Gray<uint8_t> &values)
+{
+    DoWritePngGray<uint8_t>(fileName, values, PNG_FORMAT_GRAY);
+}
+
+
+void WritePngGray16(
+    const std::string &fileName,
+    const Gray<uint16_t> &values)
+{
+    DoWritePngGray<uint16_t>(fileName, values, PNG_FORMAT_LINEAR_Y);
 }
 
 
