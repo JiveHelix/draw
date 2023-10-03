@@ -146,7 +146,8 @@ void DoWritePng(
     using Interleaved =
         Eigen::Matrix<Pixel, Eigen::Dynamic, 3, Eigen::RowMajor>;
 
-    Interleaved interleaved = planarRgb.GetInterleaved<Eigen::RowMajor>();
+    Interleaved interleaved =
+        planarRgb.template GetInterleaved<Eigen::RowMajor>();
 
     int pngResult = png_image_write_to_file(
         &image,
