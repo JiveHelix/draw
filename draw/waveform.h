@@ -20,7 +20,7 @@ using Data = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
 template<typename T>
 Eigen::Index FloatToIndex(T value)
 {
-    return static_cast<Eigen::Index>(value);
+    return static_cast<Eigen::Index>(std::round(value));
 }
 
 
@@ -39,10 +39,21 @@ Waveform DoGenerateWaveform(
 {
     auto maximum = tau::Index(levelCount) - 1;
 
-    auto columnDivisor = static_cast<float>(data.cols())
+    auto columnDivisor = static_cast<float>(data.cols() - 1)
         / static_cast<float>(columnCount - 1);
 
     auto columnMultiplier = 1.0f / columnDivisor;
+
+    auto maximumData = static_cast<size_t>(data.maxCoeff());
+
+    if (maximumData > maximumValue)
+    {
+        std::cerr << "Warning: data exceeds expected maximum value:\n";
+        std::cerr << "  maximumValue: " << maximumValue << std::endl;
+        std::cerr << "  maximumData: " << maximumData << std::endl;
+
+        maximumValue = maximumData;
+    }
 
     auto valueDivisor = static_cast<float>(maximumValue)
         / static_cast<float>(maximum);
@@ -54,9 +65,18 @@ Waveform DoGenerateWaveform(
 
     using Scalar = typename Matrix::Scalar;
 
-    Matrix scaled =
-        (data.template cast<float>().array() * valueMultiplier)
-            .template cast<Scalar>();
+    Matrix scaled;
+
+    if (maximum == tau::Index(maximumValue))
+    {
+        scaled = data;
+    }
+    else
+    {
+        scaled =
+            (data.template cast<float>().array() * valueMultiplier).round()
+                .template cast<Scalar>();
+    }
 
     using Eigen::Index;
 

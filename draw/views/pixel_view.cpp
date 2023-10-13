@@ -12,10 +12,6 @@ PixelView::PixelView(
     PixelViewControl controls)
     :
     wxPanel(parent, wxID_ANY),
-    imageSizeEndpoint_(
-        this,
-        controls.viewSettings.imageSize,
-        &PixelView::OnImageSize_),
     horizontalZoom_(
         new ScaleSlider(
             this,
@@ -62,6 +58,8 @@ PixelView::PixelView(
     auto sizer = new wxBoxSizer(wxHORIZONTAL);
     sizer->Add(gridSizer, 1, wxALL | wxEXPAND, margin);
     this->SetSizer(sizer);
+
+    this->SetMinSize(wxSize(100, 100));
 }
 
 
@@ -71,14 +69,6 @@ wxSize PixelView::DoGetBestSize() const
         this->GetWindowSize_(this->canvas_->GetVirtualSize());
 
     return wxpex::ToWxSize(result);
-}
-
-
-void PixelView::OnImageSize_(const Size &imageSize)
-{
-    // Recalculate window size based on new image size.
-    auto size = this->GetWindowSize_(imageSize);
-    this->SetClientSize(wxpex::ToWxSize(size));
 }
 
 
@@ -109,9 +99,9 @@ PixelFrame::PixelFrame(PixelViewControl control, const std::string &title)
     wxFrame(nullptr, wxID_ANY, title)
 {
     auto pixelView = new PixelView(this, control);
+    pixelView->SetMinSize(wxSize(400, 225));
     auto sizer = std::make_unique<wxBoxSizer>(wxVERTICAL);
     sizer->Add(pixelView, 1, wxEXPAND);
-
     this->SetSizerAndFit(sizer.release());
 }
 

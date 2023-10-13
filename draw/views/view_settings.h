@@ -20,6 +20,7 @@ struct ViewFields
         fields::Field(&T::imageSize, "imageSize"),
         fields::Field(&T::viewSize, "viewSize"),
         fields::Field(&T::viewPosition, "viewPosition"),
+        fields::Field(&T::imageCenterPixel, "imageCenterPixel"),
         fields::Field(&T::scale, "scale"),
         fields::Field(&T::linkZoom, "linkZoom"),
         fields::Field(&T::resetZoom, "resetZoom"),
@@ -33,6 +34,7 @@ struct ViewTemplate
     T<pex::MakeGroup<SizeGroup>> imageSize;
     T<pex::MakeGroup<SizeGroup>> viewSize;
     T<pex::MakeGroup<PointGroup>> viewPosition;
+    T<pex::MakeGroup<tau::Point2dGroup<double>>> imageCenterPixel;
     T<pex::MakeGroup<ScaleGroup>> scale;
     T<bool> linkZoom;
     T<pex::MakeSignal> resetZoom;
@@ -52,6 +54,7 @@ struct ViewSettings: public ViewTemplate<pex::Identity>
         return ViewSettings{{
             Size{{defaultWidth, defaultHeight}},
             Size{{defaultWidth, defaultHeight}},
+            Point{{0, 0}},
             Point{{0, 0}},
             Scale(1.0, 1.0),
             true,
@@ -84,7 +87,6 @@ private:
     pex::Terminus<ViewSettingsModel, pex::model::Value<bool>> linkZoomTerminus_;
     pex::Terminus<ViewSettingsModel, pex::model::Signal> resetZoomTerminus_;
     pex::Terminus<ViewSettingsModel, pex::model::Signal> fitZoomTerminus_;
-    tau::Point2d<double> imageCenterPixel_;
     bool ignoreZoom_;
     bool ignoreViewPosition_;
 

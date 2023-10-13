@@ -43,21 +43,15 @@ using DemoModel = typename DemoGroup::Model;
 using DemoControl = typename DemoGroup::Control;
 
 
-class DemoMainFrame: public wxFrame
+class DemoControls: public wxPanel
 {
 public:
-    DemoMainFrame(
-        UserControl userControl,
+    DemoControls(
+        wxWindow *parent,
         DemoControl control)
         :
-        wxFrame(nullptr, wxID_ANY, "Shapes Demo"),
-        shortcuts_(
-            std::make_unique<wxpex::MenuShortcuts>(
-                wxpex::UnclosedWindow(this),
-                MakeShortcuts(userControl)))
+        wxPanel(parent, wxID_ANY)
     {
-        this->SetMenuBar(this->shortcuts_->GetMenuBar());
-
         wxpex::LayoutOptions layoutOptions{};
         layoutOptions.labelFlags = wxALIGN_RIGHT;
 
@@ -72,9 +66,6 @@ public:
         auto topSizer = wxpex::BorderSizer(polygonShapeView, 5);
         this->SetSizerAndFit(topSizer.release());
     }
-
-private:
-    std::unique_ptr<wxpex::MenuShortcuts> shortcuts_;
 };
 
 
@@ -101,16 +92,12 @@ public:
         this->demoControl_.polygon.look.fillColor.saturation.Set(1);
     }
 
-    wxpex::Window CreateControlFrame()
+    wxWindow * CreateControls(wxWindow *parent)
     {
         this->userControl_.pixelView.viewSettings.imageSize.Set(
             draw::Size(1920, 1080));
 
-        auto window = wxpex::Window(new DemoMainFrame(
-            this->GetUserControls(),
-            this->demoControl_));
-
-        return window;
+        return new DemoControls(parent, this->demoControl_);
     }
 
     void SaveSettings() const
@@ -121,6 +108,11 @@ public:
     void LoadSettings()
     {
         std::cout << "TODO: Restore the processing settings." << std::endl;
+    }
+
+    std::string GetAppName() const
+    {
+        return "Polygon Demo";
     }
 
     void ShowAbout()
@@ -140,20 +132,9 @@ public:
         Brain<DemoBrain>::Shutdown();
     }
 
-    void LoadPng(const draw::Png<int32_t> &)
+    void LoadPng(const draw::GrayPng<PngPixel> &)
     {
 
-    }
-
-    void CreatePixelView_()
-    {
-        this->pixelView_ = {
-            new draw::PixelFrame(
-                this->userControl_.pixelView,
-                "Polygon"),
-            MakeShortcuts(this->GetUserControls())};
-
-        this->pixelView_.Get()->Show();
     }
 
 private:

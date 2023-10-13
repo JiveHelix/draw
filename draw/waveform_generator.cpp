@@ -52,7 +52,7 @@ void WaveformColormap::Filter(
     const WaveformSettings &waveformSettings,
     const Size &displayedSize,
     const DataMatrix &data,
-    const std::optional<Highlights> &highlights,
+    const Highlights *highlights,
     PixelMatrix *output)
 {
     Waveform levelMap = DoGenerateWaveform(
@@ -144,9 +144,7 @@ WaveformGenerator::WaveformGenerator(
     viewSize_(this->pixelViewControl_.viewSettings.viewSize),
 
     isRunning_(true),
-    hasFrame_(false),
-    data_(),
-    highlights_(),
+    inputs_(),
     colorMap_(waveformControl.color.Get()),
     hasFrameCondition_(),
     thread_(std::bind(&WaveformGenerator::Run_, this))
@@ -176,11 +174,16 @@ void WaveformGenerator::operator()(
     const std::optional<Highlights> &highlights)
 {
     pex::WriteLock lock(this->mutex_);
-    this->data_ = data;
-    this->highlights_ = highlights;
-    this->hasFrame_ = true;
+
+    this->inputs_.emplace(
+        this->waveformSettings_,
+        this->viewSize_,
+        data,
+        highlights);
+
     this->hasFrameCondition_.notify_one();
 }
+
 
 void WaveformGenerator::Shutdown()
 {
@@ -225,30 +228,36 @@ void WaveformGenerator::Run_()
 {
     while (this->isRunning_)
     {
-        pex::ReadLock lock(this->mutex_);
+        WaveformInput input;
 
-        if (!this->hasFrame_)
         {
-            this->hasFrameCondition_.wait(
-                lock,
-                [this]{ return this->hasFrame_ || !this->isRunning_; });
+            pex::WriteLock lock(this->mutex_);
+
+            if (this->inputs_.empty())
+            {
+                this->hasFrameCondition_.wait(
+                    lock,
+                    [this]{ return !this->inputs_.empty() || !this->isRunning_; });
+            }
+
+            if (!this->isRunning_)
+            {
+                return;
+            }
+
+            assert(!this->inputs_.empty());
+
+            input = this->inputs_.front();
+            this->inputs_.pop();
         }
 
-        if (!this->isRunning_)
-        {
-            return;
-        }
-
-        // TODO: Change the input frames to a queue.
-        this->hasFrame_ = false;
-
-        auto waveformPixels = Pixels::CreateShared(this->viewSize_);
+        auto waveformPixels = Pixels::CreateShared(input.viewSize);
 
         this->colorMap_.Filter(
-            this->waveformSettings_,
-            this->viewSize_,
-            this->data_,
-            this->highlights_,
+            input.waveformSettings,
+            input.viewSize,
+            *input.data,
+            input.highlights.get(),
             &waveformPixels->data);
 
         this->pixelViewControl_.asyncPixels.Set(waveformPixels);
@@ -282,9 +291,7 @@ WaveformGenerator::WaveformGenerator(
     viewSize_(other.viewSize_),
 
     isRunning_(true),
-    hasFrame_(false),
-    data_(),
-    highlights_(),
+    inputs_(),
     colorMap_(std::move(other.colorMap_)),
     hasFrameCondition_(),
     thread_(std::bind(&WaveformGenerator::Run_, this))

@@ -25,8 +25,7 @@ template<typename T>
 struct DemoFields
 {
     static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::quad, "quad"),
-        fields::Field(&T::pixelView, "pixelView"));
+        fields::Field(&T::quad, "quad"));
 };
 
 
@@ -34,7 +33,6 @@ template<template<typename> typename T>
 struct DemoTemplate
 {
     T<pex::MakeGroup<draw::QuadShapeGroup>> quad;
-    T<draw::PixelViewGroupMaker> pixelView;
 };
 
 
@@ -44,21 +42,15 @@ using DemoModel = typename DemoGroup::Model;
 using DemoControl = typename DemoGroup::Control;
 
 
-class DemoMainFrame: public wxFrame
+class DemoControls: public wxPanel
 {
 public:
-    DemoMainFrame(
-        UserControl userControl,
+    DemoControls(
+        wxWindow *parent,
         DemoControl control)
         :
-        wxFrame(nullptr, wxID_ANY, "Shapes Demo"),
-        shortcuts_(
-            std::make_unique<wxpex::MenuShortcuts>(
-                wxpex::UnclosedWindow(this),
-                MakeShortcuts(userControl)))
+        wxPanel(parent, wxID_ANY)
     {
-        this->SetMenuBar(this->shortcuts_->GetMenuBar());
-
         wxpex::LayoutOptions layoutOptions{};
         layoutOptions.labelFlags = wxALIGN_RIGHT;
 
@@ -73,9 +65,6 @@ public:
         auto topSizer = wxpex::BorderSizer(quadShapeView, 5);
         this->SetSizerAndFit(topSizer.release());
     }
-
-private:
-    std::unique_ptr<wxpex::MenuShortcuts> shortcuts_;
 };
 
 
@@ -92,22 +81,20 @@ public:
         quadEndpoint_(this, this->demoControl_.quad, &DemoBrain::OnQuad_),
         quadBrain_(
             this->demoControl_.quad.quad,
-            this->demoControl_.pixelView)
+            this->userControl_.pixelView)
     {
         this->demoControl_.quad.look.fillEnable.Set(true);
         this->demoControl_.quad.look.fillColor.saturation.Set(1);
     }
 
-    wxpex::Window CreateControlFrame()
+    wxWindow * CreateControls(wxWindow *parent)
     {
         this->userControl_.pixelView.viewSettings.imageSize.Set(
             draw::Size(1920, 1080));
 
-        auto window = wxpex::Window(new DemoMainFrame(
-            this->GetUserControls(),
-            DemoControl(this->demoModel_)));
-
-        return window;
+        return new DemoControls(
+            parent,
+            this->demoControl_);
     }
 
     void SaveSettings() const
@@ -120,6 +107,11 @@ public:
         std::cout << "TODO: Restore the settings." << std::endl;
     }
 
+    std::string GetAppName() const
+    {
+        return "Quad Demo";
+    }
+
     void ShowAbout()
     {
         wxAboutBox(MakeAboutDialogInfo("Quad Demo"));
@@ -129,7 +121,7 @@ public:
     {
         auto shapes = draw::Shapes(this->shapesId_.Get());
         shapes.EmplaceBack<draw::QuadShape>(this->demoModel_.quad.Get());
-        this->demoControl_.pixelView.asyncShapes.Set(shapes);
+        this->userControl_.pixelView.asyncShapes.Set(shapes);
     }
 
     void Shutdown()
@@ -137,20 +129,9 @@ public:
         Brain<DemoBrain>::Shutdown();
     }
 
-    void LoadPng(const draw::Png<int32_t> &)
+    void LoadPng(const draw::GrayPng<PngPixel> &)
     {
 
-    }
-
-    void CreatePixelView_()
-    {
-        this->pixelView_ = {
-            new draw::PixelFrame(
-                this->demoControl_.pixelView,
-                "Quad"),
-            MakeShortcuts(this->GetUserControls())};
-
-        this->pixelView_.Get()->Show();
     }
 
 private:

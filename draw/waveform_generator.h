@@ -2,6 +2,7 @@
 
 #include <thread>
 #include <condition_variable>
+#include <queue>
 
 #include <tau/color_map.h>
 #include <tau/color_maps/gradient.h>
@@ -46,12 +47,48 @@ public:
         const WaveformSettings &waveformSettings,
         const Size &displayedSize,
         const DataMatrix &data,
-        const std::optional<Highlights> &highlights,
+        const Highlights *highlights, // may be NULL
         PixelMatrix *output);
 
 private:
     ColorMap map_;
     Rescale rescale_;
+};
+
+
+struct WaveformInput
+{
+    WaveformSettings waveformSettings;
+    Size viewSize;
+    std::shared_ptr<DataMatrix> data;
+    std::shared_ptr<Highlights> highlights;
+
+    WaveformInput()
+        :
+        waveformSettings{},
+        viewSize{},
+        data{},
+        highlights{}
+    {
+
+    }
+
+    WaveformInput(
+        const WaveformSettings &waveformSettings_,
+        const Size &viewSize_,
+        const DataMatrix &data_,
+        const std::optional<Highlights> &highlights_ = {})
+        :
+        waveformSettings(waveformSettings_),
+        viewSize(viewSize_),
+        data(std::make_shared<DataMatrix>(data_)),
+        highlights()
+    {
+        if (highlights_)
+        {
+            this->highlights = std::make_shared<Highlights>(*highlights);
+        }
+    }
 };
 
 
@@ -94,9 +131,7 @@ private:
     WaveformSettings waveformSettings_;
     Size viewSize_;
     bool isRunning_;
-    bool hasFrame_;
-    DataMatrix data_;
-    std::optional<Highlights> highlights_;
+    std::queue<WaveformInput> inputs_;
 
     WaveformColormap colorMap_;
 

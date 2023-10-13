@@ -43,21 +43,8 @@ static wxpex::Shortcuts GetFileMenuShortcuts(UserControl userControl)
 }
 
 
-static wxpex::Shortcuts GetLayoutMenuShortcuts(UserControl userControl)
-{
-    return {
-        wxpex::Shortcut(
-            userControl.layoutWindows,
-            wxACCEL_ALT,
-            'L',
-            "Layout windows",
-            "Restore the default window layout")};
-}
-
-
 wxpex::ShortcutGroups MakeShortcuts(UserControl userControl)
 {
     return {
-        {"File", GetFileMenuShortcuts(userControl)},
-        {"Layout", GetLayoutMenuShortcuts(userControl)}};
+        {"File", GetFileMenuShortcuts(userControl)}};
 }

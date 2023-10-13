@@ -1,9 +1,9 @@
 #pragma once
 
 #include <mutex>
+#include <jive/path.h>
 #include <pex/value.h>
 #include <pex/endpoint.h>
-#include <tau/view.h>
 
 #include <wxpex/ignores.h>
 
@@ -11,6 +11,7 @@ WXSHIM_PUSH_IGNORES
 #include <wx/scrolwin.h>
 WXSHIM_POP_IGNORES
 
+#include "draw/view.h"
 #include "draw/scale.h"
 #include "draw/pixels.h"
 #include "draw/views/pixel_view_settings.h"
@@ -72,6 +73,8 @@ private:
 
     void OnPaint_(wxPaintEvent &);
 
+    tau::Point2d<int> CorrectCenterPixel_(draw::View<int> &view) const;
+
     template<typename Context>
     bool Draw_(Context &&context)
     {
@@ -87,10 +90,10 @@ private:
             this->viewPositionEndpoint_.control.Get(),
             this->control_.viewSettings.viewSize.Get()}};
 
-        auto view = tau::View<int>(
-            viewRegion,
-            this->imageSizeEndpoint_.control.Get(),
-            scale);
+        auto imageSize = this->imageSizeEndpoint_.control.Get();
+
+        auto view =
+            draw::View<int>(viewRegion, imageSize, scale);
 
         bool hasShapes = this->HasShapes_();
 
@@ -99,8 +102,12 @@ private:
             return false;
         }
 
+        tau::Point2d<int> correction{{0, 0}};
+
         if (view.HasArea())
         {
+            correction = this->CorrectCenterPixel_(view);
+
             auto bitmap = wxBitmap(this->image_);
             auto source = wxMemoryDC(bitmap);
 
@@ -124,7 +131,7 @@ private:
         auto gc = wxpex::GraphicsContext(context);
 
         auto viewPosition =
-            this->viewPositionEndpoint_.control.Get()
+            (this->viewPositionEndpoint_.control.Get() + correction)
                 .template Convert<double>();
 
         gc->Translate(-viewPosition.x, -viewPosition.y);
@@ -151,6 +158,7 @@ private:
 
     SizeEndpoint imageSizeEndpoint_;
     PositionEndpoint viewPositionEndpoint_;
+    ScaleEndpoint scaleEndpoint_;
 
     using CursorEndpoint =
         typename pex::Endpoint
@@ -159,8 +167,10 @@ private:
             decltype(PixelViewControl::cursor)
         >;
 
-    ScaleEndpoint scaleEndpoint_;
     CursorEndpoint cursorEndpoint_;
+
+    using ImageCenterControl = typename tau::Point2dGroup<double>::Control;
+    ImageCenterControl imageCenter_;
 
     PixelViewControl control_;
     wxImage image_;

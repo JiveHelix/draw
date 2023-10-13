@@ -18,21 +18,16 @@
 #include "common/brain.h"
 
 
-class DemoMainFrame: public wxFrame
+class DemoControls: public wxPanel
 {
 public:
-    DemoMainFrame(
+    DemoControls(
+        wxWindow *parent,
         UserControl userControl,
         draw::WaveformControl control)
         :
-        wxFrame(nullptr, wxID_ANY, "Waveform Demo"),
-        shortcuts_(
-            std::make_unique<wxpex::MenuShortcuts>(
-                wxpex::UnclosedWindow(this),
-                MakeShortcuts(userControl)))
+        wxPanel(parent, wxID_ANY)
     {
-        this->SetMenuBar(this->shortcuts_->GetMenuBar());
-
         wxpex::LayoutOptions layoutOptions{};
         layoutOptions.labelFlags = wxALIGN_RIGHT;
 
@@ -60,72 +55,76 @@ public:
         auto topSizer = wxpex::BorderSizer(std::move(sizer), 5);
         this->SetSizerAndFit(topSizer.release());
     }
-
-private:
-    std::unique_ptr<wxpex::MenuShortcuts> shortcuts_;
 };
 
 
 class DemoBrain: public Brain<DemoBrain>
 {
 public:
-    static constexpr size_t valueCount = 766;
-
     DemoBrain()
         :
         Brain<DemoBrain>(),
-        observer_(this, UserControl(this->user_)),
+        observer_(this, this->userControl_),
         waveformModel_(),
-        waveformPixelViewModel_(),
+        waveformPixelModel_(),
+        waveformPixelControl_(this->waveformPixelModel_),
 
-        waveformEndpoint_(
+        waveformGenerator_(
+            draw::WaveformControl(this->waveformModel_),
+            this->waveformPixelControl_),
+
+        viewSettingsEndpoint_(
+            this,
+            this->waveformPixelControl_.viewSettings,
+            &DemoBrain::OnViewSettings_),
+
+        waveformSettingsEndpoint_(
             this,
             draw::WaveformControl(this->waveformModel_),
-            &DemoBrain::OnSettings_),
-
-        waveformViewSettingsEndpoint_(
-            this,
-            draw::ViewSettingsControl(
-                this->waveformPixelViewModel_.viewSettings),
-            &DemoBrain::OnWaveformViewSettings_),
+            &DemoBrain::OnWaveformSettings_),
 
         pngIsLoaded_(false),
         pngData_(),
 
-        waveformGenerator_(
-            draw::WaveformControl(this->waveformModel_),
-            draw::PixelViewControl(this->waveformPixelViewModel_)),
-
         colorMap_(
             tau::gray::MakeRgb8(valueCount),
             0,
-            static_cast<int32_t>(valueCount - 1)),
-
-        doCreateWaveformView_([this](){this->CreateWaveformView_();})
-
+            static_cast<int32_t>(valueCount - 1))
     {
-
+        this->user_.pixelView.viewSettings.scale.Set({.5, .5});
     }
 
-    void LoadPng(const draw::Png<int32_t> &png)
+    ~DemoBrain()
+    {
+        this->Shutdown();
+    }
+
+    void LoadPng(const draw::GrayPng<PngPixel> &png)
     {
         this->pngIsLoaded_ = false;
-        this->pngData_ = png.GetValue(1);
-        this->waveformPixelViewModel_.viewSettings.imageSize.Set(png.GetSize());
+        this->pngData_ = png.GetValues().template cast<int32_t>();
+        this->userControl_.pixelView.viewSettings.imageSize.Set(png.GetSize());
         this->waveformModel_.maximumValue.Set(valueCount - 1);
         this->waveformModel_.levelCount.SetMaximum(valueCount);
-        this->doCreateWaveformView_();
+
+        this->waveformModel_.columnCount.SetMaximum(
+            static_cast<size_t>(this->pngData_.cols()));
+
+        this->waveformModel_.columnCount.Set(
+            static_cast<size_t>(this->pngData_.cols()));
+
         this->pngIsLoaded_ = true;
+
+        auto pixelViewSize = this->pixelView_->GetClientSize();
+        this->pixelView_->SetSashPosition(pixelViewSize.GetHeight() / 2);
     }
 
-    wxpex::Window CreateControlFrame()
+    wxWindow * CreateControls(wxWindow *parent)
     {
-        auto window = wxpex::Window(
-            new DemoMainFrame(
-                this->GetUserControls(),
-                draw::WaveformControl(this->waveformModel_)));
-
-        return window;
+        return new DemoControls(
+            parent,
+            this->userControl_,
+            draw::WaveformControl(this->waveformModel_));
     }
 
     void SaveSettings() const
@@ -138,6 +137,11 @@ public:
         std::cout << "TODO: Restore the processing settings." << std::endl;
     }
 
+    std::string GetAppName() const
+    {
+        return "Waveform Demo";
+    }
+
     void ShowAbout()
     {
         wxAboutBox(MakeAboutDialogInfo("Waveform Demo"));
@@ -146,7 +150,7 @@ public:
     std::shared_ptr<draw::Pixels>
     MakePixels() const
     {
-        auto size = this->waveformPixelViewModel_.viewSettings.imageSize.Get();
+        auto size = this->userControl_.pixelView.viewSettings.imageSize.Get();
 
         auto result = draw::Pixels::CreateShared(size);
 
@@ -163,34 +167,29 @@ public:
         }
 
         this->waveformGenerator_(this->pngData_);
+
+        // this->pngIsLoaded_ = false;
         this->user_.pixelView.pixels.Set(this->MakePixels());
+        // this->pngIsLoaded_ = true;
     }
 
     void Shutdown()
     {
         this->waveformGenerator_.Shutdown();
-        this->waveformView_.Close();
         Brain<DemoBrain>::Shutdown();
     }
 
-private:
-    void CreateWaveformView_()
+    wxWindow * CreatePixelView(wxWindow *parent)
     {
-        if (!this->waveformView_)
-        {
-            this->waveformView_ = {
-                new draw::WaveformView(
-                    nullptr,
-                    draw::PixelViewControl(this->waveformPixelViewModel_),
-                    draw::WaveformControl(this->waveformModel_),
-                    "Waveform"),
-                MakeShortcuts(this->GetUserControls())};
-
-            this->waveformView_.Get()->Show();
-        }
+        return this->pixelView_ = new draw::PixelViewAndWaveform(
+            parent,
+            this->userControl_.pixelView,
+            this->waveformPixelControl_,
+            draw::WaveformControl(this->waveformModel_));
     }
 
-    void OnSettings_(const draw::WaveformSettings &)
+private:
+    void OnWaveformSettings_(const draw::WaveformSettings &)
     {
         if (this->pngIsLoaded_)
         {
@@ -198,7 +197,7 @@ private:
         }
     }
 
-    void OnWaveformViewSettings_(const draw::ViewSettings &)
+    void OnViewSettings_(const draw::ViewSettings &)
     {
         if (this->pngIsLoaded_)
         {
@@ -209,18 +208,21 @@ private:
 private:
     Observer<DemoBrain> observer_;
     draw::WaveformModel waveformModel_;
-    draw::PixelViewModel waveformPixelViewModel_;
-    pex::Endpoint<DemoBrain, draw::WaveformControl> waveformEndpoint_;
-    pex::Endpoint<DemoBrain, draw::ViewSettingsControl>
-        waveformViewSettingsEndpoint_;
-    bool pngIsLoaded_;
-    draw::DataMatrix pngData_;
+    draw::PixelViewModel waveformPixelModel_;
+    draw::PixelViewControl waveformPixelControl_;
 
     draw::WaveformGenerator waveformGenerator_;
 
+    pex::Endpoint<DemoBrain, draw::ViewSettingsControl>
+        viewSettingsEndpoint_;
+
+    pex::Endpoint<DemoBrain, draw::WaveformControl> waveformSettingsEndpoint_;
+
+    bool pngIsLoaded_;
+    draw::DataMatrix pngData_;
+
     tau::LimitedColorMap<draw::PixelMatrix, int32_t> colorMap_;
-    wxpex::CallAfter doCreateWaveformView_;
-    wxpex::ShortcutWindow waveformView_;
+    draw::PixelViewAndWaveform *pixelView_;
 };
 
 

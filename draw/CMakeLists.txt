@@ -51,6 +51,7 @@ target_sources(
     waveform.h
     waveform_generator.h
     waveform_settings.h
+    detail/png_image.h
     views/affine_view.h
     views/ellipse_shape_view.h
     views/ellipse_view.h
@@ -90,6 +91,7 @@ target_sources(
     waveform.cpp
     waveform_generator.cpp
     waveform_settings.cpp
+    detail/png_image.cpp
     views/ellipse_shape_view.cpp
     views/ellipse_view.cpp
     views/font_look_view.cpp

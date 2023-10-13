@@ -8,6 +8,7 @@ WXSHIM_POP_IGNORES
 
 #include <wxpex/button.h>
 #include <wxpex/check_box.h>
+#include <wxpex/layout_top_level.h>
 
 namespace draw
 {
@@ -37,6 +38,7 @@ PixelCanvas::PixelCanvas(
         &PixelCanvas::OnScale_),
 
     cursorEndpoint_(this, controls.cursor),
+    imageCenter_(controls.viewSettings.imageCenterPixel),
     control_(controls),
 
     image_(
@@ -132,6 +134,7 @@ void PixelCanvas::OnImageSize_(const Size &imageSize)
 void PixelCanvas::OnSize_(wxSizeEvent &event)
 {
     event.Skip();
+
     this->control_.viewSettings.viewSize.Set(
         wxpex::ToSize<int>(this->GetClientSize()));
 }
@@ -289,8 +292,9 @@ void PixelCanvas::SizeVirtualPanel_(const Scale &scale)
 
     auto unitCount = this->virtualSize_ / PixelCanvas::pixelsPerScrollUnit;
 
-    auto positionInUnits =
-        this->viewPositionEndpoint_.control.Get() / pixelsPerScrollUnit;
+    auto viewPosition = this->viewPositionEndpoint_.control.Get();
+
+    auto positionInUnits = viewPosition / pixelsPerScrollUnit;
 
     this->skipUpdateViewPosition_ = true;
 
@@ -302,6 +306,8 @@ void PixelCanvas::SizeVirtualPanel_(const Scale &scale)
         positionInUnits.x,
         positionInUnits.y);
 
+    wxpex::LayoutTopLevel(this);
+
     this->skipUpdateViewPosition_ = false;
 }
 
@@ -310,10 +316,11 @@ void PixelCanvas::OnPixels_(const std::shared_ptr<Pixels> &pixels)
 {
     this->pixelData_ = pixels;
     auto imageSize = wxpex::ToSize<Pixels::Index>(this->image_.GetSize());
+    auto dataSize = this->pixelData_->size;
 
-    if (imageSize != this->pixelData_->size)
+    if (imageSize != dataSize)
     {
-        this->image_ = wxImage(imageSize.width, imageSize.height, false);
+        this->image_ = wxImage(dataSize.width, dataSize.height, false);
     }
 
     this->image_.SetData(this->pixelData_->data.data(), true);
@@ -370,6 +377,37 @@ void PixelCanvas::OnPaint_(wxPaintEvent &)
 #endif
 
     this->Draw_(dc);
+}
+
+
+/**
+ ** The center pixel appears to jump around as we zoom in or out.
+ ** This is caused by rounding error of the source region.
+ **
+ ** Shift the blit target coordinates to maintain the center pixel.
+ **/
+tau::Point2d<int> PixelCanvas::CorrectCenterPixel_(draw::View<int> &view) const
+{
+    auto sourceAsDouble = view.source.template Convert<double>();
+
+    auto apparentCenter =
+        sourceAsDouble.topLeft + (sourceAsDouble.size / 2.0);
+
+    auto actualCenter = this->imageCenter_.Get();
+
+    auto error = apparentCenter - actualCenter;
+
+    if (error.Magnitude() <= 1.0)
+    {
+        auto correction =
+            (error * view.scale).template Convert<int, tau::Round>();
+
+        view.target.topLeft += correction;
+
+        return correction;
+    }
+
+    return {};
 }
 
 

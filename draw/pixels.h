@@ -3,7 +3,7 @@
 
 #include <memory>
 #include <pex/endpoint.h>
-#include <tau/color_maps/rgb.h>
+#include <tau/color.h>
 #include <wxpex/async.h>
 
 

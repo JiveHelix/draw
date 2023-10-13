@@ -12,17 +12,17 @@ namespace draw
 {
 
 
-using LowBrightness = pex::Limit<0, 4, 10>;
-using HighBrightness = pex::Limit<0, 7, 10>;
+using LowBrightness = pex::Limit<0, 2, 10>;
+using HighBrightness = pex::Limit<0, 9, 10>;
 
 using BrightnessRanges =
     pex::LinkedRanges
     <
         double,
         pex::Limit<0>,
-        pex::Limit<0, 4, 10>,
+        LowBrightness,
         pex::Limit<1>,
-        pex::Limit<0, 7, 10>
+        HighBrightness
     >;
 
 
@@ -41,7 +41,7 @@ template<template<typename> typename T>
 struct WaveformColorTemplate
 {
     T<BrightnessRanges::GroupMaker> range;
-    T<pex::MakeRange<size_t, pex::Limit<1>, pex::Limit<256>>> count;
+    T<pex::MakeRange<size_t, pex::Limit<1>, pex::Limit<64>>> count;
     T<pex::MakeGroup<wxpex::HsvGroup>> color;
     T<pex::MakeGroup<wxpex::HsvGroup>> highlightColor;
 
@@ -111,7 +111,7 @@ struct WaveformTemplate
 struct WaveformSettings: public WaveformTemplate<pex::Identity>
 {
     static constexpr size_t defaultMaximumValue = 255;
-    static constexpr size_t defaultLevelCount = 200;
+    static constexpr size_t defaultLevelCount = 256;
     static constexpr size_t defaultColumnCount = 400;
     static constexpr double defaultVerticalZoom = 1.0;
 

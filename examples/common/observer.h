@@ -15,8 +15,7 @@ public:
         :
         actor_(actor),
         endpoints_(this, control),
-        doOpenFile_([this](){this->actor_->OpenFile();}),
-        doLayoutWindows_([this](){this->actor_->LayoutWindows();})
+        doOpenFile_([this](){this->actor_->OpenFile();})
     {
         this->endpoints_.openFile.Connect(
             &Observer::OnOpenFile_);
@@ -29,9 +28,6 @@ public:
 
         this->endpoints_.about.Connect(
             &Observer::OnAbout_);
-
-        this->endpoints_.layoutWindows.Connect(
-            &Observer::OnLayoutWindows_);
 
         this->endpoints_.fileName.Connect(
             &Observer::OnFileName_);
@@ -50,13 +46,6 @@ private:
         // OpenFile will open windows that add new callbacks on this signal.
         // Do the work later, outside of this callback.
         this->doOpenFile_();
-    }
-
-    void OnLayoutWindows_()
-    {
-        // LayoutWindows will open windows that add new callbacks on this
-        // signal.  Do the work later, outside of this callback.
-        this->doLayoutWindows_();
     }
 
     void OnSaveSettings_()
@@ -83,5 +72,4 @@ private:
     Actor *actor_;
     UserEndpoints<Observer<Actor>> endpoints_;
     wxpex::CallAfter doOpenFile_;
-    wxpex::CallAfter doLayoutWindows_;
 };

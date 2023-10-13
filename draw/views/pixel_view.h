@@ -33,13 +33,9 @@ public:
     wxSize DoGetBestSize() const override;
 
 private:
-    void OnImageSize_(const Size &imageSize);
-
     Size GetWindowSize_(const Size &canvasSize) const;
 
 private:
-    using SizeEndpoint = pex::Endpoint<PixelView, SizeControl>;
-    SizeEndpoint imageSizeEndpoint_;
     wxWindow *horizontalZoom_;
     wxWindow *verticalZoom_;
     wxBoxSizer *controlsSizer_;

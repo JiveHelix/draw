@@ -18,7 +18,6 @@ struct UserFields
         fields::Field(&T::loadSettings, "loadSettings"),
         fields::Field(&T::quit, "quit"),
         fields::Field(&T::about, "about"),
-        fields::Field(&T::layoutWindows, "layoutWindows"),
         fields::Field(&T::showPixelViewLayout, "showPixelViewLayout"),
         fields::Field(&T::pixelView, "pixelView"),
         fields::Field(&T::errors, "errors"));
@@ -34,7 +33,6 @@ struct UserTemplate
     T<pex::MakeSignal> loadSettings;
     T<pex::MakeSignal> quit;
     T<pex::MakeSignal> about;
-    T<pex::MakeSignal> layoutWindows;
     T<pex::MakeSignal> showPixelViewLayout;
     T<draw::PixelViewGroupMaker> pixelView;
     T<std::string> errors;

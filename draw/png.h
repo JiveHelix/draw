@@ -2,24 +2,17 @@
 
 
 #include <string>
-#include <png.h>
 #include <tau/eigen.h>
 #include <tau/color.h>
 #include "draw/error.h"
 #include "draw/size.h"
 #include "draw/planar.h"
+#include "draw/gray.h"
 
 
 namespace draw
 {
 
-
-CREATE_EXCEPTION(PngError, DrawError);
-
-
-template<typename Pixel>
-using Gray =
-    Eigen::Matrix<Pixel, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
 PlanarRgb<uint8_t> ReadPng(const std::string &fileName);
 PlanarRgb<uint16_t> ReadPng48(const std::string &fileName);
@@ -31,13 +24,21 @@ void WritePng(
     const std::string &fileName,
     const PlanarRgb<uint8_t> &planarRgb);
 
+
+void WritePng(
+    const std::string &fileName,
+    const tau::RgbPixels<uint8_t> &rgbPixels);
+
+
 void WritePng48(
     const std::string &fileName,
     const PlanarRgb<uint16_t> &planarRgb);
 
+
 void WritePngGray8(
     const std::string &fileName,
     const Gray<uint8_t> &gray);
+
 
 void WritePngGray16(
     const std::string &fileName,
@@ -120,6 +121,7 @@ public:
         return tau::RgbToHsv<double>(*this->rgb_);
     }
 
+#if 0
     Matrix GetValue(double scale) const
     {
         if (!this->rgb_)
@@ -140,6 +142,7 @@ public:
 
         return values.template cast<Pixel>();
     }
+#endif
 
     Size GetSize() const
     {
@@ -163,14 +166,12 @@ public:
 
     GrayPng() = default;
 
-    GrayPng(const std::string &fileName, bool high)
+    GrayPng(const std::string &fileName)
         :
         values_(Values())
     {
-        if (high)
+        if constexpr (sizeof(Pixel) >= 2)
         {
-            assert(sizeof(Pixel) >= 2);
-
             this->values_ =
                 ReadPngGray16(fileName).template cast<Pixel>();
         }
@@ -219,7 +220,7 @@ public:
         assert(rows <= std::numeric_limits<SizeType>::max());
         assert(columns <= std::numeric_limits<SizeType>::max());
 
-        return Size{{SizeType(columns), SizeType(rows)}};
+        return Size(SizeType(columns), SizeType(rows));
     }
 
     void Write(const std::string &fileName, bool high)

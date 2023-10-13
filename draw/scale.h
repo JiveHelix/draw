@@ -37,7 +37,7 @@ using Scale = tau::Scale<ScaleType>;
 
 // Initial range for Scale is from 0.25x to 8.0x
 using ScaleRange =
-    pex::MakeRange<ScaleType, pex::Limit<0, 25, 100>, pex::Limit<8>>;
+    pex::MakeRange<ScaleType, pex::Limit<0, 25, 100>, pex::Limit<16>>;
 
 using ScaleGroup =
     pex::Group

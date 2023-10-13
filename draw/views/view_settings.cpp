@@ -45,7 +45,7 @@ Point ViewSettings::GetLogicalPosition(const Point &point) const
 
 void ViewSettingsModel::SetImageCenterPixel_(const tau::Point2d<double> &point)
 {
-    this->imageCenterPixel_ = point;
+    this->imageCenterPixel.Set(point);
 }
 
 
@@ -58,44 +58,44 @@ tau::Point2d<double> ViewSettingsModel::ComputeImageCenterPixel() const
 
     auto viewCenterPixel = viewPosition_ + halfView;
 
-    auto imageCenterPixel = viewCenterPixel / this->scale.Get();
+    auto imageCenterPixel_ = viewCenterPixel / this->scale.Get();
 
-    auto asIntegers = imageCenterPixel.template Convert<int, tau::Floor>();
+    auto asIntegers = imageCenterPixel_.template Convert<int, tau::Floor>();
     auto size = this->imageSize.Get();
-
+ 
     if (asIntegers.x >= size.width)
     {
-        imageCenterPixel.x = static_cast<double>(size.width - 1);
+        imageCenterPixel_.x = static_cast<double>(size.width - 1);
     }
     else if (asIntegers.x < 0)
     {
-        imageCenterPixel.x = 0.0;
+        imageCenterPixel_.x = 0.0;
     }
 
     if (asIntegers.y >= size.height)
     {
-        imageCenterPixel.y = static_cast<double>(size.height - 1);
+        imageCenterPixel_.y = static_cast<double>(size.height - 1);
     }
     else if (asIntegers.y < 0)
     {
-        imageCenterPixel.y = 0.0;
+        imageCenterPixel_.y = 0.0;
     }
 
-    return imageCenterPixel;
+    return imageCenterPixel_;
 }
 
 
 Point ViewSettingsModel::GetViewPositionFromCenterImagePixel() const
 {
-    auto scaledCenterPixel = this->imageCenterPixel_ * this->scale.Get();
+    auto scaledCenterPixel = 
+        this->imageCenterPixel.Get() * this->scale.Get();
 
     auto halfView =
-        this->viewSize.Get().template Convert<double>().ToPoint2d() / 2.0;
+        (this->viewSize.Get().ToPoint2d().template Convert<double>() / 2.0);
 
-    auto result = (scaledCenterPixel - halfView)
-        .template Convert<int, tau::Floor>();
+    auto result = (scaledCenterPixel - halfView);
 
-    return result;
+    return result.template Convert<int, tau::Round>();
 }
 
 
@@ -204,7 +204,7 @@ void ViewSettingsModel::OnImageSize_(const Size &imageSize_)
 void ViewSettingsModel::ResetView_(const Size &imageSize_)
 {
     this->SetImageCenterPixel_(
-        imageSize_.template Convert<double>().ToPoint2d() / 2.0);
+        imageSize_.ToPoint2d().template Convert<double>() / 2.0);
 
     this->RecenterView();
 }

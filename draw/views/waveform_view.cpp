@@ -7,6 +7,7 @@
 #include <wxpex/field.h>
 #include <wxpex/labeled_widget.h>
 #include "draw/size.h"
+#include "draw/views/pixel_view.h"
 
 
 namespace draw
@@ -60,25 +61,21 @@ void WaveformPixels::OnPixels_(const std::shared_ptr<Pixels> &waveform)
 {
     this->waveformData_ = waveform;
 
-    wxSize imageSize = this->image_.GetSize();
-
     // Pixels are sent asynchronously using the wx event system.
     // When the size of the frame is changing rapidly, it is possible that
     // there are pixels of the wrong size in the event queue.
     // Ignore any that do not match.
 
-    if (imageSize.GetHeight() != waveform->size.height)
-    {
-        return;
-    }
+    auto imageSize = wxpex::ToSize<Pixels::Index>(this->image_.GetSize());
+    auto dataSize = this->waveformData_->size;
 
-    if (imageSize.GetWidth() != waveform->size.width)
+    if (imageSize != dataSize)
     {
-        return;
+        this->image_ = wxImage(dataSize.width, dataSize.height, false);
     }
 
     this->image_.SetData(this->waveformData_->data.data(), true);
-    this->Refresh(true);
+    this->Refresh(false);
     this->Update();
 }
 
@@ -149,10 +146,9 @@ void WaveformPixels::OnPaint_(wxPaintEvent &)
 WaveformView::WaveformView(
     wxWindow *parent,
     PixelViewControl pixelViewControl,
-    WaveformControl waveformControl,
-    const std::string &title)
+    WaveformControl waveformControl)
     :
-    wxFrame(parent, wxID_ANY, title),
+    wxPanel(parent, wxID_ANY),
 
     waveformPixels_(
         new WaveformPixels(this, pixelViewControl, waveformControl)),
@@ -203,6 +199,7 @@ void WaveformView::OnPaint_(wxPaintEvent &)
 
     auto size = paintDc.GetSize();
     auto height = size.GetHeight();
+
     auto waveformPosition = this->waveformPixels_->GetPosition();
     auto lines = this->waveformPixels_->GetLines();
 
@@ -248,6 +245,47 @@ void WaveformView::OnPaint_(wxPaintEvent &)
             box,
             wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
     }
+}
+
+
+PixelViewAndWaveform::PixelViewAndWaveform(
+    wxWindow *parent,
+    PixelViewControl pixelViewControl,
+    PixelViewControl waveformPixelViewControl,
+    WaveformControl waveformControl)
+    :
+    wxPanel(parent, wxID_ANY),
+    splitter_(new wxpex::Splitter(this))
+{
+    auto pixelView = new PixelView(
+        this->splitter_,
+        pixelViewControl);
+
+    auto waveformView =
+        new WaveformView(
+            this->splitter_,
+            waveformPixelViewControl,
+            waveformControl);
+
+    this->splitter_->SplitHorizontallyTop(pixelView, waveformView);
+    auto sizer = std::make_unique<wxBoxSizer>(wxVERTICAL);
+    sizer->Add(this->splitter_, 1, wxEXPAND);
+    this->SetSizerAndFit(sizer.release());
+}
+
+
+void PixelViewAndWaveform::SetSashPosition(int sashPosition)
+{
+    this->splitter_->SetSashPosition(sashPosition);
+}
+
+
+bool PixelViewAndWaveform::Layout()
+{
+    bool baseResult = this->wxPanel::Layout();
+    bool derivedResult = this->splitter_->Layout();
+
+    return baseResult && derivedResult;
 }
 
 

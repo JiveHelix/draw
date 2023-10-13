@@ -5,6 +5,7 @@
 #include <pex/value.h>
 #include <pex/endpoint.h>
 #include <wxpex/wxshim.h>
+#include <wxpex/splitter.h>
 
 #include "draw/pixels.h"
 #include "draw/waveform_settings.h"
@@ -43,7 +44,7 @@ private:
 };
 
 
-class WaveformView: public wxFrame
+class WaveformView: public wxPanel
 {
 public:
     static constexpr auto observerName = "WaveformView";
@@ -51,8 +52,7 @@ public:
     WaveformView(
         wxWindow *parent,
         PixelViewControl pixelViewControl,
-        WaveformControl waveformControl,
-        const std::string &title);
+        WaveformControl waveformControl);
 
 private:
     void OnPaint_(wxPaintEvent &);
@@ -75,6 +75,24 @@ private:
     ColumnCountEndpoint columnCountEndpoint_;
     LevelCountEndpoint levelCountEndpoint_;
     pex::Endpoint<WaveformView, VerticalScaleControl> verticalScaleEndpoint_;
+};
+
+
+class PixelViewAndWaveform: public wxPanel
+{
+public:
+    PixelViewAndWaveform(
+        wxWindow *parent,
+        PixelViewControl pixelView,
+        PixelViewControl waveformPixelView,
+        WaveformControl waveformControl);
+
+    void SetSashPosition(int sashPosition);
+
+    bool Layout() override;
+
+private:
+    wxpex::Splitter * splitter_;
 };
 
 

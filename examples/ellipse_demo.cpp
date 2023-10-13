@@ -25,8 +25,7 @@ template<typename T>
 struct DemoFields
 {
     static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::ellipse, "ellipse"),
-        fields::Field(&T::pixelView, "pixelView"));
+        fields::Field(&T::ellipse, "ellipse"));
 };
 
 
@@ -34,7 +33,6 @@ template<template<typename> typename T>
 struct DemoTemplate
 {
     T<pex::MakeGroup<draw::EllipseShapeGroup>> ellipse;
-    T<draw::PixelViewGroupMaker> pixelView;
 };
 
 
@@ -44,21 +42,15 @@ using DemoModel = typename DemoGroup::Model;
 using DemoControl = typename DemoGroup::Control;
 
 
-class DemoMainFrame: public wxFrame
+class DemoControls: public wxPanel
 {
 public:
-    DemoMainFrame(
-        UserControl userControl,
+    DemoControls(
+        wxWindow *parent,
         DemoControl control)
         :
-        wxFrame(nullptr, wxID_ANY, "Ellipse Demo"),
-        shortcuts_(
-            std::make_unique<wxpex::MenuShortcuts>(
-                wxpex::UnclosedWindow(this),
-                MakeShortcuts(userControl)))
+        wxPanel(parent, wxID_ANY)
     {
-        this->SetMenuBar(this->shortcuts_->GetMenuBar());
-
         wxpex::LayoutOptions layoutOptions{};
         layoutOptions.labelFlags = wxALIGN_RIGHT;
 
@@ -74,9 +66,6 @@ public:
         auto topSizer = wxpex::BorderSizer(ellipseShapeView, 5);
         this->SetSizerAndFit(topSizer.release());
     }
-
-private:
-    std::unique_ptr<wxpex::MenuShortcuts> shortcuts_;
 };
 
 
@@ -97,7 +86,7 @@ public:
 
         pixelViewEndpoint_(
             this,
-            this->demoControl_.pixelView),
+            this->userControl_.pixelView),
 
         ellipseDrag_()
     {
@@ -112,16 +101,17 @@ public:
 
     }
 
-    wxpex::Window CreateControlFrame()
+    std::string GetAppName() const
+    {
+        return "Ellipse Demo";
+    }
+
+    wxWindow * CreateControls(wxWindow *parent)
     {
         this->userControl_.pixelView.viewSettings.imageSize.Set(
             draw::Size(1920, 1080));
 
-        auto window = wxpex::Window(new DemoMainFrame(
-            this->GetUserControls(),
-            DemoControl(this->demoModel_)));
-
-        return window;
+        return new DemoControls(parent, this->demoControl_);
     }
 
     void SaveSettings() const
@@ -146,7 +136,7 @@ public:
         shapes.EmplaceBack<draw::EllipseShape>(
             this->demoModel_.ellipse.Get());
 
-        this->demoControl_.pixelView.asyncShapes.Set(shapes);
+        this->userControl_.pixelView.asyncShapes.Set(shapes);
     }
 
     void Shutdown()
@@ -154,20 +144,9 @@ public:
         Brain<DemoBrain>::Shutdown();
     }
 
-    void LoadPng(const draw::Png<int32_t> &)
+    void LoadPng(const draw::GrayPng<PngPixel> &)
     {
 
-    }
-
-    void CreatePixelView_()
-    {
-        this->pixelView_ = {
-            new draw::PixelFrame(
-                draw::PixelViewControl(this->demoModel_.pixelView),
-                "Ellipse"),
-            MakeShortcuts(this->GetUserControls())};
-
-        this->pixelView_.Get()->Show();
     }
 
 private:
@@ -179,16 +158,15 @@ private:
         }
 
         auto ellipse = this->demoModel_.ellipse.ellipse.Get();
-        auto position = this->demoModel_.pixelView.logicalPosition.Get();
+        auto position = this->user_.pixelView.logicalPosition.Get();
 
         if (ellipse.Contains(position.template Convert<double>()))
         {
-            this->demoModel_.pixelView.cursor.Set(wxpex::Cursor::openHand);
+            this->user_.pixelView.cursor.Set(wxpex::Cursor::openHand);
         }
-        else if (
-            this->demoModel_.pixelView.cursor.Get() != wxpex::Cursor::cross)
+        else if (this->user_.pixelView.cursor.Get() != wxpex::Cursor::cross)
         {
-            this->demoModel_.pixelView.cursor.Set(wxpex::Cursor::cross);
+            this->user_.pixelView.cursor.Set(wxpex::Cursor::cross);
         }
     }
 
@@ -219,9 +197,9 @@ private:
             return;
         }
 
-        auto point = this->demoModel_.pixelView.logicalPosition.Get();
+        auto point = this->user_.pixelView.logicalPosition.Get();
 
-        if (this->demoModel_.pixelView.modifier.Get().IsNone())
+        if (this->user_.pixelView.modifier.Get().IsNone())
         {
             auto ellipse = this->demoModel_.ellipse.ellipse.Get();
 
@@ -229,7 +207,7 @@ private:
             {
                 this->ellipseDrag_ = draw::Drag(point, ellipse.center);
 
-                this->demoModel_.pixelView.cursor.Set(
+                this->user_.pixelView.cursor.Set(
                     wxpex::Cursor::closedHand);
 
                 return;
