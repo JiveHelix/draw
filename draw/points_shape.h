@@ -3,6 +3,7 @@
 
 #include <pex/group.h>
 #include <tau/vector2d.h>
+#include "draw/point.h"
 #include "draw/look.h"
 #include "draw/shapes.h"
 
@@ -72,6 +73,22 @@ using PointsShapeControl =
     typename PointsShapeGroup::Control;
 
 using PointsShapeGroupMaker = pex::MakeGroup<PointsShapeGroup>;
+
+
+class ValuePointsShape: public Shape
+{
+public:
+    using ValuePoints = std::vector<ValuePoint<double>>;
+
+    ValuePointsShape(
+        const PointsShapeSettings &settings,
+        const ValuePoints &points);
+
+    void Draw(wxpex::GraphicsContext &context) override;
+
+    PointsShapeSettings settings_;
+    ValuePoints points_;
+};
 
 
 } // end namespace draw

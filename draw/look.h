@@ -70,6 +70,10 @@ using LookGroupMaker = pex::MakeGroup<LookGroup>;
 
 void ConfigureLook(wxpex::GraphicsContext &, const Look &);
 
+void ConfigureColors(wxpex::GraphicsContext &, const Look &);
+
+void ConfigureColors(wxpex::GraphicsContext &, const Look &, double value);
+
 
 } // end namespace draw
 
