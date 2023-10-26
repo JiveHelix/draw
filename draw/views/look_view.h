@@ -23,4 +23,17 @@ public:
 };
 
 
+class StrokeView: public wxpex::StaticBox
+{
+public:
+    using LayoutOptions = wxpex::LayoutOptions;
+
+    StrokeView(
+        wxWindow *parent,
+        const std::string &name,
+        LookControl control,
+        const LayoutOptions &layoutOptions);
+};
+
+
 } // end namespace draw

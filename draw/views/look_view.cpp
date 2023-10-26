@@ -10,6 +10,7 @@
 namespace draw
 {
 
+
 LookView::LookView(
     wxWindow *parent,
     const std::string &name,
@@ -56,6 +57,47 @@ LookView::LookView(
         strokeColor,
         fillEnable,
         fillColor,
+        antialias);
+
+    this->ConfigureSizer(std::move(sizer));
+}
+
+
+StrokeView::StrokeView(
+    wxWindow *parent,
+    const std::string &name,
+    LookControl control,
+    const LayoutOptions &layoutOptions)
+    :
+    wxpex::StaticBox(parent, name)
+{
+    using namespace wxpex;
+
+    auto strokeEnable =
+        new CheckBox(this, "Stroke Enable", control.strokeEnable);
+
+    auto strokeWeight = wxpex::LabeledWidget(
+        this,
+        "Stroke Weight",
+        new FieldSlider(
+            this,
+            control.strokeWeight,
+            control.strokeWeight.value));
+
+    auto strokeColor =
+        new HsvPicker(
+            this,
+            "Stroke Color",
+            control.strokeColor);
+
+    auto antialias =
+        new CheckBox(this, "Anti-alias", control.antialias);
+
+    auto sizer = wxpex::LayoutItems(
+        verticalItems,
+        strokeEnable,
+        strokeWeight.Layout(wxHORIZONTAL).release(),
+        strokeColor,
         antialias);
 
     this->ConfigureSizer(std::move(sizer));

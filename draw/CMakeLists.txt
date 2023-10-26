@@ -22,6 +22,8 @@ target_link_libraries(
 target_sources(
     draw
     PRIVATE
+    cross.h
+    cross_shape.h
     drag.h
     draw_ellipse.h
     draw_lines.h
@@ -53,6 +55,8 @@ target_sources(
     waveform_settings.h
     detail/png_image.h
     views/affine_view.h
+    views/cross_shape_view.h
+    views/cross_view.h
     views/ellipse_shape_view.h
     views/ellipse_view.h
     views/font_look_view.h
@@ -71,6 +75,8 @@ target_sources(
     views/view_settings.h
     views/waveform_settings_view.h
     views/waveform_view.h
+    cross.cpp
+    cross_shape.cpp
     ellipse.cpp
     ellipse_shape.cpp
     oddeven.cpp
@@ -92,6 +98,8 @@ target_sources(
     waveform_generator.cpp
     waveform_settings.cpp
     detail/png_image.cpp
+    views/cross_shape_view.cpp
+    views/cross_view.cpp
     views/ellipse_shape_view.cpp
     views/ellipse_view.cpp
     views/font_look_view.cpp
