@@ -19,7 +19,7 @@ PolygonLines::PolygonLines(
     const PolygonPoint &bottomRight,
     const PolygonPoint &bottomLeft)
     :
-    PolygonLines(PolygonPoints({topLeft, topRight, bottomRight, bottomLeft}))
+    PolygonLines(Points({topLeft, topRight, bottomRight, bottomLeft}))
 {
 
 }
@@ -45,7 +45,7 @@ PolygonLines::PolygonLines(const tau::Size<double> &size)
 }
 
 
-PolygonLines::PolygonLines(const PolygonPoints &points)
+PolygonLines::PolygonLines(const Points &points)
     :
     lines(points.size())
 {
@@ -71,14 +71,14 @@ PolygonLines::PolygonLines(const PolygonPoints &points)
 }
 
 
-PolygonPoints PolygonLines::GetPoints() const
+Points PolygonLines::GetPoints() const
 {
     if (this->lines.size() < 3)
     {
         return {};
     }
 
-    PolygonPoints points(this->lines.size());
+    Points points(this->lines.size());
 
     // First point is intersection of last line with first line.
     points[0] = this->lines.back().Intersect(this->lines.front());
@@ -90,6 +90,24 @@ PolygonPoints PolygonLines::GetPoints() const
     }
 
     return points;
+}
+
+
+std::optional<size_t> PolygonLines::Find(
+    const tau::Point2d<double> &point,
+    double margin)
+{
+    for (size_t index = 0; index < this->lines.size(); ++index)
+    {
+        auto &line = this->lines[index];
+
+        if (line.DistanceToPoint(point) < margin)
+        {
+            return index;
+        }
+    }
+
+    return {};
 }
 
 

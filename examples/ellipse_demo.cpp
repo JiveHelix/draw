@@ -42,6 +42,30 @@ using DemoModel = typename DemoGroup::Model;
 using DemoControl = typename DemoGroup::Control;
 
 
+class EllipseDrag: public draw::Drag
+{
+public:
+    EllipseDrag(
+        const tau::Point2d<int> &start,
+        const tau::Point2d<double> &offset,
+        draw::EllipseControl ellipseControl)
+        :
+        draw::Drag(start, offset),
+        control_(ellipseControl)
+    {
+
+    }
+
+    void ReportLogicalPosition(const tau::Point2d<int> &position) override
+    {
+        this->control_.center.Set(this->GetPosition(position));
+    }
+
+private:
+    draw::EllipseControl control_;
+};
+
+
 class DemoControls: public wxPanel
 {
 public:
@@ -88,7 +112,7 @@ public:
             this,
             this->userControl_.pixelView),
 
-        ellipseDrag_()
+        drag_()
     {
         this->demoControl_.ellipse.look.strokeEnable.Set(true);
 
@@ -152,7 +176,7 @@ public:
 private:
     void UpdateCursor_()
     {
-        if (this->ellipseDrag_)
+        if (this->drag_)
         {
             return;
         }
@@ -178,21 +202,14 @@ private:
     void OnLogicalPosition_(const tau::Point2d<int> &position)
     {
         this->UpdateCursor_();
-
-        if (this->ellipseDrag_)
-        {
-            this->demoModel_.ellipse.ellipse.center.Set(
-                this->ellipseDrag_->GetPosition(position));
-
-            return;
-        }
+        this->drag_->ReportLogicalPosition(position);
     }
 
     void OnMouseDown_(bool isDown)
     {
         if (!isDown)
         {
-            this->ellipseDrag_.reset();
+            this->drag_.reset();
             this->UpdateCursor_();
             return;
         }
@@ -205,7 +222,10 @@ private:
 
             if (ellipse.Contains(point))
             {
-                this->ellipseDrag_ = draw::Drag(point, ellipse.center);
+                this->drag_ = std::make_unique<EllipseDrag>(
+                    point,
+                    ellipse.center,
+                    this->demoControl_.ellipse.ellipse);
 
                 this->user_.pixelView.cursor.Set(
                     wxpex::Cursor::closedHand);
@@ -230,7 +250,7 @@ private:
     pex::Endpoint<DemoBrain, draw::EllipseShapeControl> ellipseEndpoint_;
     pex::EndpointGroup<DemoBrain, draw::PixelViewControl> pixelViewEndpoint_;
 
-    std::optional<draw::Drag> ellipseDrag_;
+    std::unique_ptr<draw::Drag> drag_;
 };
 
 

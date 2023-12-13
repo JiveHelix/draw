@@ -3,8 +3,11 @@
 
 #include <tau/vector2d.h>
 #include "draw/quad.h"
-#include "draw/views/pixel_view_settings.h"
+#include "draw/quad_shape.h"
 #include "draw/drag.h"
+#include "draw/views/pixel_view_settings.h"
+#include "draw/polygon.h"
+#include "draw/shape_edit.h"
 
 
 namespace draw
@@ -34,103 +37,67 @@ struct QuadBounds
 };
 
 
-class DragQuad: public Drag
+using DragQuad = DragShape<QuadControl>;
+using DragEditQuad = DragEditShape<QuadControl>;
+
+
+struct CreateQuad
+{
+    std::optional<QuadShape> operator()(
+        const Drag &drag,
+        const tau::Point2d<int> position);
+};
+
+
+using DragCreateQuad = DragCreateShape<QuadListControl, CreateQuad>;
+
+
+class DragQuadPoint: public DragEditPoint<QuadControl>
 {
 public:
-    DragQuad(
-        size_t index,
-        const tau::Point2d<int> &start,
-        const tau::Point2d<double> &offset,
-        const Quad &quad,
-        const QuadBounds &quadBounds);
+    using DragEditPoint<QuadControl>::DragEditPoint;
 
 protected:
-    Quad quad_;
-    QuadBounds quadBounds_;
+    Quad MakeShape_(const tau::Point2d<int> &end) const override;
 };
 
 
-class DragQuadPoint: public DragQuad
+class DragRotateQuadPoint: public DragEditPoint<QuadControl>
 {
 public:
-    DragQuadPoint(
-        size_t index,
-        const tau::Point2d<int> &start,
-        const tau::Point2d<double> &offset,
-        const Quad &quad,
-        const QuadBounds &quadBounds);
+    using DragEditPoint<QuadControl>::DragEditPoint;
 
-    Quad GetQuad(const tau::Point2d<int> &end) const;
-
-private:
-    QuadPoints points_;
+protected:
+    Quad MakeShape_(const tau::Point2d<int> &end) const override;
 };
 
 
-class DragRotatePoint: public DragQuad
-{
-public:
-    DragRotatePoint(
-        size_t index,
-        const tau::Point2d<int> &start,
-        const tau::Point2d<double> &offset,
-        const Quad &quad,
-        const QuadBounds &quadBounds);
-
-    Quad GetQuad(const tau::Point2d<int> &end) const;
-
-private:
-    QuadPoints points_;
-};
-
-
-class DragQuadLine: public DragQuad
+class DragQuadLine: public DragEditQuad
 {
 public:
     DragQuadLine(
         size_t index,
         const tau::Point2d<int> &start,
-        const Quad &quad,
-        const QuadBounds &quadBounds);
+        QuadControl quad,
+        const QuadLines &lines);
 
-    Quad GetQuad(const tau::Point2d<int> &end) const;
+protected:
+    Quad MakeShape_(const tau::Point2d<int> &end) const override;
 
 private:
     QuadLines lines_;
 };
 
 
-class QuadBrain
-{
-public:
-    QuadBrain(
-        QuadControl quadControl,
-        PixelViewControl pixelViewControl);
+using QuadBrain = ShapeBrain
+<
+    QuadListControl,
+    DragCreateQuad,
+    DragRotateQuadPoint,
+    DragQuadPoint,
+    DragQuadLine,
+    DragQuad
+>;
 
-private:
-    void OnMouseDown_(bool isDown);
-    void OnModifier_(const wxpex::Modifier &);
-    void OnLogicalPosition_(const tau::Point2d<int> &position);
-    bool IsDragging_() const;
-    void UpdateCursor_();
-
-    QuadControl quadControl_;
-    PixelViewControl pixelViewControl_;
-
-    pex::Endpoint<QuadBrain, decltype(PixelViewControl::mouseDown)>
-        mouseDownEndpoint_;
-
-    pex::Endpoint<QuadBrain, PointControl> logicalPositionEndpoint_;
-
-    pex::Endpoint<QuadBrain, decltype(PixelViewControl::modifier)>
-        modifierEndpoint_;
-
-
-    std::optional<Drag> dragCenter_;
-    std::optional<DragQuadPoint> dragPoint_;
-    std::optional<DragRotatePoint> dragRotatePoint_;
-    std::optional<DragQuadLine> dragLine_;
-    std::optional<Drag> dragCreate_;
-};
 
 } // end namespace draw

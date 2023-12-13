@@ -42,6 +42,27 @@ tau::Region<T> UnscaleRegion(
     }
 }
 
+template<typename T>
+void ConstrainRegion(tau::Region<T> &region, const tau::Size<T> &size)
+{
+    // topLeft must be < size
+    region.topLeft.x = std::min<T>(region.topLeft.x, size.width - 1);
+    region.topLeft.y = std::min<T>(region.topLeft.y, size.height - 1);
+
+    // topLeft + region.size must fit within the source size.
+    auto bottomRight = region.GetBottomRight();
+
+    if (bottomRight.x <= size.width && bottomRight.y <= size.height)
+    {
+        // The requirement is satisfied.
+        return;
+    }
+
+    bottomRight.x = std::min(bottomRight.x, size.width);
+    bottomRight.y = std::min(bottomRight.y, size.height);
+    region.size = bottomRight - region.topLeft;
+}
+
 
 template<typename T, typename ScaleType = double>
 struct View
@@ -83,6 +104,13 @@ struct View
             scaledSourceRegion.Intersect(viewWindow),
             this->scale);
 
+        ConstrainRegion(this->source, sourceSize);
+
+        assert(this->source.topLeft.y < sourceSize.height);
+        assert(this->source.topLeft.x < sourceSize.width);
+        assert(this->source.GetBottomRight().x <= sourceSize.width);
+        assert(this->source.GetBottomRight().y <= sourceSize.height);
+
         // When the viewWindow is positive, start painting the target at zero.
         // When the viewWindow is shifted negative, start painting the target at
         // a positive shift of the same magnitude.
@@ -99,17 +127,6 @@ struct View
         // When the source viewWindow is smaller than the target, the target is
         // clipped by the source.
         this->target = tau::Region<T>{{targetTopLeft, targetIntersection.size}};
-
-        assert(this->source.topLeft.y < sourceSize.height);
-        assert(this->source.topLeft.x < sourceSize.width);
-
-        if constexpr (std::is_integral_v<T>)
-        {
-            // Floating-point types have rounding errors that make this check
-            // noisy.
-            assert(this->source.GetBottomRight().x <= sourceSize.width);
-            assert(this->source.GetBottomRight().y <= sourceSize.height);
-        }
     }
 
     template<typename U, typename Style = tau::Round>

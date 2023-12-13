@@ -1,6 +1,9 @@
 #pragma once
 
 
+#include <tau/size.h>
+
+
 namespace draw
 {
 
@@ -8,6 +11,8 @@ namespace draw
 class Drag
 {
 public:
+    virtual ~Drag() {}
+
     Drag(
         const tau::Point2d<int> &start,
         const tau::Point2d<double> &offset)
@@ -30,6 +35,8 @@ public:
     {
 
     }
+
+    virtual void ReportLogicalPosition(const tau::Point2d<int> &position) = 0;
 
     tau::Point2d<double> GetPosition(const tau::Point2d<int> &end) const
     {

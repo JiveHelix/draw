@@ -5,6 +5,7 @@
 #include "draw/polygon.h"
 #include "draw/look.h"
 #include "draw/shapes.h"
+#include "draw/oddeven.h"
 
 
 namespace draw
@@ -15,7 +16,8 @@ template<typename T>
 struct PolygonShapeFields
 {
     static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::polygon, "polygon"),
+        fields::Field(&T::id, "id"),
+        fields::Field(&T::shape, "shape"),
         fields::Field(&T::look, "look"));
 };
 
@@ -24,7 +26,9 @@ template<template<typename> typename T>
 class PolygonShapeTemplate
 {
 public:
-    T<PolygonGroupMaker> polygon;
+    // id is read-only to a control
+    T<pex::Filtered<size_t, pex::NoFilter, pex::GetTag>> id;
+    T<PolygonGroupMaker> shape;
     T<LookGroupMaker> look;
 
     static constexpr auto fields =
@@ -36,7 +40,7 @@ public:
 
 void DrawPolygon(
     wxpex::GraphicsContext &context,
-    const PolygonPoints &points);
+    const Points &points);
 
 
 class PolygonShape:
@@ -45,7 +49,9 @@ class PolygonShape:
 {
 public:
     PolygonShape() = default;
+    PolygonShape(size_t id_, const Polygon &polygon_, const Look &look_);
     PolygonShape(const Polygon &polygon_, const Look &look_);
+
     void Draw(wxpex::GraphicsContext &context) override;
 };
 
@@ -57,9 +63,24 @@ using PolygonShapeGroup = pex::Group
     PolygonShape
 >;
 
-using PolygonShapeModel = typename PolygonShapeGroup::Model;
+
+struct PolygonShapeModel: public PolygonShapeGroup::Model
+{
+public:
+    PolygonShapeModel();
+
+    void Set(const PolygonShape &other);
+};
+
+
 using PolygonShapeControl = typename PolygonShapeGroup::Control;
 
+using PolygonShapeGroupMaker =
+    pex::MakeGroup<PolygonShapeGroup, PolygonShapeModel>;
+
+
+using PolygonListMaker = pex::MakeList<PolygonShapeGroupMaker, 1>;
+using PolygonListControl = pex::ControlSelector<PolygonListMaker>;
 
 
 } // end namespace draw

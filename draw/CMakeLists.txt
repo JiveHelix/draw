@@ -49,6 +49,7 @@ target_sources(
     quad_shape.h
     scale.h
     shapes.h
+    shape_edit.cpp
     size.h
     waveform.h
     waveform_generator.h

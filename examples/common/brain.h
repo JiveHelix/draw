@@ -96,6 +96,11 @@ public:
             draw::PixelViewControl(this->user_.pixelView));
     }
 
+    void ShowAbout() const
+    {
+        wxAboutBox(MakeAboutDialogInfo(this->GetDerived()->GetAppName()));
+    }
+
 protected:
     UserModel user_;
     UserControl userControl_;

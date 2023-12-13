@@ -26,13 +26,13 @@ namespace draw
 class PointsView: public wxListView
 {
 public:
-    using Control = typename pex::ControlSelector<PolygonPoints>;
+    using Control = typename pex::ControlSelector<Points>;
 
     using Converter = pex::Converter<double, wxpex::ViewTraits<10, 0, 1>>;
 
     PointsView(wxWindow *parent, Control control);
 
-    void OnPoints_(const PolygonPoints &points);
+    void OnPoints_(const Points &points);
 
 private:
     pex::Endpoint<PointsView, Control> endpoint_;

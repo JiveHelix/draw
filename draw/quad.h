@@ -103,8 +103,14 @@ struct Quad: public QuadTemplate<pex::Identity>
     double GetSideLength(size_t index) const;
     QuadLines GetLines() const;
     void SetPoints(const QuadPoints &quadPoints);
-    bool Contains(const tau::Point2d<double> &point);
+    bool Contains(const tau::Point2d<double> &point) const;
+    bool Contains(const tau::Point2d<double> &point, double margin) const;
     double GetArea() const;
+
+    double GetMarginScale(double margin) const;
+
+private:
+    QuadPoints GetPoints_(double scale_) const;
 };
 
 

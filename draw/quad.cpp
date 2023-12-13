@@ -40,8 +40,19 @@ QuadPoints Quad::GetPerspectivePoints() const
 QuadPoints Quad::GetPoints() const
 {
     Affine transform = this->MakeTransform();
+
     return MatrixToPoints(transform * this->GetPerspectiveMatrix());
 }
+
+
+QuadPoints Quad::GetPoints_(double scale_) const
+{
+    auto scaledQuad = *this;
+    scaledQuad.scale = scale_;
+
+    return scaledQuad.GetPoints();
+}
+
 
 double Quad::GetSideLength(size_t index) const
 {
@@ -82,10 +93,26 @@ void Quad::SetPoints(const QuadPoints &quadPoints)
     this->size = unperspective.GetSize();
 }
 
-bool Quad::Contains(const tau::Point2d<double> &point)
+
+bool Quad::Contains(const tau::Point2d<double> &point) const
 {
     return oddeven::Contains(this->GetPoints(), point);
 }
+
+
+bool Quad::Contains(const tau::Point2d<double> &point, double margin) const
+{
+    return oddeven::Contains(
+        this->GetPoints_(this->GetMarginScale(margin)),
+        point);
+}
+
+
+double Quad::GetMarginScale(double margin) const
+{
+    return this->scale + (margin / this->size.Magnitude());
+}
+
 
 double Quad::GetArea() const
 {

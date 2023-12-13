@@ -56,23 +56,7 @@ QuadPoints MatrixToPoints(const QuadMatrix &pointsMatrix)
 
 const QuadLines::Line & QuadLines::operator[](size_t index) const
 {
-    switch (index)
-    {
-        case 0:
-            return this->top;
-
-        case 1:
-            return this->right;
-
-        case 2:
-            return this->bottom;
-
-        case 3:
-            return this->left;
-
-        default:
-            throw std::out_of_range("QuadLines only has 4 items");
-    }
+    return *this->lines_.at(index);
 }
 
 
@@ -93,7 +77,8 @@ QuadLines::QuadLines(
     top(topLeft, topRight),
     right(topRight, bottomRight),
     bottom(bottomRight, bottomLeft),
-    left(bottomLeft, topLeft)
+    left(bottomLeft, topLeft),
+    lines_{&this->top, &this->right, &this->bottom, &this->left}
 {
     this->top.point = GetMidpoint(topLeft, topRight);
     this->bottom.point = GetMidpoint(bottomLeft, bottomRight);
@@ -111,6 +96,22 @@ QuadLines::QuadLines(double halfWidth, double halfHeight)
         QuadPoint(-halfWidth, halfHeight))
 {
 
+}
+
+
+QuadLines::QuadLines(const PolygonLines &polygonLines)
+    :
+    QuadLines()
+{
+    if (polygonLines.lines.size() != 4)
+    {
+        throw std::logic_error("A quad must always have 4 lines.");
+    }
+
+    for (size_t i = 0; i < 4; ++i)
+    {
+        *this->lines_[i] = polygonLines[i];
+    }
 }
 
 
@@ -214,6 +215,24 @@ tau::Size<double> QuadLines::GetSize() const
     return tau::Size<double>(
         bottomRight.x - topLeft.x,
         bottomRight.y - topLeft.y);
+}
+
+
+std::optional<size_t> QuadLines::Find(
+    const tau::Point2d<double> &point,
+    double margin)
+{
+    for (size_t index = 0; index < this->lines_.size(); ++index)
+    {
+        auto &line = *this->lines_[index];
+
+        if (line.DistanceToPoint(point) < margin)
+        {
+            return index;
+        }
+    }
+
+    return {};
 }
 
 

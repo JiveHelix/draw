@@ -16,52 +16,28 @@ QuadBounds::QuadBounds(QuadControl control)
 }
 
 
-DragQuad::DragQuad(
-    size_t index,
-    const tau::Point2d<int> &start,
-    const tau::Point2d<double> &offset,
-    const Quad &quad,
-    const QuadBounds &quadBounds)
-    :
-    Drag(index, start, offset),
-    quad_(quad),
-    quadBounds_(quadBounds)
+std::optional<QuadShape> CreateQuad::operator()(
+    const Drag &drag,
+    const tau::Point2d<int> position)
 {
+    auto size = drag.GetSize(position);
 
+    if (size.GetArea() < 1)
+    {
+        return {};
+    }
+
+    auto quad = Quad::Default();
+    quad.center = drag.GetDragCenter(position);
+    quad.size = drag.GetSize(position);
+
+    return QuadShape{quad, Look::Default()};
 }
 
 
-DragQuadPoint::DragQuadPoint(
-    size_t index,
-    const tau::Point2d<int> &start,
-    const tau::Point2d<double> &offset,
-    const Quad &quad,
-    const QuadBounds &quadBounds)
-    :
-    DragQuad(index, start, offset, quad, quadBounds),
-    points_(quad.GetPoints())
+Quad DragQuadPoint::MakeShape_(const tau::Point2d<int> &end) const
 {
-
-}
-
-
-DragRotatePoint::DragRotatePoint(
-    size_t index,
-    const tau::Point2d<int> &start,
-    const tau::Point2d<double> &offset,
-    const Quad &quad,
-    const QuadBounds &quadBounds)
-    :
-    DragQuad(index, start, offset, quad, quadBounds),
-    points_(quad.GetPoints())
-{
-
-}
-
-
-Quad DragQuadPoint::GetQuad(const tau::Point2d<int> &end) const
-{
-    auto adjusted = this->quad_;
+    auto adjusted = this->startingShape_;
     double magnitude = this->GetMagnitude(end);
     
     if (magnitude < 1.0)
@@ -128,21 +104,23 @@ Quad DragQuadPoint::GetQuad(const tau::Point2d<int> &end) const
         verticalFlip
         * DragAngleDifference(verticalChange, verticalBaseline);
 
+    auto quadBounds = QuadBounds(this->control_);
+
     adjusted.perspective.x =
-        this->quadBounds_.perspective.x.Constrain(
+        quadBounds.perspective.x.Constrain(
             adjusted.perspective.x + horizontalDifference * 2.0);
 
     adjusted.perspective.y =
-        this->quadBounds_.perspective.y.Constrain(
+        quadBounds.perspective.y.Constrain(
             adjusted.perspective.y + verticalDifference * 2.0);
     
     return adjusted;
 }
 
 
-Quad DragRotatePoint::GetQuad(const tau::Point2d<int> &end) const
+Quad DragRotateQuadPoint::MakeShape_(const tau::Point2d<int> &end) const
 {
-    auto adjusted = this->quad_;
+    auto adjusted = this->startingShape_;
     double magnitude = this->GetMagnitude(end);
     
     if (magnitude < 1.0)
@@ -152,7 +130,7 @@ Quad DragRotatePoint::GetQuad(const tau::Point2d<int> &end) const
 
     const auto &point = this->points_[this->index_];
 
-    auto center = this->quad_.center;
+    auto center = adjusted.center;
     auto baseline = (center - point).GetAngle();
     auto change = (center - end).GetAngle();
     auto difference = DragAngleDifference(change, baseline);
@@ -167,17 +145,17 @@ Quad DragRotatePoint::GetQuad(const tau::Point2d<int> &end) const
 DragQuadLine::DragQuadLine(
     size_t index,
     const tau::Point2d<int> &start,
-    const Quad &quad,
-    const QuadBounds &quadBounds)
+    QuadControl quad,
+    const QuadLines &quadLines)
     :
-    DragQuad(index, start, start.template Convert<double>(), quad, quadBounds),
-    lines_(this->quad_.GetLines())
+    DragEditQuad(index, start, start.template Convert<double>(), quad),
+    lines_(quadLines)
 {
 
 }
 
 
-Quad DragQuadLine::GetQuad(const tau::Point2d<int> &end) const
+Quad DragQuadLine::MakeShape_(const tau::Point2d<int> &end) const
 {
     const auto &line = this->lines_[this->index_];
     double lineAngle = line.GetAngleDegrees();
@@ -188,20 +166,22 @@ Quad DragQuadLine::GetQuad(const tau::Point2d<int> &end) const
     auto parallel = magnitude * std::cos(relativeAngle);
     auto perpendicular = -1 * magnitude * std::sin(relativeAngle);
 
-    auto adjusted = this->quad_;
+    auto adjusted = this->startingShape_;
 
     if (std::abs(parallel) > std::abs(perpendicular))
     {
         double adjustment = parallel / adjusted.GetSideLength(this->index_);
 
+        auto quadBounds = QuadBounds(this->control_);
+
         if (this->index_ == 0 || this->index_ == 2)
         {
-            adjusted.shear.x = this->quadBounds_.shear.x.Constrain(
+            adjusted.shear.x = quadBounds.shear.x.Constrain(
                 adjusted.shear.x - adjustment);
         }
         else
         {
-            adjusted.shear.y = this->quadBounds_.shear.y.Constrain(
+            adjusted.shear.y = quadBounds.shear.y.Constrain(
                 adjusted.shear.y + adjustment);
         }
     }
@@ -229,230 +209,6 @@ Quad DragQuadLine::GetQuad(const tau::Point2d<int> &end) const
     }
 
     return adjusted;
-}
-
-
-QuadBrain::QuadBrain(
-    QuadControl quadControl,
-    PixelViewControl pixelViewControl)
-    :
-    quadControl_(quadControl),
-    pixelViewControl_(pixelViewControl),
-    mouseDownEndpoint_(
-        this,
-        pixelViewControl.mouseDown,
-        &QuadBrain::OnMouseDown_),
-    logicalPositionEndpoint_(
-        this,
-        pixelViewControl.logicalPosition,
-        &QuadBrain::OnLogicalPosition_),
-    modifierEndpoint_(
-        this,
-        pixelViewControl.modifier,
-        &QuadBrain::OnModifier_),
-    dragCenter_(),
-    dragPoint_(),
-    dragLine_(),
-    dragCreate_()
-{
-
-}
-
-
-void QuadBrain::OnMouseDown_(bool isDown)
-{
-    if (!isDown)
-    {
-        // Mouse has been released.
-        this->dragCenter_.reset();
-        this->dragLine_.reset();
-        this->dragPoint_.reset();
-        this->dragRotatePoint_.reset();
-        this->dragCreate_.reset();
-        this->UpdateCursor_();
-        return;
-    }
-
-    auto click = this->pixelViewControl_.logicalPosition.Get();
-    auto quad = this->quadControl_.Get();
-    auto points = quad.GetPoints();
-    auto pointIndex = GetPoint(click, points);
-
-    if (pointIndex)
-    {
-        if (this->pixelViewControl_.modifier.Get().IsControl())
-        {
-            this->dragPoint_ =
-                DragQuadPoint(
-                    *pointIndex,
-                    click,
-                    points[*pointIndex],
-                    quad,
-                    QuadBounds(this->quadControl_));
-        }
-        else
-        {
-            this->dragRotatePoint_ =
-                DragRotatePoint(
-                    *pointIndex,
-                    click,
-                    points[*pointIndex],
-                    quad,
-                    QuadBounds(this->quadControl_));
-        }
-
-        return;
-    }
-
-    auto lineIndex = GetLine(click, points);
-
-    if (lineIndex)
-    {
-        this->dragLine_ = DragQuadLine(
-            *lineIndex,
-            click,
-            quad,
-            QuadBounds(this->quadControl_));
-
-        return;
-    }
-
-    if (quad.Contains(click.template Convert<double>()))
-    {
-        this->dragCenter_ = Drag(click, quad.center);
-
-        this->pixelViewControl_.cursor.Set(
-            wxpex::Cursor::closedHand);
-
-        return;
-    }
-
-    this->dragCreate_ = Drag(click, click);
-}
-
-
-void QuadBrain::OnModifier_(const wxpex::Modifier &)
-{
-    this->UpdateCursor_();
-}
-
-
-void QuadBrain::OnLogicalPosition_(const tau::Point2d<int> &position)
-{
-    this->UpdateCursor_();
-
-    if (this->dragCenter_)
-    {
-        this->quadControl_.center.Set(
-            this->dragCenter_->GetPosition(position));
-
-        return;
-    }
-
-    if (this->dragLine_)
-    {
-        this->quadControl_.Set(this->dragLine_->GetQuad(position));
-
-        return;
-    }
-
-    if (this->dragPoint_)
-    {
-        this->quadControl_.Set(this->dragPoint_->GetQuad(position));
-
-        return;
-    }
-
-    if (this->dragRotatePoint_)
-    {
-        this->quadControl_.Set(this->dragRotatePoint_->GetQuad(position));
-
-        return;
-    }
-
-    if (this->dragCreate_)
-    {
-        auto size = this->dragCreate_->GetSize(position);
-        
-        if (size.GetArea() < 1)
-        {
-            return;
-        }
-
-        auto quad = Quad::Default();
-        quad.center = this->dragCreate_->GetDragCenter(position);
-        quad.size = this->dragCreate_->GetSize(position);
-        this->quadControl_.Set(quad);
-
-        return;
-    }
-}
-
-
-bool QuadBrain::IsDragging_() const
-{
-    return (
-        this->dragCenter_
-        || this->dragPoint_
-        || this->dragRotatePoint_
-        || this->dragLine_
-        || this->dragCreate_);
-}
-
-
-void QuadBrain::UpdateCursor_()
-{
-    if (this->IsDragging_())
-    {
-        return;
-    }
-
-    auto modifier = this->pixelViewControl_.modifier.Get();
-    auto quad = this->quadControl_.Get();
-
-    if (quad.size.GetArea() < 1.0)
-    {
-        return;
-    }
-
-    auto click = this->pixelViewControl_.logicalPosition.Get();
-    auto points = quad.GetPoints();
-
-    auto pointIndex = GetPoint(click, points);
-
-    if (pointIndex)
-    {
-        // Hovering over a point, change cursor
-        if (modifier.IsControl())
-        {
-            this->pixelViewControl_.cursor.Set(wxpex::Cursor::cross);
-        }
-        else
-        {
-            // TODO: Create a rotate cursor
-            this->pixelViewControl_.cursor.Set(wxpex::Cursor::pointRight);
-        }
-
-        return;
-    }
-
-    auto lineIndex = GetLine(click, points);
-
-    if (lineIndex)
-    {
-        // Hovering over a line, change cursor
-        this->pixelViewControl_.cursor.Set(wxpex::Cursor::sizing);
-        return;
-    }
-
-    if (quad.Contains(click.template Convert<double>()))
-    {
-        this->pixelViewControl_.cursor.Set(wxpex::Cursor::openHand);
-    }
-    else
-    {
-        this->pixelViewControl_.cursor.Set(wxpex::Cursor::arrow);
-    }
 }
 
 

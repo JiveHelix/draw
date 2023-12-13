@@ -24,9 +24,6 @@ struct PolygonFields
 };
 
 
-using PolygonPoints = std::vector<tau::Point2d<double>>;
-
-
 using CenterGroupMaker = pex::MakeGroup<tau::Point2dGroup<double>>;
 
 using RotationRange =
@@ -36,9 +33,9 @@ using RotationRange =
 struct CenteredPoints
 {
     tau::Point2d<double> center;
-    PolygonPoints points;
+    Points points;
 
-    CenteredPoints(const PolygonPoints &points_);
+    CenteredPoints(const Points &points_);
 };
 
 
@@ -48,7 +45,7 @@ struct PolygonTemplate
     T<CenterGroupMaker> center;
     T<ScaleRange> scale;
     T<RotationRange> rotation;
-    T<PolygonPoints> points;
+    T<pex::MakeList<tau::Point2dGroup<double>, 4>> points;
 
     static constexpr auto fields = PolygonFields<PolygonTemplate>::fields;
 };
@@ -62,7 +59,11 @@ struct Polygon: public PolygonTemplate<pex::Identity>
             {{0.0, 0.0}},
             1.0,
             0.0,
-            {}}
+            Points{
+                {-100.0, -100.0},
+                {100.0, -100.0},
+                {100.0, 100.0},
+                {-100.0, 100.0}}}
     {
 
     }
@@ -73,10 +74,16 @@ struct Polygon: public PolygonTemplate<pex::Identity>
     }
 
     Polygon(const CenteredPoints &centeredPoints);
-    Polygon(const PolygonPoints &points_);
-    PolygonPoints GetPoints() const;
+    Polygon(const Points &points_);
+    Points GetPoints() const;
     PolygonLines GetLines() const;
-    bool Contains(const tau::Point2d<double> &point);
+    bool Contains(const tau::Point2d<double> &point) const;
+    bool Contains(const tau::Point2d<double> &point, double margin) const;
+    double GetRadius() const;
+    double GetMarginScale(double margin) const;
+
+private:
+    Points GetPoints_(double scale_) const;
 };
 
 
@@ -92,7 +99,22 @@ using PolygonControl = typename PolygonGroup::Control;
 
 using PolygonGroupMaker = pex::MakeGroup<PolygonGroup>;
 
-DECLARE_OUTPUT_STREAM_OPERATOR(Polygon)
+// DECLARE_OUTPUT_STREAM_OPERATOR(Polygon)
+
+inline
+std::ostream & operator<<(std::ostream &output, const Polygon &polygon)
+{
+    output << fields::DescribeCompact(polygon) << " points: ";
+
+    auto points = polygon.GetPoints();
+    for (auto &point: points)
+    {
+        output << point << ", ";
+    }
+
+    return output;
+}
+
 DECLARE_EQUALITY_OPERATORS(Polygon)
 
 

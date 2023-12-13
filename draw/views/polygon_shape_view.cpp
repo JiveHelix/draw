@@ -19,7 +19,7 @@ PolygonShapeView::PolygonShapeView(
         new PolygonView(
             this->GetPanel(),
             "Polygon",
-            control.polygon,
+            control.shape,
             layoutOptions);
 
     auto look =

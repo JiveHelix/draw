@@ -7,7 +7,7 @@ namespace draw
 
 void DrawPolygon(
     wxpex::GraphicsContext &context,
-    const PolygonPoints &points)
+    const Points &points)
 {
     auto path = context->CreatePath();
     auto point = std::begin(points);
@@ -23,22 +23,53 @@ void DrawPolygon(
 }
 
 
-PolygonShape::PolygonShape(const Polygon &polygon_, const Look &look_)
+PolygonShape::PolygonShape(
+    size_t id_,
+    const Polygon &polygon_,
+    const Look &look_)
     :
-    PolygonShapeTemplate<pex::Identity>({polygon_, look_})
+    PolygonShapeTemplate<pex::Identity>({id_, polygon_, look_})
 {
 
 }
 
+
+PolygonShape::PolygonShape(const Polygon &polygon_, const Look &look_)
+    :
+    PolygonShapeTemplate<pex::Identity>({0, polygon_, look_})
+{
+
+}
+
+
 void PolygonShape::Draw(wxpex::GraphicsContext &context)
 {
-    if (this->polygon.points.empty())
+    auto points = this->shape.GetPoints();
+
+    if (points.empty())
     {
         return;
     }
 
     ConfigureLook(context, this->look);
-    DrawPolygon(context, this->polygon.GetPoints());
+    DrawPolygon(context, points);
+}
+
+
+PolygonShapeModel::PolygonShapeModel()
+    :
+    PolygonShapeGroup::Model()
+{
+    static size_t nextId = 0;
+    this->id.Set(nextId++);
+}
+
+
+void PolygonShapeModel::Set(const PolygonShape &other)
+{
+    // Do not change the id.
+    this->shape.Set(other.shape);
+    this->look.Set(other.look);
 }
 
 

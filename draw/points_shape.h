@@ -6,6 +6,7 @@
 #include "draw/point.h"
 #include "draw/look.h"
 #include "draw/shapes.h"
+#include "draw/oddeven.h"
 
 
 namespace draw
@@ -47,8 +48,6 @@ DECLARE_EQUALITY_OPERATORS(PointsShapeSettings)
 class PointsShape: public Shape
 {
 public:
-    using Points = std::vector<tau::Point2d<double>>;
-
     PointsShape(
         const PointsShapeSettings &settings,
         const Points &points);

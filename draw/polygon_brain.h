@@ -1,121 +1,110 @@
 #pragma once
 
 
-#include <pex/endpoint.h>
 #include <tau/vector2d.h>
 #include "draw/polygon.h"
+#include "draw/polygon_shape.h"
 #include "draw/drag.h"
-#include "draw/views/pixel_view_settings.h"
+#include "draw/shape_edit.h"
 
 
 namespace draw
 {
 
 
-std::optional<size_t> GetPoint(
-    const tau::Point2d<int> &click,
-    const std::vector<tau::Point2d<double>> &points);
+using DragPolygon = DragShape<PolygonControl>;
+using DragEditPolygon = DragEditShape<PolygonControl>;
 
 
-std::optional<size_t> GetLine(
-    const tau::Point2d<int> &click,
-    const std::vector<tau::Point2d<double>> &points);
+struct CreatePolygon
+{
+    std::optional<PolygonShape> operator()(
+        const Drag &drag,
+        const tau::Point2d<int> position);
+};
 
 
-class DragPolygon: public Drag
+using DragCreatePolygon = DragCreateShape<PolygonListControl, CreatePolygon>;
+
+
+class DragPolygonPoint: public DragEditPoint<PolygonControl>
 {
 public:
-    DragPolygon(
-        size_t index,
-        const tau::Point2d<int> &start,
-        const tau::Point2d<double> &offset,
-        const Polygon &polygon);
+    using DragEditPoint<PolygonControl>::DragEditPoint;
 
 protected:
-    Polygon polygon_;
+    Polygon MakeShape_(const tau::Point2d<int> &end) const override;
 };
 
 
-double DragAngleDifference(double first, double second);
-
-
-class DragPolygonPoint: public DragPolygon
+class DragRotatePolygonPoint: public DragEditPoint<PolygonControl>
 {
 public:
-    DragPolygonPoint(
-        size_t index,
-        const tau::Point2d<int> &start,
-        const tau::Point2d<double> &offset,
-        const Polygon &polygon);
+    using DragEditPoint<PolygonControl>::DragEditPoint;
 
-    Polygon GetPolygon(const tau::Point2d<int> &end) const;
-
-private:
-    std::vector<tau::Point2d<double>> points_;
+protected:
+    Polygon MakeShape_(const tau::Point2d<int> &end) const override;
 };
 
 
-class DragRotatePolygonPoint: public DragPolygon
-{
-public:
-    DragRotatePolygonPoint(
-        size_t index,
-        const tau::Point2d<int> &start,
-        const tau::Point2d<double> &offset,
-        const Polygon &polygon);
-
-    Polygon GetPolygon(const tau::Point2d<int> &end) const;
-
-private:
-    std::vector<tau::Point2d<double>> points_;
-};
-
-
-class DragPolygonLine: public DragPolygon
+class DragPolygonLine: public DragEditPolygon
 {
 public:
     DragPolygonLine(
         size_t index,
         const tau::Point2d<int> &start,
-        const Polygon &polygon);
+        PolygonControl polygon,
+        const PolygonLines &lines);
 
-    Polygon GetPolygon(const tau::Point2d<int> &end) const;
+protected:
+    Polygon MakeShape_(const tau::Point2d<int> &end) const override;
 
 private:
     PolygonLines lines_;
 };
 
 
+using PolygonBrainBase = ShapeBrain
+<
+    PolygonListControl,
+    DragCreatePolygon,
+    DragRotatePolygonPoint,
+    DragPolygonPoint,
+    DragPolygonLine,
+    DragPolygon
+>;
+
 class PolygonBrain
+    :
+    public PolygonBrainBase
 {
 public:
-    PolygonBrain(
-        PolygonControl polygonControl,
-        PixelViewControl pixelViewControl);
+    using ShapeBrain::ShapeBrain;
 
-private:
-    void OnMouseDown_(bool isDown);
-    void OnModifier_(const wxpex::Modifier &);
-    void OnLogicalPosition_(const tau::Point2d<int> &position);
-    bool IsDragging_() const;
-    void UpdateCursor_();
+protected:
+    bool HandleControlModifier_(
+        const tau::Point2d<int> click,
+        ItemControl control) override
+    {
+        auto points = control.shape.Get().GetPoints();
+        points.push_back(click.Convert<double>());
+        control.shape.Set(Polygon(points));
 
-    PolygonControl polygonControl_;
-    PixelViewControl pixelViewControl_;
+        return true;
+    }
 
-    pex::Endpoint<PolygonBrain, decltype(PixelViewControl::mouseDown)>
-        mouseDownEndpoint_;
+    bool HandleAltModifier_(
+        PointsIterator foundPoint,
+        ItemControl control,
+        Points &points) override
+    {
+        // Subtract a point
+        points.erase(foundPoint);
+        control.shape.Set(Polygon(points));
 
-    pex::Endpoint<PolygonBrain, PointControl> logicalPositionEndpoint_;
-
-    pex::Endpoint<PolygonBrain, decltype(PixelViewControl::modifier)>
-        modifierEndpoint_;
-
-    std::optional<Drag> dragCenter_;
-    std::optional<DragPolygonPoint> dragPoint_;
-    std::optional<DragRotatePolygonPoint> dragRotatePoint_;
-    std::optional<DragPolygonLine> dragLine_;
-    std::optional<Drag> dragCreate_;
+        return true;
+    }
 };
+
 
 } // end namespace draw

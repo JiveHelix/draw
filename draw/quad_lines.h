@@ -5,6 +5,7 @@
 #include <Eigen/Dense>
 #include <tau/line2d.h>
 #include <tau/vector2d.h>
+#include "draw/polygon_lines.h"
 
 
 namespace draw
@@ -78,7 +79,41 @@ struct QuadLines
     Line bottom;
     Line left;
 
-    QuadLines() = default;
+private:
+    std::array<Line *, 4> lines_;
+
+public:
+    QuadLines()
+        :
+        top(),
+        right(),
+        bottom(),
+        left(),
+        lines_{&this->top, &this->right, &this->bottom, &this->left}
+    {
+
+    }
+
+    QuadLines(const QuadLines &other)
+        :
+        top(other.top),
+        right(other.right),
+        bottom(other.bottom),
+        left(other.left),
+        lines_{&this->top, &this->right, &this->bottom, &this->left}
+    {
+
+    }
+
+    QuadLines & operator=(const QuadLines &other)
+    {
+        this->top = other.top;
+        this->right = other.right;
+        this->bottom = other.bottom;
+        this->left = other.left;
+
+        return *this;
+    }
 
     const Line & operator[](size_t index) const;
 
@@ -92,6 +127,8 @@ struct QuadLines
         const QuadPoint &bottomRight,
         const QuadPoint &bottomLeft);
 
+    QuadLines(const PolygonLines &polygonLines);
+
     QuadLines(double halfWidth, double halfHeight);
     QuadLines(const tau::Size<double> &size);
     QuadLines(const QuadPoints &points);
@@ -103,6 +140,10 @@ struct QuadLines
     QuadLines ApplyPerspective(const Perspective &perspective) const;
     QuadLines UndoPerspective();
     tau::Size<double> GetSize() const;
+
+    std::optional<size_t> Find(
+        const tau::Point2d<double> &point,
+        double margin);
 };
 
 

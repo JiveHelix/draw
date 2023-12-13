@@ -17,7 +17,7 @@ QuadShapeView::QuadShapeView(
     wxpex::Collapsible(parent, name)
 {
     auto quad =
-        new QuadView(this->GetPanel(), "Quad", control.quad, layoutOptions);
+        new QuadView(this->GetPanel(), "Quad", control.shape, layoutOptions);
 
     auto look =
         new LookView(this->GetPanel(), "Look", control.look, layoutOptions);

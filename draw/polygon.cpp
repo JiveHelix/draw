@@ -5,7 +5,7 @@ namespace draw
 {
 
 
-CenteredPoints::CenteredPoints(const PolygonPoints &points_)
+CenteredPoints::CenteredPoints(const Points &points_)
     :
     center(0, 0),
     points(points_)
@@ -92,7 +92,7 @@ Polygon::Polygon(const CenteredPoints &centeredPoints)
 }
 
 
-Polygon::Polygon(const PolygonPoints &points_)
+Polygon::Polygon(const Points &points_)
     :
     Polygon(CenteredPoints(points_))
 {
@@ -100,18 +100,9 @@ Polygon::Polygon(const PolygonPoints &points_)
 }
 
 
-PolygonPoints Polygon::GetPoints() const
+Points Polygon::GetPoints() const
 {
-    PolygonPoints result = this->points;
-
-    for (auto &point: result)
-    {
-        point = point.ToVector().Rotate(this->rotation);
-        point *= this->scale;
-        point += this->center;
-    }
-
-    return result;
+    return this->GetPoints_(this->scale);
 }
 
 
@@ -121,7 +112,7 @@ PolygonLines Polygon::GetLines() const
 }
 
 
-bool Polygon::Contains(const tau::Point2d<double> &point)
+bool Polygon::Contains(const tau::Point2d<double> &point) const
 {
     if (this->points.size() < 3)
     {
@@ -129,6 +120,77 @@ bool Polygon::Contains(const tau::Point2d<double> &point)
     }
 
     return oddeven::Contains(this->GetPoints(), point);
+}
+
+
+bool Polygon::Contains(const tau::Point2d<double> &point, double margin) const
+{
+    if (this->points.size() < 3)
+    {
+        return false;
+    }
+
+    return oddeven::Contains(
+        this->GetPoints_(this->GetMarginScale(margin)),
+        point);
+}
+
+
+double Polygon::GetRadius() const
+{
+    double radius = 1.0;
+
+    for (auto &point: this->points)
+    {
+        radius = std::max(radius, point.Magnitude());
+    }
+
+    return radius;
+}
+
+
+double Polygon::GetMarginScale(double margin) const
+{
+    if (this->points.size() < 3)
+    {
+        return this->scale;
+    }
+
+    /*
+
+    Increase scale by marginFactor to add margin pixels to the radius point.
+
+                   r ⋅ scale + margin
+    marginFactor = ──────────────────
+                        r ⋅ scale
+
+    newScale = scale ⋅ marginFactor
+
+               scale ⋅ (r ⋅ scale + margin)
+    newScale = ────────────────────────────
+                         r ⋅ scale
+
+                       ⎛margin⎞
+    newScale = scale + ⎜──────⎟
+                       ⎝   r  ⎠
+    */
+
+    return this->scale + (margin / this->GetRadius());
+}
+
+
+Points Polygon::GetPoints_(double scale_) const
+{
+    Points result = this->points;
+
+    for (auto &point: result)
+    {
+        point = point.ToVector().Rotate(this->rotation);
+        point *= scale_;
+        point += this->center;
+    }
+
+    return result;
 }
 
 

@@ -5,14 +5,14 @@
 #include <Eigen/Dense>
 #include <tau/line2d.h>
 #include <tau/vector2d.h>
+#include "draw/oddeven.h"
 
 
 namespace draw
 {
 
 
-using PolygonPoint = tau::Point2d<double>;
-using PolygonPoints = std::vector<PolygonPoint>;
+using PolygonPoint = typename Points::value_type;
 
 
 struct PolygonLines
@@ -55,9 +55,13 @@ struct PolygonLines
 
     PolygonLines(double halfWidth, double halfHeight);
     PolygonLines(const tau::Size<double> &size);
-    PolygonLines(const PolygonPoints &points);
+    PolygonLines(const Points &points);
 
-    PolygonPoints GetPoints() const;
+    Points GetPoints() const;
+
+    std::optional<size_t> Find(
+        const tau::Point2d<double> &point,
+        double margin);
 };
 
 

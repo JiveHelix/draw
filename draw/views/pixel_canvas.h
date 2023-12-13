@@ -84,13 +84,13 @@ private:
         context.Clear();
 #endif
 
-        auto scale = this->scaleEndpoint_.control.Get();
+        auto scale = this->scaleEndpoint_.GetControl().Get();
 
         auto viewRegion = tau::Region<int>{{
-            this->viewPositionEndpoint_.control.Get(),
+            this->viewPositionEndpoint_.GetControl().Get(),
             this->control_.viewSettings.viewSize.Get()}};
 
-        auto imageSize = this->imageSizeEndpoint_.control.Get();
+        auto imageSize = this->imageSizeEndpoint_.GetControl().Get();
 
         auto view =
             draw::View<int>(viewRegion, imageSize, scale);
@@ -131,7 +131,7 @@ private:
         auto gc = wxpex::GraphicsContext(context);
 
         auto viewPosition =
-            (this->viewPositionEndpoint_.control.Get() + correction)
+            (this->viewPositionEndpoint_.GetControl().Get() + correction)
                 .template Convert<double>();
 
         gc->Translate(-viewPosition.x, -viewPosition.y);
@@ -152,9 +152,9 @@ private:
     bool ignoreViewPosition_;
     bool skipUpdateViewPosition_;
 
-    using SizeEndpoint = pex::EndpointControl<PixelCanvas, SizeControl>;
-    using PositionEndpoint = pex::EndpointControl<PixelCanvas, PointControl>;
-    using ScaleEndpoint = pex::EndpointControl<PixelCanvas, ScaleControl>;
+    using SizeEndpoint = pex::Endpoint<PixelCanvas, SizeControl>;
+    using PositionEndpoint = pex::Endpoint<PixelCanvas, PointControl>;
+    using ScaleEndpoint = pex::Endpoint<PixelCanvas, ScaleControl>;
 
     SizeEndpoint imageSizeEndpoint_;
     PositionEndpoint viewPositionEndpoint_;
