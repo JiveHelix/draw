@@ -6,6 +6,7 @@
 #include <vector>
 #include <wxpex/graphics.h>
 #include <wxpex/async.h>
+#include "draw/detail/unique_id.h"
 
 
 namespace draw
@@ -24,29 +25,10 @@ public:
 };
 
 
-size_t CreateShapesId();
-
-
-void ReleaseShapesId();
-
-
-class ShapesId
+class ShapesId: public UniqueId<ssize_t>
 {
 public:
     ShapesId();
-
-    ~ShapesId();
-
-    ShapesId(const ShapesId &) = delete;
-    ShapesId & operator=(const ShapesId &) = delete;
-
-    ShapesId(ShapesId &&other);
-    ShapesId & operator=(ShapesId &&other);
-
-    ssize_t Get() const;
-
-private:
-    ssize_t id_;
 };
 
 
@@ -95,6 +77,17 @@ using ShapesControl = typename AsyncShapes::Control;
 
 template<typename Observer>
 using ShapesEndpoint = pex::Endpoint<Observer, ShapesControl>;
+
+
+template<typename T>
+struct ShapeFields
+{
+    static constexpr auto fields = std::make_tuple(
+        fields::Field(&T::id, "id"),
+        fields::Field(&T::shape, "shape"),
+        fields::Field(&T::look, "look"),
+        fields::Field(&T::node, "node"));
+};
 
 
 } // end namespace draw

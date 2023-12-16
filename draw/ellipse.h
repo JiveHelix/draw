@@ -31,7 +31,7 @@ struct EllipseTemplate
     using AngleRange =
         pex::MakeRange<double, pex::Limit<-180>, pex::Limit<180>>;
 
-    T<pex::MakeGroup<tau::Point2dGroup<double>>> center;
+    T<tau::Point2dGroup<double>> center;
     T<AxisRange> major;
     T<AxisRange> minor;
     T<AngleRange> rotation;

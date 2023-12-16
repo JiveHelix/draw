@@ -24,7 +24,7 @@ struct PolygonFields
 };
 
 
-using CenterGroupMaker = pex::MakeGroup<tau::Point2dGroup<double>>;
+using CenterGroup = tau::Point2dGroup<double>;
 
 using RotationRange =
     pex::MakeRange<double, pex::Limit<-180>, pex::Limit<180>>;
@@ -42,7 +42,7 @@ struct CenteredPoints
 template<template<typename> typename T>
 struct PolygonTemplate
 {
-    T<CenterGroupMaker> center;
+    T<CenterGroup> center;
     T<ScaleRange> scale;
     T<RotationRange> rotation;
     T<pex::MakeList<tau::Point2dGroup<double>, 4>> points;
@@ -87,7 +87,6 @@ private:
 };
 
 
-
 using PolygonGroup = pex::Group
 <
     PolygonFields,
@@ -97,9 +96,6 @@ using PolygonGroup = pex::Group
 
 using PolygonControl = typename PolygonGroup::Control;
 
-using PolygonGroupMaker = pex::MakeGroup<PolygonGroup>;
-
-// DECLARE_OUTPUT_STREAM_OPERATOR(Polygon)
 
 inline
 std::ostream & operator<<(std::ostream &output, const Polygon &polygon)

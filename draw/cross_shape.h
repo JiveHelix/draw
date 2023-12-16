@@ -24,8 +24,8 @@ template<template<typename> typename T>
 class CrossShapeTemplate
 {
 public:
-    T<CrossGroupMaker> cross;
-    T<LookGroupMaker> look;
+    T<CrossGroup> cross;
+    T<LookGroup> look;
 
     static constexpr auto fields =
         CrossShapeFields<CrossShapeTemplate>::fields;

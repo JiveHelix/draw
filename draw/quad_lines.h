@@ -42,12 +42,8 @@ using PerspectiveGroup = pex::Group
 >;
 
 using Perspective = typename PerspectiveGroup::Plain;
-
 using PerspectiveModel = typename PerspectiveGroup::Model;
-
 using PerspectiveControl = typename PerspectiveGroup::Control;
-
-using PerspectiveGroupMaker = pex::MakeGroup<PerspectiveGroup>;
 
 DECLARE_OUTPUT_STREAM_OPERATOR(Perspective)
 

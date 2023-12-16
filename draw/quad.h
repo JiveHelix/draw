@@ -39,10 +39,7 @@ using ShearGroup = pex::Group
 
 using Shear = typename ShearGroup::Plain;
 using ShearModel = typename ShearGroup::Model;
-
 using ShearControl = typename ShearGroup::Control;
-
-using ShearGroupMaker = pex::MakeGroup<ShearGroup>;
 
 DECLARE_OUTPUT_STREAM_OPERATOR(Shear)
 
@@ -68,12 +65,12 @@ using RotationRange =
 template<template<typename> typename T>
 struct QuadTemplate
 {
-    T<CenterGroupMaker> center;
-    T<SizeGroupMaker> size;
+    T<CenterGroup> center;
+    T<SizeGroup> size;
     T<ScaleRange> scale;
     T<RotationRange> rotation;
-    T<ShearGroupMaker> shear;
-    T<PerspectiveGroupMaker> perspective;
+    T<ShearGroup> shear;
+    T<PerspectiveGroup> perspective;
     T<pex::MakeSignal> reset;
 
     static constexpr auto fields = QuadFields<QuadTemplate>::fields;

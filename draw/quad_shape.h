@@ -2,23 +2,20 @@
 
 
 #include <pex/group.h>
+#include <wxpex/modifier.h>
+
 #include "draw/quad.h"
 #include "draw/look.h"
 #include "draw/shapes.h"
+#include "draw/oddeven.h"
+#include "draw/drag.h"
+#include "draw/views/pixel_view_settings.h"
+#include "draw/detail/poly_shape_id.h"
+#include "draw/node_settings.h"
 
 
 namespace draw
 {
-
-
-template<typename T>
-struct QuadShapeFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::id, "id"),
-        fields::Field(&T::shape, "shape"),
-        fields::Field(&T::look, "look"));
-};
 
 
 template<template<typename> typename T>
@@ -26,12 +23,13 @@ class QuadShapeTemplate
 {
 public:
     // id is read-only to a control
-    T<pex::Filtered<size_t, pex::NoFilter, pex::GetTag>> id;
+    T<pex::ReadOnly<size_t>> id;
     T<QuadGroupMaker> shape;
-    T<LookGroupMaker> look;
+    T<LookGroup> look;
+    T<NodeSettingsGroup> node;
 
     static constexpr auto fields =
-        QuadShapeFields<QuadShapeTemplate>::fields;
+        ShapeFields<QuadShapeTemplate>::fields;
 
     static constexpr auto fieldsTypeName = "QuadShape";
 };
@@ -52,7 +50,7 @@ public:
 
 using QuadShapeGroup = pex::Group
 <
-    QuadShapeFields,
+    ShapeFields,
     QuadShapeTemplate,
     QuadShape
 >;
@@ -64,11 +62,40 @@ public:
     QuadShapeModel();
 
     void Set(const QuadShape &other);
+
+private:
+    detail::PolyShapeId polyShapeId_;
 };
 
 
-using QuadShapeControl = typename QuadShapeGroup::Control;
-using QuadShapeGroupMaker = pex::MakeGroup<QuadShapeGroup, QuadShapeModel>;
+struct QuadShapeControl
+    :
+    public QuadShapeGroup::Control
+{
+    using QuadShapeGroup::Control::Control;
+
+    std::unique_ptr<Drag> ProcessMouseDown(
+        const tau::Point2d<int> &click,
+        const wxpex::Modifier &modifier,
+        CursorControl cursor);
+
+    NodeSettingsControl & GetNode()
+    {
+        return this->node;
+    }
+
+    wxWindow * CreateShapeView(wxWindow *parent) const;
+    wxWindow * CreateLookView(wxWindow *parent) const;
+    std::string GetName() const;
+};
+
+
+using QuadShapeGroupMaker = pex::MakeGroup
+<
+    QuadShapeGroup,
+    QuadShapeModel,
+    QuadShapeControl
+>;
 
 
 DECLARE_OUTPUT_STREAM_OPERATOR(QuadShape)

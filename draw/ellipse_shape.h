@@ -25,8 +25,8 @@ template<template<typename> typename T>
 class EllipseShapeTemplate
 {
 public:
-    T<pex::MakeGroup<draw::EllipseGroup>> ellipse;
-    T<pex::MakeGroup<draw::LookGroup>> look;
+    T<draw::EllipseGroup> ellipse;
+    T<draw::LookGroup> look;
 
     static constexpr auto fields =
         EllipseShapeFields<EllipseShapeTemplate>::fields;

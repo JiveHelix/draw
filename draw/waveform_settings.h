@@ -42,8 +42,8 @@ struct WaveformColorTemplate
 {
     T<BrightnessRanges::GroupMaker> range;
     T<pex::MakeRange<size_t, pex::Limit<1>, pex::Limit<64>>> count;
-    T<pex::MakeGroup<wxpex::HsvGroup>> color;
-    T<pex::MakeGroup<wxpex::HsvGroup>> highlightColor;
+    T<wxpex::HsvGroup> color;
+    T<wxpex::HsvGroup> highlightColor;
 
     static constexpr auto fields =
         WaveformColorFields<WaveformColorTemplate>::fields;
@@ -101,7 +101,7 @@ struct WaveformTemplate
     T<pex::MakeRange<size_t, pex::Limit<1>, pex::Limit<1024>>> levelCount;
     T<pex::MakeRange<size_t, pex::Limit<1>, pex::Limit<1920>>> columnCount;
     T<pex::MakeRange<double, pex::Limit<1>, pex::Limit<10>>> verticalScale;
-    T<pex::MakeGroup<WaveformColorGroup>> color;
+    T<WaveformColorGroup> color;
 
     static constexpr auto fields = WaveformFields<WaveformTemplate>::fields;
     static constexpr auto fieldsTypeName = "Waveform";
@@ -137,8 +137,6 @@ using WaveformGroup =
 
 using WaveformModel = typename WaveformGroup::Model;
 using WaveformControl = typename WaveformGroup::Control;
-
-using WaveformGroupMaker = pex::MakeGroup<WaveformGroup>;
 
 
 } // end namespace draw

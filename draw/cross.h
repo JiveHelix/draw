@@ -31,7 +31,7 @@ using SizeRange =
 template<template<typename> typename T>
 struct CrossTemplate
 {
-    T<pex::MakeGroup<tau::Point2dGroup<double>>> center;
+    T<tau::Point2dGroup<double>> center;
     T<SizeRange> size;
     T<RotationRange> rotation;
 
@@ -60,10 +60,8 @@ struct Cross: public CrossTemplate<pex::Identity>
 
 
 using CrossGroup = pex::Group<CrossFields, CrossTemplate, Cross>;
-
 using CrossControl = typename CrossGroup::Control;
 
-using CrossGroupMaker = pex::MakeGroup<CrossGroup>;
 
 DECLARE_OUTPUT_STREAM_OPERATOR(Cross)
 DECLARE_EQUALITY_OPERATORS(Cross)

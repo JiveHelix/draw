@@ -5,9 +5,10 @@
 #include <pex/endpoint.h>
 #include <wxpex/border_sizer.h>
 #include <wxpex/async.h>
+#include <draw/views/shape_view.h>
 
 
-template<typename View, typename ShapesControl>
+template<typename ShapesControl>
 class ShapesInterface: public wxPanel
 {
 public:
@@ -35,16 +36,8 @@ public:
 
         for (auto &it: this->shapesControl_)
         {
-            auto id = it.id.Get();
-
-            auto view =
-                new View(
-                    this,
-                    fmt::format("Shape {}", id),
-                    it,
-                    layoutOptions);
-
-            this->viewsByShapeId_[id] = view;
+            auto view = new draw::ShapeView(this, it);
+            this->viewsByShapeId_[it.id.Get()] = view;
             sizer->Add(view);
         }
 
@@ -118,7 +111,7 @@ public:
 
     wxWindow * MakeInterface()
     {
-        return new ShapesInterface<View, decltype(this->control_.shapes)>(
+        return new ShapesInterface<decltype(this->control_.shapes)>(
             this,
             this->control_.shapes,
             this->control_.reorder);

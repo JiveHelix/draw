@@ -92,11 +92,7 @@ private:
 using QuadBrain = ShapeBrain
 <
     QuadListControl,
-    DragCreateQuad,
-    DragRotateQuadPoint,
-    DragQuadPoint,
-    DragQuadLine,
-    DragQuad
+    DragCreateQuad
 >;
 
 

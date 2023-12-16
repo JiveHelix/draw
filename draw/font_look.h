@@ -28,7 +28,7 @@ struct FontLookTemplate
 
     T<bool> enable;
     T<double> pointSize;
-    T<pex::MakeGroup<wxpex::HsvGroup>> color;
+    T<wxpex::HsvGroup> color;
     T<bool> antialias;
 
     static constexpr auto fields = FontLookFields<FontLookTemplate>::fields;
@@ -54,12 +54,8 @@ DECLARE_OUTPUT_STREAM_OPERATOR(FontLook)
 
 
 using FontLookGroup = pex::Group<FontLookFields, FontLookTemplate, FontLook>;
-
 using FontLookModel = typename FontLookGroup::Model;
-
 using FontLookControl = typename FontLookGroup::Control;
-
-using FontLookGroupMaker = pex::MakeGroup<FontLookGroup>;
 
 
 void ConfigureFontLook(

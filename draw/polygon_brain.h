@@ -64,47 +64,11 @@ private:
 };
 
 
-using PolygonBrainBase = ShapeBrain
+using PolygonBrain = ShapeBrain
 <
     PolygonListControl,
-    DragCreatePolygon,
-    DragRotatePolygonPoint,
-    DragPolygonPoint,
-    DragPolygonLine,
-    DragPolygon
+    DragCreatePolygon
 >;
-
-class PolygonBrain
-    :
-    public PolygonBrainBase
-{
-public:
-    using ShapeBrain::ShapeBrain;
-
-protected:
-    bool HandleControlModifier_(
-        const tau::Point2d<int> click,
-        ItemControl control) override
-    {
-        auto points = control.shape.Get().GetPoints();
-        points.push_back(click.Convert<double>());
-        control.shape.Set(Polygon(points));
-
-        return true;
-    }
-
-    bool HandleAltModifier_(
-        PointsIterator foundPoint,
-        ItemControl control,
-        Points &points) override
-    {
-        // Subtract a point
-        points.erase(foundPoint);
-        control.shape.Set(Polygon(points));
-
-        return true;
-    }
-};
 
 
 } // end namespace draw

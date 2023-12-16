@@ -2,24 +2,20 @@
 
 
 #include <pex/group.h>
+#include <wxpex/modifier.h>
+
 #include "draw/polygon.h"
 #include "draw/look.h"
 #include "draw/shapes.h"
 #include "draw/oddeven.h"
+#include "draw/drag.h"
+#include "draw/views/pixel_view_settings.h"
+#include "draw/detail/poly_shape_id.h"
+#include "draw/node_settings.h"
 
 
 namespace draw
 {
-
-
-template<typename T>
-struct PolygonShapeFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::id, "id"),
-        fields::Field(&T::shape, "shape"),
-        fields::Field(&T::look, "look"));
-};
 
 
 template<template<typename> typename T>
@@ -27,12 +23,13 @@ class PolygonShapeTemplate
 {
 public:
     // id is read-only to a control
-    T<pex::Filtered<size_t, pex::NoFilter, pex::GetTag>> id;
-    T<PolygonGroupMaker> shape;
-    T<LookGroupMaker> look;
+    T<pex::ReadOnly<size_t>> id;
+    T<PolygonGroup> shape;
+    T<LookGroup> look;
+    T<NodeSettingsGroup> node;
 
     static constexpr auto fields =
-        PolygonShapeFields<PolygonShapeTemplate>::fields;
+        ShapeFields<PolygonShapeTemplate>::fields;
 
     static constexpr auto fieldsTypeName = "PolygonShape";
 };
@@ -58,7 +55,7 @@ public:
 
 using PolygonShapeGroup = pex::Group
 <
-    PolygonShapeFields,
+    ShapeFields,
     PolygonShapeTemplate,
     PolygonShape
 >;
@@ -70,13 +67,49 @@ public:
     PolygonShapeModel();
 
     void Set(const PolygonShape &other);
+
+private:
+    detail::PolyShapeId polyShapeId_;
 };
 
 
-using PolygonShapeControl = typename PolygonShapeGroup::Control;
+struct PolygonShapeControl
+    :
+    public PolygonShapeGroup::Control
+{
+    static constexpr bool handlesControlClick = true;
+    static constexpr bool handlesAltClick = true;
 
-using PolygonShapeGroupMaker =
-    pex::MakeGroup<PolygonShapeGroup, PolygonShapeModel>;
+    using PolygonShapeGroup::Control::Control;
+
+    bool ProcessControlClick(const tau::Point2d<int> &click);
+
+    bool ProcessAltClick(
+        PointsIterator foundPoint,
+        Points &points);
+
+    std::unique_ptr<Drag> ProcessMouseDown(
+        const tau::Point2d<int> &click,
+        const wxpex::Modifier &modifier,
+        CursorControl cursor);
+
+    NodeSettingsControl & GetNode()
+    {
+        return this->node;
+    }
+
+    wxWindow * CreateShapeView(wxWindow *parent) const;
+    wxWindow * CreateLookView(wxWindow *parent) const;
+    std::string GetName() const;
+};
+
+
+using PolygonShapeGroupMaker = pex::MakeGroup
+<
+    PolygonShapeGroup,
+    PolygonShapeModel,
+    PolygonShapeControl
+>;
 
 
 using PolygonListMaker = pex::MakeList<PolygonShapeGroupMaker, 1>;

@@ -55,6 +55,7 @@ target_sources(
     waveform_generator.h
     waveform_settings.h
     detail/png_image.h
+    detail/poly_shape_id.h
     views/affine_view.h
     views/cross_shape_view.h
     views/cross_view.h
@@ -63,6 +64,7 @@ target_sources(
     views/font_look_view.h
     views/lines_shape_view.h
     views/look_view.h
+    views/node_settings_view.h
     views/pixel_canvas.h
     views/pixel_view.h
     views/pixel_view_settings.h
@@ -99,6 +101,7 @@ target_sources(
     waveform_generator.cpp
     waveform_settings.cpp
     detail/png_image.cpp
+    detail/poly_shape_id.cpp
     views/cross_shape_view.cpp
     views/cross_view.cpp
     views/ellipse_shape_view.cpp
@@ -106,6 +109,7 @@ target_sources(
     views/font_look_view.cpp
     views/lines_shape_view.cpp
     views/look_view.cpp
+    views/node_settings_view.cpp
     views/pixel_canvas.cpp
     views/pixel_view.cpp
     views/pixel_view_settings.cpp

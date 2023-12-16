@@ -32,7 +32,7 @@ struct DemoFields
 template<template<typename> typename T>
 struct DemoTemplate
 {
-    T<pex::MakeGroup<draw::EllipseShapeGroup>> ellipse;
+    T<draw::EllipseShapeGroup> ellipse;
 };
 
 

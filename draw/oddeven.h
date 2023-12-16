@@ -10,6 +10,7 @@ namespace draw
 
 
 using Points = std::vector<tau::Point2d<double>>;
+using PointsIterator = typename Points::const_iterator;
 
 
 namespace oddeven

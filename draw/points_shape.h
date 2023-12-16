@@ -25,7 +25,7 @@ template<template<typename> typename T>
 struct PointsShapeTemplate
 {
     T<pex::MakeRange<double, pex::Limit<0>, pex::Limit<20>>> radius;
-    T<pex::MakeGroup<draw::LookGroup>> look;
+    T<draw::LookGroup> look;
 
     static constexpr auto fields =
         PointsShapeFields<PointsShapeTemplate>::fields;
@@ -70,8 +70,6 @@ using PointsShapeModel = typename PointsShapeGroup::Model;
 
 using PointsShapeControl =
     typename PointsShapeGroup::Control;
-
-using PointsShapeGroupMaker = pex::MakeGroup<PointsShapeGroup>;
 
 
 class ValuePointsShape: public Shape

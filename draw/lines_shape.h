@@ -25,7 +25,7 @@ struct LinesShapeTemplate
 {
     T<bool> infinite;
     T<pex::MakeRange<double, pex::Limit<0>, pex::Limit<2000>>> length;
-    T<pex::MakeGroup<draw::LookGroup>> look;
+    T<draw::LookGroup> look;
 
     static constexpr auto fields =
         LinesShapeFields<LinesShapeTemplate>::fields;
@@ -73,8 +73,6 @@ using LinesShapeGroup = pex::Group
 
 using LinesShapeModel = typename LinesShapeGroup::Model;
 using LinesShapeControl = typename LinesShapeGroup::Control;
-
-using LinesShapeGroupMaker = pex::MakeGroup<LinesShapeGroup>;
 
 
 } // end namespace draw

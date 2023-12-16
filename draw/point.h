@@ -14,8 +14,6 @@ using PointGroup = tau::Point2dGroup<int>;
 using Point = typename PointGroup::Plain;
 using PointControl = typename PointGroup::Control;
 
-using PointGroupMaker = pex::MakeGroup<PointGroup>;
-
 
 template<typename T>
 struct ValuePoint: public tau::Point2d<T>

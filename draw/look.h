@@ -30,9 +30,9 @@ struct LookTemplate
 
     T<bool> strokeEnable;
     T<WeightRange> strokeWeight;
-    T<pex::MakeGroup<wxpex::HsvGroup>> strokeColor;
+    T<wxpex::HsvGroup> strokeColor;
     T<bool> fillEnable;
-    T<pex::MakeGroup<wxpex::HsvGroup>> fillColor;
+    T<wxpex::HsvGroup> fillColor;
     T<bool> antialias;
 
     static constexpr auto fields = LookFields<LookTemplate>::fields;
@@ -59,13 +59,8 @@ DECLARE_EQUALITY_OPERATORS(Look)
 
 
 using LookGroup = pex::Group<LookFields, LookTemplate, Look>;
-
 using LookModel = typename LookGroup::Model;
-
 using LookControl = typename LookGroup::Control;
-
-
-using LookGroupMaker = pex::MakeGroup<LookGroup>;
 
 
 void ConfigureLook(wxpex::GraphicsContext &, const Look &);

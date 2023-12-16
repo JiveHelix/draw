@@ -4,13 +4,41 @@
 #include "draw/oddeven.h"
 #include "draw/drag.h"
 #include "draw/views/pixel_view_settings.h"
+#include "draw/node_settings.h"
 
 
 namespace draw
 {
 
 
-using PointsIterator = typename Points::const_iterator;
+template<typename T, typename = void>
+struct HandlesControlClick_: std::false_type {};
+
+template<typename T>
+struct HandlesControlClick_
+<
+    T,
+    std::enable_if_t<T::handlesControlClick>
+>: std::true_type {};
+
+
+template<typename T>
+inline constexpr bool HandlesControlClick = HandlesControlClick_<T>::value;
+
+
+template<typename T, typename = void>
+struct HandlesAltClick_: std::false_type {};
+
+template<typename T>
+struct HandlesAltClick_
+<
+    T,
+    std::enable_if_t<T::handlesAltClick>
+>: std::true_type {};
+
+
+template<typename T>
+inline constexpr bool HandlesAltClick = HandlesAltClick_<T>::value;
 
 
 std::optional<PointsIterator> FindPoint(
@@ -160,7 +188,24 @@ protected:
         }
 
         auto newIndex = this->shapeList_.Append(*shape);
-        this->shapeList_.selected.Set(newIndex);
+
+        if (newIndex)
+        {
+            this->Select_(*newIndex);
+        }
+    }
+
+    void Select_(size_t index)
+    {
+        auto wasSelected = this->shapeList_.selected.Get();
+
+        if (wasSelected)
+        {
+            this->shapeList_.at(*wasSelected).GetNode().isSelected.Set(false);
+        }
+
+        this->shapeList_.selected.Set(index);
+        this->shapeList_.at(index).GetNode().isSelected.Set(true);
     }
 
 protected:
@@ -190,82 +235,149 @@ protected:
 };
 
 
-class ShapeBrainBase
+template
+<
+    typename RotatePoint,
+    typename DragPoint,
+    typename DragLine,
+    typename DragShape,
+    typename ItemControl
+>
+std::unique_ptr<Drag> ProcessMouseDown(
+    ItemControl itemControl,
+    const tau::Point2d<int> &click,
+    const wxpex::Modifier &modifier,
+    CursorControl cursor)
 {
-public:
-    static constexpr auto observerName = "ShapeBrainBase";
+    auto shape = itemControl.shape.Get();
+    auto points = shape.GetPoints();
+    auto foundPoint = FindPoint(click, points);
 
-    ShapeBrainBase(PixelViewControl pixelViewControl);
+    if (foundPoint)
+    {
+        if (modifier.IsAlt())
+        {
+            if constexpr (HandlesAltClick<ItemControl>)
+            {
+                itemControl.ProcessAltClick(*foundPoint, points);
 
-    virtual ~ShapeBrainBase() {}
+                return {};
+            }
+        }
 
-protected:
-    virtual void OnMouseDown_(bool isDown) = 0;
-    virtual void UpdateCursor_() = 0;
+        auto pointIndex =
+            static_cast<size_t>(
+                std::distance(points.cbegin(), *foundPoint));
 
-protected:
-    void OnModifier_(const wxpex::Modifier &);
-    void OnLogicalPosition_(const tau::Point2d<int> &position);
-    bool IsDragging_() const;
+        if (modifier.IsControl())
+        {
+            return std::make_unique<RotatePoint>(
+                pointIndex,
+                click,
+                itemControl.shape,
+                points);
+        }
+        else
+        {
+            return std::make_unique<DragPoint>(
+                pointIndex,
+                click,
+                itemControl.shape,
+                points);
+        }
+    }
 
-    PixelViewControl pixelViewControl_;
+    auto lines = PolygonLines(points);
+    auto lineIndex = lines.Find(click.template Convert<double>(), 10.0);
 
-    pex::Endpoint<ShapeBrainBase, decltype(PixelViewControl::mouseDown)>
-        mouseDownEndpoint_;
+    if (lineIndex)
+    {
+        return std::make_unique<DragLine>(
+            *lineIndex,
+            click,
+            itemControl.shape,
+            lines);
+    }
 
-    pex::Endpoint<ShapeBrainBase, PointControl> logicalPositionEndpoint_;
+    cursor.Set(wxpex::Cursor::closedHand);
 
-    pex::Endpoint<ShapeBrainBase, decltype(PixelViewControl::modifier)>
-        modifierEndpoint_;
-
-    std::unique_ptr<Drag> drag_;
-};
+    return std::make_unique<DragShape>(
+        click,
+        shape.center,
+        itemControl.shape);
+}
 
 
 template
 <
     typename ListControl,
-    typename Create,
-    typename RotatePoint,
-    typename DragPoint,
-    typename DragLine,
-    typename DragShape
+    typename Create
 >
-class ShapeBrain: public ShapeBrainBase
+class ShapeBrain
 {
 public:
+    static constexpr auto observerName = "ShapeBrain";
+
     using ItemControl = typename ListControl::ItemControl;
+    using Shape = typename ItemControl::Type;
 
     ShapeBrain(
         ListControl shapeList,
         PixelViewControl pixelViewControl)
         :
-        ShapeBrainBase(pixelViewControl),
-        shapeList_(shapeList)
+        pixelViewControl_(pixelViewControl),
+        mouseDownEndpoint_(
+            this,
+            pixelViewControl.mouseDown,
+            &ShapeBrain::OnMouseDown_),
+        logicalPositionEndpoint_(
+            this,
+            pixelViewControl.logicalPosition,
+            &ShapeBrain::OnLogicalPosition_),
+        modifierEndpoint_(
+            this,
+            pixelViewControl.modifier,
+            &ShapeBrain::OnModifier_),
+        drag_(),
+        shapeList_(shapeList),
+        listCount_(this, this->shapeList_.count, &ShapeBrain::OnCount_),
+        countWillChange_(
+            this,
+            this->shapeList_.countWillChange,
+            &ShapeBrain::OnCountWillChange_),
+        selectConnections_()
     {
-
+        this->OnCount_(this->shapeList_.count.Get());
     }
 
-    virtual ~ShapeBrain() {}
+    ~ShapeBrain()
+    {
+        this->ClearSelectConnections_();
+    }
+
+    void OnModifier_(const wxpex::Modifier &)
+    {
+        this->UpdateCursor_();
+    }
+
+
+    void OnLogicalPosition_(const tau::Point2d<int> &position)
+    {
+        this->UpdateCursor_();
+
+        if (this->drag_)
+        {
+            this->drag_->ReportLogicalPosition(position);
+        }
+    }
+
+    bool IsDragging_() const
+    {
+        return !!this->drag_;
+    }
 
 protected:
-
-    virtual bool HandleControlModifier_(
-        [[maybe_unused]] const tau::Point2d<int> click,
-        [[maybe_unused]] ItemControl control)
-    {
-        return false;
-    }
-
-    virtual bool HandleAltModifier_(
-        [[maybe_unused]] PointsIterator iterator,
-        [[maybe_unused]] ItemControl control,
-        [[maybe_unused]] Points &points)
-    {
-        return false;
-    }
-
-    void OnMouseDown_(bool isDown) override
+    void OnMouseDown_(bool isDown)
     {
         if (!isDown)
         {
@@ -283,24 +395,32 @@ protected:
 
         if (!found)
         {
-            if (wasSelected
-                && this->pixelViewControl_.modifier.Get().IsControl())
+            if constexpr (HandlesControlClick<ItemControl>)
             {
-                // There was a selected shape.
-                // Keep it selected and handle a control modifier.
-                auto control = this->shapeList_[*wasSelected];
-
-                if (this->HandleControlModifier_(click, control))
+                if (wasSelected)
                 {
-                    return;
+                    auto selected = this->shapeList_[*wasSelected];
+
+                    if (this->pixelViewControl_.modifier.Get().IsControl())
+                    {
+                        // There was a selected shape.
+                        // Keep it selected and handle a control modifier.
+                        selected.ProcessControlClick(click);
+
+                        return;
+                    }
                 }
             }
 
             // The user clicked away from a shape without holding control.
-            this->shapeList_.selected.Set({});
+
+            if (wasSelected)
+            {
+                this->Deselect(*wasSelected);
+            }
 
             // There is no selection to edit.
-            // Begin a drag to create a new shape.
+            // Begin creating a new shape.
             this->drag_ =
                 std::make_unique<Create>(click, this->shapeList_);
 
@@ -308,76 +428,15 @@ protected:
         }
 
         // The user clicked on a shape.
-        this->shapeList_.selected.Set(found->first);
-        auto selectedControl = found->second;
-        auto shape = selectedControl.shape.Get();
-        auto points = shape.GetPoints();
-        auto foundPoint = FindPoint(click, points);
+        this->Select(found->first);
 
-        if (foundPoint)
-        {
-            if (this->pixelViewControl_.modifier.Get().IsAlt())
-            {
-                if (this->HandleAltModifier_(
-                        *foundPoint,
-                        selectedControl,
-                        points))
-                {
-                    return;
-                }
-            }
-
-            auto pointIndex =
-                static_cast<size_t>(
-                    std::distance(points.cbegin(), *foundPoint));
-
-            if (this->pixelViewControl_.modifier.Get().IsControl())
-            {
-                this->drag_ =
-                    std::make_unique<RotatePoint>(
-                        pointIndex,
-                        click,
-                        selectedControl.shape,
-                        points);
-            }
-            else
-            {
-                this->drag_ =
-                    std::make_unique<DragPoint>(
-                        pointIndex,
-                        click,
-                        selectedControl.shape,
-                        points);
-            }
-
-            return;
-        }
-
-        auto lines = PolygonLines(points);
-        auto lineIndex = lines.Find(click.template Convert<double>(), 10.0);
-
-        if (lineIndex)
-        {
-            this->drag_ =
-                std::make_unique<DragLine>(
-                    *lineIndex,
-                    click,
-                    selectedControl.shape,
-                    lines);
-
-            return;
-        }
-
-        this->drag_ = std::make_unique<DragShape>(
+        this->drag_ = found->second.ProcessMouseDown(
             click,
-            shape.center,
-            selectedControl.shape);
-
-        this->pixelViewControl_.cursor.Set(
-            wxpex::Cursor::closedHand);
+            this->pixelViewControl_.modifier.Get(),
+            this->pixelViewControl_.cursor);
     }
 
-    void UpdateCursor_() override
+    void UpdateCursor_()
     {
         if (this->IsDragging_())
         {
@@ -385,14 +444,21 @@ protected:
         }
 
         auto modifier = this->pixelViewControl_.modifier.Get();
-
         auto click = this->pixelViewControl_.logicalPosition.Get();
         auto found = this->FindSelected_(click.template Convert<double>());
 
+#if 0
+        std::cout << std::boolalpha;
+        std::cout << "found: " << !!found << std::endl;
+        std::cout << "modifer.IsControl(): " << modifier.IsControl() << std::endl;
+
+        std::cout << "this->shapeList_.selected.Get(): " << !!this->shapeList_.selected.Get() << std::endl;
+#endif
+
         if (!found)
         {
-            // The cursor is not contained by any of the polygons.
-            if (modifier.IsControl())
+            // The cursor is not contained by any of the shapes.
+            if (modifier.IsControl() && this->shapeList_.selected.Get())
             {
                 this->pixelViewControl_.cursor.Set(wxpex::Cursor::pencil);
 
@@ -420,7 +486,7 @@ protected:
                 // TODO: Create a rotate cursor
                 this->pixelViewControl_.cursor.Set(wxpex::Cursor::pointRight);
             }
-            else if (modifier.IsAlt())
+            else if (modifier.IsAlt() && HandlesAltClick<ItemControl>)
             {
                 this->pixelViewControl_.cursor.Set(wxpex::Cursor::bullseye);
             }
@@ -453,12 +519,11 @@ protected:
 
         while (count-- > 0)
         {
-            auto & shapeControl = this->shapeList_[count];
+            auto &shapeControl = this->shapeList_[count];
             auto shape = shapeControl.shape.Get();
 
             if (shape.Contains(position, 10.0))
             {
-                this->shapeList_.selected.Set(count);
                 return std::make_pair(count, shapeControl);
             }
         }
@@ -467,7 +532,90 @@ protected:
     }
 
 private:
+    void ClearSelectConnections_()
+    {
+        for (auto &connection: this->selectConnections_)
+        {
+            connection.Disconnect(this);
+        }
+
+        this->selectConnections_.clear();
+    }
+
+    void OnCountWillChange_()
+    {
+        this->ClearSelectConnections_();
+    }
+
+    void OnCount_(size_t count_)
+    {
+        this->selectConnections_.reserve(count_);
+
+        for (size_t i = 0; i < count_; ++i)
+        {
+            this->selectConnections_.emplace_back(
+                this,
+                this->shapeList_[i].GetNode().select,
+                std::bind(&ShapeBrain::OnSelect_, i, std::placeholders::_1));
+        }
+    }
+
+    static void OnSelect_(size_t index, void *context)
+    {
+        auto self = static_cast<ShapeBrain *>(context);
+        auto selected = self->shapeList_.selected.Get();
+
+        if (selected && (*selected == index))
+        {
+            self->Deselect(index);
+            return;
+        }
+
+        self->Select(index);
+    }
+
+    void Select(size_t index)
+    {
+        auto wasSelected = this->shapeList_.selected.Get();
+
+        if (wasSelected && (*wasSelected != index))
+        {
+            this->shapeList_.at(*wasSelected).GetNode().isSelected.Set(false);
+        }
+
+        this->shapeList_.selected.Set(index);
+        this->shapeList_.at(index).GetNode().isSelected.Set(true);
+    }
+
+    void Deselect(size_t index)
+    {
+        this->shapeList_.selected.Set({});
+        this->shapeList_.at(index).GetNode().isSelected.Set(false);
+    }
+
+    PixelViewControl pixelViewControl_;
+
+    pex::Endpoint<ShapeBrain, decltype(PixelViewControl::mouseDown)>
+        mouseDownEndpoint_;
+
+    pex::Endpoint<ShapeBrain, PointControl> logicalPositionEndpoint_;
+
+    pex::Endpoint<ShapeBrain, decltype(PixelViewControl::modifier)>
+        modifierEndpoint_;
+
+    using ListCountEndpoint =
+        pex::Endpoint<ShapeBrain, pex::control::ListCount>;
+
+    using CountWillChange =
+        pex::Endpoint<ShapeBrain, pex::control::Signal<pex::GetTag>>;
+
+    std::unique_ptr<Drag> drag_;
+
     ListControl shapeList_;
+    ListCountEndpoint listCount_;
+    CountWillChange countWillChange_;
+
+    std::vector<NodeSelectSignal> selectConnections_;
 };
 
 
