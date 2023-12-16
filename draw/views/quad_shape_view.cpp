@@ -14,7 +14,7 @@ QuadShapeView::QuadShapeView(
     QuadShapeControl control,
     const LayoutOptions &layoutOptions)
     :
-    wxpex::Collapsible(parent, name)
+    NodeSettingsView(parent, name, control.node)
 {
     auto quad =
         new QuadView(this->GetPanel(), "Quad", control.shape, layoutOptions);

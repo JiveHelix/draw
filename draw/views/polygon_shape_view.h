@@ -5,13 +5,14 @@
 #include "draw/polygon_shape.h"
 #include "draw/views/polygon_view.h"
 #include "draw/views/look_view.h"
+#include "draw/views/node_settings_view.h"
 
 
 namespace draw
 {
 
 
-class PolygonShapeView: public wxpex::Collapsible
+class PolygonShapeView: public NodeSettingsView
 {
 public:
     using LayoutOptions = wxpex::LayoutOptions;

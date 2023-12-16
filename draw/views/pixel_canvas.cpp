@@ -42,8 +42,8 @@ PixelCanvas::PixelCanvas(
     control_(controls),
 
     image_(
-        this->imageSizeEndpoint_.GetControl().Get().width,
-        this->imageSizeEndpoint_.GetControl().Get().height),
+        this->imageSizeEndpoint_.Get().width,
+        this->imageSizeEndpoint_.Get().height),
 
     bitmap_(),
     pixelsEndpoint_(this, controls.pixels, &PixelCanvas::OnPixels_),
@@ -98,7 +98,7 @@ PixelCanvas::PixelCanvas(
     this->cursorEndpoint_.Connect(&PixelCanvas::OnCursor_);
 
     // Configure the scrollable area
-    this->SizeVirtualPanel_(this->scaleEndpoint_.GetControl().Get());
+    this->SizeVirtualPanel_(this->scaleEndpoint_.Get());
 
     this->Bind(wxEVT_PAINT, &PixelCanvas::OnPaint_, this);
 }
@@ -115,8 +115,8 @@ void PixelCanvas::ScrollWindow(int dx, int dy, const wxRect *rect)
 
     this->ignoreViewPosition_ = true;
     auto delta = tau::Point2d<int>(-dx, -dy);
-    auto position = this->viewPositionEndpoint_.GetControl().Get();
-    this->viewPositionEndpoint_.GetControl().Set(position + delta);
+    auto position = this->viewPositionEndpoint_.Get();
+    this->viewPositionEndpoint_.Set(position + delta);
     this->ignoreViewPosition_ = false;
 }
 
@@ -128,7 +128,7 @@ Size PixelCanvas::GetVirtualSize() const
 void PixelCanvas::OnImageSize_(const Size &imageSize)
 {
     this->image_ = wxImage(imageSize.width, imageSize.height, true);
-    this->SizeVirtualPanel_(this->scaleEndpoint_.GetControl().Get());
+    this->SizeVirtualPanel_(this->scaleEndpoint_.Get());
 }
 
 void PixelCanvas::OnSize_(wxSizeEvent &event)
@@ -283,7 +283,7 @@ void PixelCanvas::OnViewPosition_(const Point &viewPosition)
 
 void PixelCanvas::SizeVirtualPanel_(const Scale &scale)
 {
-    auto imageSize = this->imageSizeEndpoint_.GetControl().Get();
+    auto imageSize = this->imageSizeEndpoint_.Get();
     auto virtualSize = imageSize.template Convert<double>();
 
     virtualSize.width *= scale.horizontal;
@@ -292,7 +292,7 @@ void PixelCanvas::SizeVirtualPanel_(const Scale &scale)
 
     auto unitCount = this->virtualSize_ / PixelCanvas::pixelsPerScrollUnit;
 
-    auto viewPosition = this->viewPositionEndpoint_.GetControl().Get();
+    auto viewPosition = this->viewPositionEndpoint_.Get();
 
     auto positionInUnits = viewPosition / pixelsPerScrollUnit;
 

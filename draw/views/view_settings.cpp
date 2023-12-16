@@ -114,9 +114,7 @@ void ViewSettingsModel::FitZoom()
     // imageSize_ * fit = viewSize_
     viewSize_ /= imageSize_;
     auto fit = Scale{viewSize_.height, viewSize_.width};
-
-    auto scaleDeferred =
-        pex::Defer<decltype(this->scale)>(this->scale);
+    auto scaleDeferred = pex::MakeDefer(this->scale);
 
     if (this->linkZoom.Get())
     {

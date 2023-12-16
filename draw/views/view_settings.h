@@ -31,11 +31,11 @@ struct ViewFields
 template<template<typename> typename T>
 struct ViewTemplate
 {
-    T<pex::MakeGroup<SizeGroup>> imageSize;
-    T<pex::MakeGroup<SizeGroup>> viewSize;
-    T<pex::MakeGroup<PointGroup>> viewPosition;
-    T<pex::MakeGroup<tau::Point2dGroup<double>>> imageCenterPixel;
-    T<pex::MakeGroup<ScaleGroup>> scale;
+    T<SizeGroup> imageSize;
+    T<SizeGroup> viewSize;
+    T<PointGroup> viewPosition;
+    T<tau::Point2dGroup<double>> imageCenterPixel;
+    T<ScaleGroup> scale;
     T<bool> linkZoom;
     T<pex::MakeSignal> resetZoom;
     T<pex::MakeSignal> fitZoom;

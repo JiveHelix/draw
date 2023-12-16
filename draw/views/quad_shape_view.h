@@ -1,15 +1,15 @@
 #pragma once
 
 
-#include <wxpex/collapsible.h>
 #include "draw/quad_shape.h"
+#include "draw/views/node_settings_view.h"
 
 
 namespace draw
 {
 
 
-class QuadShapeView: public wxpex::Collapsible
+class QuadShapeView: public NodeSettingsView
 {
 public:
     using LayoutOptions = wxpex::LayoutOptions;

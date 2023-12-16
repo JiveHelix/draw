@@ -11,7 +11,7 @@ PolygonShapeView::PolygonShapeView(
     PolygonShapeControl control,
     const LayoutOptions &layoutOptions)
     :
-    wxpex::Collapsible(parent, name)
+    NodeSettingsView(parent, name, control.node)
 {
     using namespace wxpex;
 

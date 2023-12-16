@@ -38,8 +38,8 @@ struct PixelViewTemplate
     using AsyncShapes = wxpex::MakeAsync<Shapes>;
 
     T<ViewSettingsGroupMaker> viewSettings;
-    T<PointGroupMaker> mousePosition;
-    T<PointGroupMaker> logicalPosition;
+    T<PointGroup> mousePosition;
+    T<PointGroup> logicalPosition;
     T<bool> mouseDown;
     T<bool> rightMouseDown;
     T<wxpex::Modifier> modifier;
@@ -83,6 +83,9 @@ struct PixelViewControl: public PixelViewGroup::Control
 
     PixelViewControl(PixelViewModel &dataViewModel);
 };
+
+
+using CursorControl = decltype(PixelViewControl::cursor);
 
 
 using PixelViewGroupMaker = pex::MakeGroup
