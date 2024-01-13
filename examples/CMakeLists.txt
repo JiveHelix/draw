@@ -11,11 +11,21 @@ endif ()
 add_executable(polygon_demo polygon_demo.cpp)
 
 target_link_libraries(
-   polygon_demo
-   PRIVATE
-   project_warnings
-   project_options
-   common)
+    polygon_demo
+    PRIVATE
+    project_warnings
+    project_options
+    common)
+
+
+add_executable(poly_demo poly_demo.cpp)
+
+target_link_libraries(
+    poly_demo
+    PRIVATE
+    project_warnings
+    project_options
+    common)
 
 
 add_executable(ellipse_demo ellipse_demo.cpp)

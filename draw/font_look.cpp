@@ -38,5 +38,5 @@ template struct pex::Group
     <
         draw::FontLookFields,
         draw::FontLookTemplate,
-        draw::FontLook
+        pex::PlainT<draw::FontLook>
     >;

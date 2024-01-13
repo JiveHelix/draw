@@ -63,6 +63,17 @@ LookView::LookView(
 }
 
 
+LookView::LookView(
+    wxWindow *parent,
+    LookControl control,
+    const LayoutOptions &layoutOptions)
+    :
+    LookView(parent, "Look", control, layoutOptions)
+{
+
+}
+
+
 StrokeView::StrokeView(
     wxWindow *parent,
     const std::string &name,
@@ -101,6 +112,17 @@ StrokeView::StrokeView(
         antialias);
 
     this->ConfigureSizer(std::move(sizer));
+}
+
+
+StrokeView::StrokeView(
+    wxWindow *parent,
+    LookControl control,
+    const LayoutOptions &layoutOptions)
+    :
+    StrokeView(parent, "Stroke", control, layoutOptions)
+{
+
 }
 
 

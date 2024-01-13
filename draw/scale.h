@@ -44,7 +44,7 @@ using ScaleGroup =
     <
         tau::ScaleFields,
         tau::ScaleTemplate<ScaleRange>::template Template,
-        Scale
+        pex::PlainT<Scale>
     >;
 
 using ScaleModel = typename ScaleGroup::Model;

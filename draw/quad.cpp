@@ -6,7 +6,7 @@ namespace draw
 {
 
 
-Quad::Affine Quad::MakeTransform() const
+QuadGroupTemplates_::Plain::Affine QuadGroupTemplates_::Plain::MakeTransform() const
 {
     Affine scale_ = Affine::Identity();
     scale_(0, 0) = this->scale;
@@ -25,19 +25,19 @@ Quad::Affine Quad::MakeTransform() const
 }
 
 
-QuadMatrix Quad::GetPerspectiveMatrix() const
+QuadMatrix QuadGroupTemplates_::Plain::GetPerspectiveMatrix() const
 {
     auto quadLines = QuadLines(this->size);
     auto perspectiveLines = quadLines.ApplyPerspective(this->perspective);
     return perspectiveLines.GetMatrix();
 }
 
-QuadPoints Quad::GetPerspectivePoints() const
+QuadPoints QuadGroupTemplates_::Plain::GetPerspectivePoints() const
 {
     return MatrixToPoints(this->GetPerspectiveMatrix());
 }
 
-QuadPoints Quad::GetPoints() const
+QuadPoints QuadGroupTemplates_::Plain::GetPoints() const
 {
     Affine transform = this->MakeTransform();
 
@@ -45,7 +45,7 @@ QuadPoints Quad::GetPoints() const
 }
 
 
-QuadPoints Quad::GetPoints_(double scale_) const
+QuadPoints QuadGroupTemplates_::Plain::GetPoints_(double scale_) const
 {
     auto scaledQuad = *this;
     scaledQuad.scale = scale_;
@@ -54,7 +54,7 @@ QuadPoints Quad::GetPoints_(double scale_) const
 }
 
 
-double Quad::GetSideLength(size_t index) const
+double QuadGroupTemplates_::Plain::GetSideLength(size_t index) const
 {
     QuadPoints points = this->GetPoints();
 
@@ -77,12 +77,12 @@ double Quad::GetSideLength(size_t index) const
     }
 }
 
-QuadLines Quad::GetLines() const
+QuadLines QuadGroupTemplates_::Plain::GetLines() const
 {
     return QuadLines(this->GetPoints());
 }
 
-void Quad::SetPoints(const QuadPoints &quadPoints)
+void QuadGroupTemplates_::Plain::SetPoints(const QuadPoints &quadPoints)
 {
     Affine inverseTransform = this->MakeTransform().inverse();
     auto pointsMatrix = PointsToMatrix(quadPoints);
@@ -94,13 +94,13 @@ void Quad::SetPoints(const QuadPoints &quadPoints)
 }
 
 
-bool Quad::Contains(const tau::Point2d<double> &point) const
+bool QuadGroupTemplates_::Plain::Contains(const tau::Point2d<double> &point) const
 {
     return oddeven::Contains(this->GetPoints(), point);
 }
 
 
-bool Quad::Contains(const tau::Point2d<double> &point, double margin) const
+bool QuadGroupTemplates_::Plain::Contains(const tau::Point2d<double> &point, double margin) const
 {
     return oddeven::Contains(
         this->GetPoints_(this->GetMarginScale(margin)),
@@ -108,13 +108,13 @@ bool Quad::Contains(const tau::Point2d<double> &point, double margin) const
 }
 
 
-double Quad::GetMarginScale(double margin) const
+double QuadGroupTemplates_::Plain::GetMarginScale(double margin) const
 {
     return this->scale + (margin / this->size.Magnitude());
 }
 
 
-double Quad::GetArea() const
+double QuadGroupTemplates_::Plain::GetArea() const
 {
     auto points = this->GetPoints();
     auto bisecting = tau::Line2d<double>(points[0], points[2]);
@@ -140,5 +140,5 @@ template struct pex::Group
 <
     draw::QuadFields,
     draw::QuadTemplate,
-    draw::Quad
+    draw::QuadGroupTemplates_
 >;

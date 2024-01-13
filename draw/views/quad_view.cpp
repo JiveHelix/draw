@@ -116,4 +116,15 @@ QuadView::QuadView(
 }
 
 
+QuadView::QuadView(
+    wxWindow *parent,
+    QuadControl control,
+    const wxpex::LayoutOptions &layoutOptions)
+    :
+    QuadView(parent, "Quad", control, layoutOptions)
+{
+
+}
+
+
 } // end namespace draw

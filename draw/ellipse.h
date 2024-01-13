@@ -52,7 +52,7 @@ using EllipseGroup = pex::Group
 <
     EllipseFields,
     EllipseTemplate,
-    Ellipse
+    pex::PlainT<Ellipse>
 >;
 
 using EllipseModel = typename EllipseGroup::Model;
@@ -71,5 +71,5 @@ extern template struct pex::Group
 <
     draw::EllipseFields,
     draw::EllipseTemplate,
-    draw::Ellipse
+    pex::PlainT<draw::Ellipse>
 >;

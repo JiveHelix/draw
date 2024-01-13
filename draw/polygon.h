@@ -91,7 +91,7 @@ using PolygonGroup = pex::Group
 <
     PolygonFields,
     PolygonTemplate,
-    Polygon
+    pex::PlainT<Polygon>
 >;
 
 using PolygonControl = typename PolygonGroup::Control;
@@ -123,5 +123,5 @@ extern template struct pex::Group
     <
         draw::PolygonFields,
         draw::PolygonTemplate,
-        draw::Polygon
+        pex::PlainT<draw::Polygon>
     >;

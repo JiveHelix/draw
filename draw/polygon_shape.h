@@ -2,6 +2,7 @@
 
 
 #include <pex/group.h>
+#include <pex/poly_group.h>
 #include <wxpex/modifier.h>
 
 #include "draw/polygon.h"
@@ -10,12 +11,20 @@
 #include "draw/oddeven.h"
 #include "draw/drag.h"
 #include "draw/views/pixel_view_settings.h"
+#include "draw/views/polygon_view.h"
+#include "draw/views/look_view.h"
 #include "draw/detail/poly_shape_id.h"
 #include "draw/node_settings.h"
+#include "draw/polygon_brain.h"
 
 
 namespace draw
 {
+
+
+void DrawPolygon(
+    wxpex::GraphicsContext &context,
+    const Points &points);
 
 
 template<template<typename> typename T>
@@ -23,7 +32,7 @@ class PolygonShapeTemplate
 {
 public:
     // id is read-only to a control
-    T<pex::ReadOnly<size_t>> id;
+    T<pex::ReadOnly<ssize_t>> id;
     T<PolygonGroup> shape;
     T<LookGroup> look;
     T<NodeSettingsGroup> node;
@@ -32,88 +41,118 @@ public:
         ShapeFields<PolygonShapeTemplate>::fields;
 
     static constexpr auto fieldsTypeName = "PolygonShape";
+
+    template<typename Base>
+    class Impl: public Base
+    {
+    public:
+        using Base::Base;
+
+        static Impl Default()
+        {
+            return {{
+                0,
+                Polygon::Default(),
+                Look::Default(),
+                NodeSettings::Default()}};
+        }
+
+        void Draw(wxpex::GraphicsContext &context) override
+        {
+            auto points = this->shape.GetPoints();
+
+            if (points.empty())
+            {
+                return;
+            }
+
+            ConfigureLook(context, this->look);
+            DrawPolygon(context, points);
+        }
+
+        ssize_t GetId() const override
+        {
+            return this->id;
+        }
+
+        Points GetPoints() const override
+        {
+            return this->shape.GetPoints();
+        }
+
+        bool Contains(
+            const tau::Point2d<int> &point,
+            double margin) const override
+        {
+            return this->shape.Contains(point, margin);
+        }
+
+        std::shared_ptr<Shape> Copy() const override
+        {
+            return std::make_shared<Impl>(*this);
+        }
+
+        bool HandlesAltClick() const override { return true; }
+        bool HandlesControlClick() const override { return true; }
+
+        std::string GetName() const override
+        {
+            return fmt::format("Polygon {}", this->id);
+        }
+
+        std::unique_ptr<Drag> ProcessMouseDown(
+            std::shared_ptr<ShapeControl> control,
+            const tau::Point2d<int> &click,
+            const wxpex::Modifier &modifier,
+            CursorControl cursor) override
+        {
+            return ::draw::ProcessMouseDown
+                <
+                    DragRotatePolygonPoint<Impl>,
+                    DragPolygonPoint<Impl>,
+                    DragPolygonLine<Impl>,
+                    DragShape<Impl>,
+                    Impl
+                >(control, *this, click, modifier, cursor);
+        }
+
+        bool ProcessControlClick(
+            ShapeControl &control,
+            const tau::Point2d<int> &click) override
+        {
+            auto points = this->shape.GetPoints();
+            points.push_back(click.Convert<double>());
+            this->shape = Polygon(points);
+            control.SetValueBase(*this);
+
+            return true;
+        }
+
+        bool ProcessAltClick(
+            ShapeControl &control,
+            PointsIterator iterator,
+            Points &points) override
+        {
+            // Subtract a point
+            points.erase(iterator);
+            this->shape = Polygon(points);
+            control.SetValueBase(*this);
+
+            return true;
+        }
+    };
 };
 
 
-void DrawPolygon(
-    wxpex::GraphicsContext &context,
-    const Points &points);
 
-
-class PolygonShape:
-    public Shape,
-    public PolygonShapeTemplate<pex::Identity>
-{
-public:
-    PolygonShape() = default;
-    PolygonShape(size_t id_, const Polygon &polygon_, const Look &look_);
-    PolygonShape(const Polygon &polygon_, const Look &look_);
-
-    void Draw(wxpex::GraphicsContext &context) override;
-};
-
-
-using PolygonShapeGroup = pex::Group
+template<typename Value>
+using PolygonShapePolyGroup = pex::poly::PolyGroup
 <
     ShapeFields,
     PolygonShapeTemplate,
-    PolygonShape
+    Value,
+    ShapeTemplates<PolygonView>
 >;
-
-
-struct PolygonShapeModel: public PolygonShapeGroup::Model
-{
-public:
-    PolygonShapeModel();
-
-    void Set(const PolygonShape &other);
-
-private:
-    detail::PolyShapeId polyShapeId_;
-};
-
-
-struct PolygonShapeControl
-    :
-    public PolygonShapeGroup::Control
-{
-    static constexpr bool handlesControlClick = true;
-    static constexpr bool handlesAltClick = true;
-
-    using PolygonShapeGroup::Control::Control;
-
-    bool ProcessControlClick(const tau::Point2d<int> &click);
-
-    bool ProcessAltClick(
-        PointsIterator foundPoint,
-        Points &points);
-
-    std::unique_ptr<Drag> ProcessMouseDown(
-        const tau::Point2d<int> &click,
-        const wxpex::Modifier &modifier,
-        CursorControl cursor);
-
-    NodeSettingsControl & GetNode()
-    {
-        return this->node;
-    }
-
-    wxWindow * CreateShapeView(wxWindow *parent) const;
-    wxWindow * CreateLookView(wxWindow *parent) const;
-    std::string GetName() const;
-};
-
-
-using PolygonShapeGroupMaker = pex::MakeGroup
-<
-    PolygonShapeGroup,
-    PolygonShapeModel,
-    PolygonShapeControl
->;
-
-
-using PolygonListMaker = pex::MakeList<PolygonShapeGroupMaker, 1>;
-using PolygonListControl = pex::ControlSelector<PolygonListMaker>;
 
 
 } // end namespace draw

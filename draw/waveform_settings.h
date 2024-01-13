@@ -40,7 +40,7 @@ struct WaveformColorFields
 template<template<typename> typename T>
 struct WaveformColorTemplate
 {
-    T<BrightnessRanges::GroupMaker> range;
+    T<BrightnessRanges::Group> range;
     T<pex::MakeRange<size_t, pex::Limit<1>, pex::Limit<64>>> count;
     T<wxpex::HsvGroup> color;
     T<wxpex::HsvGroup> highlightColor;
@@ -75,7 +75,12 @@ DECLARE_EQUALITY_OPERATORS(WaveformColor)
 
 
 using WaveformColorGroup =
-    pex::Group<WaveformColorFields, WaveformColorTemplate, WaveformColor>;
+    pex::Group
+    <
+        WaveformColorFields,
+        WaveformColorTemplate,
+        pex::PlainT<WaveformColor>
+    >;
 
 using WaveformColorControl = typename WaveformColorGroup::Control;
 
@@ -133,7 +138,7 @@ DECLARE_EQUALITY_OPERATORS(WaveformSettings)
 
 
 using WaveformGroup =
-    pex::Group<WaveformFields, WaveformTemplate, WaveformSettings>;
+    pex::Group<WaveformFields, WaveformTemplate, pex::PlainT<WaveformSettings>>;
 
 using WaveformModel = typename WaveformGroup::Model;
 using WaveformControl = typename WaveformGroup::Control;
@@ -146,7 +151,7 @@ extern template struct pex::Group
     <
         draw::WaveformColorFields,
         draw::WaveformColorTemplate,
-        draw::WaveformColor
+        pex::PlainT<draw::WaveformColor>
     >;
 
 
@@ -154,5 +159,5 @@ extern template struct pex::Group
     <
         draw::WaveformFields,
         draw::WaveformTemplate,
-        draw::WaveformSettings
+        pex::PlainT<draw::WaveformSettings>
     >;

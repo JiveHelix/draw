@@ -53,7 +53,9 @@ DECLARE_EQUALITY_OPERATORS(FontLook)
 DECLARE_OUTPUT_STREAM_OPERATOR(FontLook)
 
 
-using FontLookGroup = pex::Group<FontLookFields, FontLookTemplate, FontLook>;
+using FontLookGroup =
+    pex::Group<FontLookFields, FontLookTemplate, pex::PlainT<FontLook>>;
+
 using FontLookModel = typename FontLookGroup::Model;
 using FontLookControl = typename FontLookGroup::Control;
 
@@ -71,5 +73,5 @@ extern template struct pex::Group
     <
         draw::FontLookFields,
         draw::FontLookTemplate,
-        draw::FontLook
+        pex::PlainT<draw::FontLook>
     >;

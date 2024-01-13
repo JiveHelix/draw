@@ -45,7 +45,7 @@ DECLARE_EQUALITY_OPERATORS(LinesShapeSettings)
 
 class LinesShape
     :
-    public Shape
+    public DrawnShape
 {
 public:
     using Line = tau::Line2d<double>;
@@ -68,7 +68,7 @@ using LinesShapeGroup = pex::Group
 <
     LinesShapeFields,
     LinesShapeTemplate,
-    LinesShapeSettings
+    pex::PlainT<LinesShapeSettings>
 >;
 
 using LinesShapeModel = typename LinesShapeGroup::Model;
@@ -82,5 +82,5 @@ extern template struct pex::Group
 <
     draw::LinesShapeFields,
     draw::LinesShapeTemplate,
-    draw::LinesShapeSettings
+    pex::PlainT<draw::LinesShapeSettings>
 >;

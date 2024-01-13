@@ -40,27 +40,31 @@ struct LookTemplate
 };
 
 
-struct Look: public LookTemplate<pex::Identity>
+template<typename Base>
+struct Look_: public Base
 {
-    static Look Default()
+    static Look_ Default()
     {
-        return {{
+        return {
             true,
             1,
             {{0.0, 0.0, 1.0}},
             false,
             {{0.0, 0.0, 0.5}},
-            true}};
+            true};
     }
 };
 
 
-DECLARE_EQUALITY_OPERATORS(Look)
 
+using LookGroup = pex::Group<LookFields, LookTemplate, pex::PlainU<Look_>>;
 
-using LookGroup = pex::Group<LookFields, LookTemplate, Look>;
 using LookModel = typename LookGroup::Model;
 using LookControl = typename LookGroup::Control;
+using Look = typename LookGroup::Plain;
+
+DECLARE_EQUALITY_OPERATORS(Look)
+
 
 
 void ConfigureLook(wxpex::GraphicsContext &, const Look &);
@@ -77,5 +81,5 @@ extern template struct pex::Group
     <
         draw::LookFields,
         draw::LookTemplate,
-        draw::Look
+        pex::PlainU<draw::Look_>
     >;

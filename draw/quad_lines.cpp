@@ -183,9 +183,9 @@ QuadLines QuadLines::ApplyPerspective(const Perspective &perspective) const
 
 Perspective QuadLines::GetPerspective() const
 {
-    return {{
+    return {
         this->top.GetAngleDegrees() - this->bottom.GetAngleDegrees(),
-        this->left.GetAngleDegrees() - this->right.GetAngleDegrees()}};
+        this->left.GetAngleDegrees() - this->right.GetAngleDegrees()};
 }
 
 

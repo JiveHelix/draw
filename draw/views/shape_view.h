@@ -19,16 +19,20 @@ public:
         wxWindow *parent,
         Control control)
         :
-        NodeSettingsView(parent, control.GetName(), control.node)
+        NodeSettingsView(
+            parent,
+            control.Get().GetValueBase()->GetName(),
+            control.GetControlBase()->GetNode())
     {
-        auto shape = control.CreateShapeView(this->GetPanel());
-        auto look = control.CreateLookView(this->GetPanel());
+        auto shape =
+            control.GetControlBase()->CreateShapeView(this->GetPanel());
+
+        auto look =
+            control.GetControlBase()->CreateLookView(this->GetPanel());
 
         this->ConfigureTopSizer(
             wxpex::LayoutItems(wxpex::verticalItems, shape, look));
     }
-
-
 };
 
 

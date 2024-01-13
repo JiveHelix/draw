@@ -20,6 +20,11 @@ public:
         const std::string &name,
         LookControl control,
         const LayoutOptions &layoutOptions);
+
+    LookView(
+        wxWindow *parent,
+        LookControl control,
+        const LayoutOptions &layoutOptions);
 };
 
 
@@ -31,6 +36,11 @@ public:
     StrokeView(
         wxWindow *parent,
         const std::string &name,
+        LookControl control,
+        const LayoutOptions &layoutOptions);
+
+    StrokeView(
+        wxWindow *parent,
         LookControl control,
         const LayoutOptions &layoutOptions);
 };

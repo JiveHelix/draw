@@ -36,8 +36,9 @@ public:
 
         for (auto &it: this->shapesControl_)
         {
+            auto id = it.GetControlBase()->GetId();
             auto view = new draw::ShapeView(this, it);
-            this->viewsByShapeId_[it.id.Get()] = view;
+            this->viewsByShapeId_[id] = view;
             sizer->Add(view);
         }
 
@@ -54,7 +55,7 @@ public:
 
         for (auto &it: this->shapesControl_)
         {
-            auto id = it.id.Get();
+            auto id = it.GetControlBase()->GetId();
             this->sizer_->Add(this->viewsByShapeId_.at(id));
         }
 
@@ -63,13 +64,13 @@ public:
 
 private:
     ShapesControl shapesControl_;
-    std::map<size_t, wxWindow *> viewsByShapeId_;
+    std::map<ssize_t, wxWindow *> viewsByShapeId_;
     wxBoxSizer *sizer_;
     pex::Endpoint<ShapesInterface, pex::control::Signal<>> onReorder_;
 };
 
 
-template<typename View, typename ShapesControl>
+template<typename ShapesControl>
 class DemoInterface: public wxPanel
 {
 public:

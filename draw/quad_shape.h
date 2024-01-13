@@ -2,6 +2,7 @@
 
 
 #include <pex/group.h>
+#include <pex/poly_group.h>
 #include <wxpex/modifier.h>
 
 #include "draw/quad.h"
@@ -10,8 +11,12 @@
 #include "draw/oddeven.h"
 #include "draw/drag.h"
 #include "draw/views/pixel_view_settings.h"
+#include "draw/views/quad_view.h"
+#include "draw/views/look_view.h"
 #include "draw/detail/poly_shape_id.h"
 #include "draw/node_settings.h"
+#include "draw/quad_brain.h"
+#include "draw/polygon_shape.h"
 
 
 namespace draw
@@ -23,8 +28,8 @@ class QuadShapeTemplate
 {
 public:
     // id is read-only to a control
-    T<pex::ReadOnly<size_t>> id;
-    T<QuadGroupMaker> shape;
+    T<pex::ReadOnly<ssize_t>> id;
+    T<QuadGroup> shape;
     T<LookGroup> look;
     T<NodeSettingsGroup> node;
 
@@ -32,77 +37,100 @@ public:
         ShapeFields<QuadShapeTemplate>::fields;
 
     static constexpr auto fieldsTypeName = "QuadShape";
+
+    // pex::poly::Value generates a variadic pack of PolyDerived types using
+    // ValueBase_ and a variadic pack of templates (like this one).
+    // We need to override some of the virtual methods in draw::Shape.
+    // The template argument Base should be
+    // pex::poly::PolyDerived_<draw::Shape, QuadShapeTemplate>
+    //
+    // TODO: There must be a less labyrinthine architecture.
+    template<typename Base>
+    class Impl: public Base
+    {
+        static_assert(
+            std::is_base_of_v<Shape, Base>,
+            "Expected Base to be derived from Shape.");
+
+    public:
+        using Base::Base;
+
+        static Impl Default()
+        {
+            return {{
+                0,
+                Quad::Default(),
+                Look::Default(),
+                NodeSettings::Default()}};
+        }
+
+        void Draw(wxpex::GraphicsContext &context) override
+        {
+            if (this->shape.size.GetArea() < 0.5)
+            {
+                return;
+            }
+
+            ConfigureLook(context, this->look);
+            DrawPolygon(context, this->shape.GetPoints());
+        }
+
+        ssize_t GetId() const override
+        {
+            return this->id;
+        }
+
+        Points GetPoints() const override
+        {
+            return this->shape.GetPoints();
+        }
+
+        bool Contains(
+            const tau::Point2d<int> &point,
+            double margin) const override
+        {
+            return this->shape.Contains(point, margin);
+        }
+
+        std::shared_ptr<Shape> Copy() const override
+        {
+            return std::make_shared<Impl>(*this);
+        }
+
+        std::string GetName() const override
+        {
+            return fmt::format("Quad {}", this->id);
+        }
+
+        std::unique_ptr<Drag> ProcessMouseDown(
+            std::shared_ptr<ShapeControl> control,
+            const tau::Point2d<int> &click,
+            const wxpex::Modifier &modifier,
+            CursorControl cursor) override
+        {
+            using QuadControlMembers = pex::ControlMembers_<QuadShapeTemplate>;
+
+            return ::draw::ProcessMouseDown
+                <
+                    DragRotateQuadPoint<Impl>,
+                    DragQuadPoint<Impl, QuadControlMembers>,
+                    DragQuadLine<Impl, QuadControlMembers>,
+                    DragShape<Impl>,
+                    Impl
+                >(control, *this, click, modifier, cursor);
+        }
+    };
 };
 
 
-class QuadShape:
-    public Shape,
-    public QuadShapeTemplate<pex::Identity>
-{
-public:
-    QuadShape() = default;
-    QuadShape(const Quad &quad_, const Look &look_);
-    QuadShape(size_t id_, const Quad &quad_, const Look &look_);
-
-    void Draw(wxpex::GraphicsContext &context) override;
-};
-
-
-using QuadShapeGroup = pex::Group
+template<typename Value>
+using QuadShapePolyGroup = pex::poly::PolyGroup
 <
     ShapeFields,
     QuadShapeTemplate,
-    QuadShape
+    Value,
+    ShapeTemplates<QuadView>
 >;
-
-
-struct QuadShapeModel: public QuadShapeGroup::Model
-{
-public:
-    QuadShapeModel();
-
-    void Set(const QuadShape &other);
-
-private:
-    detail::PolyShapeId polyShapeId_;
-};
-
-
-struct QuadShapeControl
-    :
-    public QuadShapeGroup::Control
-{
-    using QuadShapeGroup::Control::Control;
-
-    std::unique_ptr<Drag> ProcessMouseDown(
-        const tau::Point2d<int> &click,
-        const wxpex::Modifier &modifier,
-        CursorControl cursor);
-
-    NodeSettingsControl & GetNode()
-    {
-        return this->node;
-    }
-
-    wxWindow * CreateShapeView(wxWindow *parent) const;
-    wxWindow * CreateLookView(wxWindow *parent) const;
-    std::string GetName() const;
-};
-
-
-using QuadShapeGroupMaker = pex::MakeGroup
-<
-    QuadShapeGroup,
-    QuadShapeModel,
-    QuadShapeControl
->;
-
-
-DECLARE_OUTPUT_STREAM_OPERATOR(QuadShape)
-
-
-using QuadListMaker = pex::MakeList<QuadShapeGroupMaker, 1>;
-using QuadListControl = pex::ControlSelector<QuadListMaker>;
 
 
 } // end namespace draw

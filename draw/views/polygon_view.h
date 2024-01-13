@@ -46,6 +46,11 @@ public:
 
     PolygonView(
         wxWindow *parent,
+        PolygonControl control,
+        const LayoutOptions &layoutOptions);
+
+    PolygonView(
+        wxWindow *parent,
         const std::string &name,
         PolygonControl control,
         const LayoutOptions &layoutOptions);

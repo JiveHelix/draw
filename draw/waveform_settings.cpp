@@ -5,7 +5,7 @@ template struct pex::Group
     <
         draw::WaveformColorFields,
         draw::WaveformColorTemplate,
-        draw::WaveformColor
+        pex::PlainT<draw::WaveformColor>
     >;
 
 
@@ -13,5 +13,5 @@ template struct pex::Group
     <
         draw::WaveformFields,
         draw::WaveformTemplate,
-        draw::WaveformSettings
+        pex::PlainT<draw::WaveformSettings>
     >;

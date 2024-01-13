@@ -16,7 +16,6 @@
 
 #include <draw/pixels.h>
 #include <draw/polygon_shape.h>
-#include <draw/views/polygon_shape_view.h>
 #include <draw/views/pixel_view_settings.h>
 #include <draw/views/pixel_view.h>
 #include <draw/polygon_brain.h>
@@ -28,9 +27,16 @@
 #include "shapes_interface.h"
 
 
-using ListMaker = draw::PolygonListMaker;
+using ShapeValue = pex::poly::Value<draw::Shape, draw::PolygonShapeTemplate>;
+using PolygonShapePolyGroup = draw::PolygonShapePolyGroup<ShapeValue>;
+using PolygonShapeValue = typename PolygonShapePolyGroup::PolyValue;
+using PolygonShapeModel = typename PolygonShapePolyGroup::Model;
+
+using ListMaker = pex::MakePolyList<ShapeValue, draw::ShapeTemplates<void>>;
+
 using DemoModel = typename DemoGroup<ListMaker>::Model;
 using DemoControl = typename DemoGroup<ListMaker>::Control;
+using ShapesControl = decltype(DemoControl::shapes);
 
 
 class DemoBrain: public Brain<DemoBrain>
@@ -52,11 +58,7 @@ public:
             this->demoControl_.shapes,
             this->userControl_.pixelView)
     {
-        for (auto &polygon: this->demoControl_.shapes)
-        {
-            polygon.look.fillEnable.Set(true);
-            polygon.look.fillColor.saturation.Set(1);
-        }
+        this->demoControl_.shapes.Append(PolygonShapeValue::Default());
     }
 
     wxWindow * CreateControls(wxWindow *parent)
@@ -64,7 +66,7 @@ public:
         this->userControl_.pixelView.viewSettings.imageSize.Set(
             draw::Size(1920, 1080));
 
-        return new DemoInterface<draw::PolygonShapeView, DemoControl>(
+        return new DemoInterface<DemoControl>(
             parent,
             this->demoControl_);
     }
@@ -88,9 +90,10 @@ public:
     {
         auto shapes = draw::Shapes(this->shapesId_.Get());
 
-        for (auto &shape: this->demoControl_.shapes)
+        for (auto &shapeControl: this->demoControl_.shapes)
         {
-            shapes.EmplaceBack<draw::PolygonShape>(shape.Get());
+            const auto &shapeValue = shapeControl.Get();
+            shapes.Append(*shapeValue.GetValueBase());
         }
 
         this->userControl_.pixelView.asyncShapes.Set(shapes);
@@ -102,7 +105,7 @@ public:
     }
 
 private:
-    void OnPolygons_(const std::vector<draw::PolygonShape> &)
+    void OnPolygons_(const typename ShapesControl::Type &)
     {
         this->Display();
     }
@@ -116,11 +119,22 @@ private:
     using PolygonsEndpoint =
         pex::Endpoint<
             DemoBrain,
-            decltype(DemoControl::shapes)
+            ShapesControl
         >;
 
     PolygonsEndpoint polygonsEndpoint_;
-    draw::PolygonBrain polygonBrain_;
+
+    using PolygonBrain = draw::ShapeBrain
+    <
+        ShapesControl,
+        draw::DragCreatePolygon
+        <
+            ShapesControl,
+            PolygonShapeValue
+        >
+    >;
+
+    PolygonBrain polygonBrain_;
 };
 
 

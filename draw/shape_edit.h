@@ -5,6 +5,7 @@
 #include "draw/drag.h"
 #include "draw/views/pixel_view_settings.h"
 #include "draw/node_settings.h"
+#include "draw/shapes.h"
 
 
 namespace draw
@@ -49,7 +50,7 @@ std::optional<PointsIterator> FindPoint(
 double DragAngleDifference(double first, double second);
 
 
-template<typename Control>
+template<typename DerivedShape>
 class DragShape: public Drag
 {
 public:
@@ -57,14 +58,16 @@ public:
         size_t index,
         const tau::Point2d<int> &start,
         const tau::Point2d<double> &offset,
-        Control control)
+        std::shared_ptr<ShapeControl> control,
+        const DerivedShape &startingShape)
         :
         Drag(index, start, offset),
-        control_(control)
+        control_(control),
+        startingShape_(startingShape)
     {
         if (this->index_ > 0)
         {
-            if (index >= control.Get().GetPoints().size())
+            if (index >= startingShape.GetPoints().size())
             {
                 throw std::out_of_range(
                     "Selected indexed exceeds point count.");
@@ -75,43 +78,46 @@ public:
     DragShape(
         const tau::Point2d<int> &start,
         const tau::Point2d<double> &offset,
-        Control control)
+        std::shared_ptr<ShapeControl> control,
+        const DerivedShape &startingShape)
         :
         Drag(start, offset),
-        control_(control)
+        control_(control),
+        startingShape_(startingShape)
     {
 
     }
 
     void ReportLogicalPosition(const tau::Point2d<int> &position) override
     {
-        this->control_.center.Set(this->GetPosition(position));
+        this->startingShape_.shape.center = this->GetPosition(position);
+        this->control_->SetValueBase(this->startingShape_);
     }
 
 protected:
-    Control control_;
+    std::shared_ptr<ShapeControl> control_;
+    DerivedShape startingShape_;
 };
 
 
-template<typename Control>
+template<typename DerivedShape>
 class DragEditShape: public Drag
 {
 public:
-    using Shape = typename Control::Type;
-
     DragEditShape(
         size_t index,
         const tau::Point2d<int> &start,
         const tau::Point2d<double> &offset,
-        Control control)
+        std::shared_ptr<ShapeControl> control,
+        const DerivedShape &startingShape)
         :
         Drag(index, start, offset),
         control_(control),
-        startingShape_(control.Get())
+        startingShape_(startingShape)
     {
         if (this->index_ > 0)
         {
-            if (index >= control.Get().GetPoints().size())
+            if (index >= startingShape.GetPoints().size())
             {
                 throw std::out_of_range(
                     "Selected indexed exceeds point count.");
@@ -122,27 +128,37 @@ public:
     DragEditShape(
         const tau::Point2d<int> &start,
         const tau::Point2d<double> &offset,
-        Control control)
+        std::shared_ptr<ShapeControl> control,
+        const DerivedShape &startingShape)
         :
         Drag(start, offset),
         control_(control),
-        startingShape_(control.Get())
+        startingShape_(startingShape)
     {
 
     }
 
     void ReportLogicalPosition(const tau::Point2d<int> &position) override
     {
-        this->control_.Set(this->MakeShape_(position));
+        this->control_->SetValueBase(*this->MakeShape_(position));
     }
 
 protected:
-    virtual Shape MakeShape_(const tau::Point2d<int> &end) const = 0;
+    virtual std::shared_ptr<Shape> MakeShape_(
+        const tau::Point2d<int> &end) const = 0;
 
 protected:
-    Control control_;
-    Shape startingShape_;
+    std::shared_ptr<ShapeControl> control_;
+    DerivedShape startingShape_;
 };
+
+
+template<typename List>
+NodeSettingsControl & GetNode(List &list, size_t index)
+{
+    auto &shapeControl = list.at(index);
+    return shapeControl.GetControlBase()->GetNode();
+}
 
 
 template<typename ListControl, typename CreateShape>
@@ -201,11 +217,11 @@ protected:
 
         if (wasSelected)
         {
-            this->shapeList_.at(*wasSelected).GetNode().isSelected.Set(false);
+            GetNode(this->shapeList_, *wasSelected).isSelected.Set(false);
         }
 
         this->shapeList_.selected.Set(index);
-        this->shapeList_.at(index).GetNode().isSelected.Set(true);
+        GetNode(this->shapeList_, index).isSelected.Set(true);
     }
 
 protected:
@@ -214,17 +230,20 @@ protected:
 };
 
 
-template<typename Control>
-class DragEditPoint: public DragEditShape<Control>
+template<typename DerivedShape>
+class DragEditPoint: public DragEditShape<DerivedShape>
 {
 public:
+    using Base = DragEditShape<DerivedShape>;
+
     DragEditPoint(
         size_t index,
         const tau::Point2d<int> &start,
-        Control control,
+        std::shared_ptr<ShapeControl> control,
+        const DerivedShape &startingShape,
         const Points &points)
         :
-        DragEditShape<Control>(index, start, points.at(index), control),
+        Base(index, start, points.at(index), control, startingShape),
         points_(points)
     {
 
@@ -241,15 +260,15 @@ template
     typename DragPoint,
     typename DragLine,
     typename DragShape,
-    typename ItemControl
+    typename DerivedShape
 >
 std::unique_ptr<Drag> ProcessMouseDown(
-    ItemControl itemControl,
+    std::shared_ptr<ShapeControl> shapeControl,
+    const DerivedShape &shape,
     const tau::Point2d<int> &click,
     const wxpex::Modifier &modifier,
     CursorControl cursor)
 {
-    auto shape = itemControl.shape.Get();
     auto points = shape.GetPoints();
     auto foundPoint = FindPoint(click, points);
 
@@ -257,11 +276,12 @@ std::unique_ptr<Drag> ProcessMouseDown(
     {
         if (modifier.IsAlt())
         {
-            if constexpr (HandlesAltClick<ItemControl>)
+            if constexpr (HandlesAltClick<DerivedShape>)
             {
-                itemControl.ProcessAltClick(*foundPoint, points);
-
-                return {};
+                if (shape.ProcessAltClick(*shapeControl, *foundPoint, points))
+                {
+                    return {};
+                }
             }
         }
 
@@ -271,18 +291,22 @@ std::unique_ptr<Drag> ProcessMouseDown(
 
         if (modifier.IsControl())
         {
+            // DragEditPoint
             return std::make_unique<RotatePoint>(
                 pointIndex,
                 click,
-                itemControl.shape,
+                shapeControl,
+                shape,
                 points);
         }
         else
         {
+            // DragEditPoint
             return std::make_unique<DragPoint>(
                 pointIndex,
                 click,
-                itemControl.shape,
+                shapeControl,
+                shape,
                 points);
         }
     }
@@ -295,16 +319,19 @@ std::unique_ptr<Drag> ProcessMouseDown(
         return std::make_unique<DragLine>(
             *lineIndex,
             click,
-            itemControl.shape,
-            lines);
+            lines,
+            shapeControl,
+            shape);
     }
 
     cursor.Set(wxpex::Cursor::closedHand);
 
+    // DragShape
     return std::make_unique<DragShape>(
         click,
-        shape.center,
-        itemControl.shape);
+        shape.shape.center,
+        shapeControl,
+        shape);
 }
 
 
@@ -319,7 +346,6 @@ public:
     static constexpr auto observerName = "ShapeBrain";
 
     using ItemControl = typename ListControl::ItemControl;
-    using Shape = typename ItemControl::Type;
 
     ShapeBrain(
         ListControl shapeList,
@@ -395,17 +421,20 @@ protected:
 
         if (!found)
         {
-            if constexpr (HandlesControlClick<ItemControl>)
+            if (wasSelected)
             {
-                if (wasSelected)
-                {
-                    auto selected = this->shapeList_[*wasSelected];
+                auto selected = this->shapeList_[*wasSelected];
+                auto shape = selected.Get();
 
+                if (shape.GetValueBase()->HandlesControlClick())
+                {
                     if (this->pixelViewControl_.modifier.Get().IsControl())
                     {
                         // There was a selected shape.
                         // Keep it selected and handle a control modifier.
-                        selected.ProcessControlClick(click);
+                        shape.GetValueBase()->ProcessControlClick(
+                            *selected.GetControlBase(),
+                            click);
 
                         return;
                     }
@@ -421,6 +450,7 @@ protected:
 
             // There is no selection to edit.
             // Begin creating a new shape.
+            // DragCreate
             this->drag_ =
                 std::make_unique<Create>(click, this->shapeList_);
 
@@ -430,7 +460,8 @@ protected:
         // The user clicked on a shape.
         this->Select(found->first);
 
-        this->drag_ = found->second.ProcessMouseDown(
+        this->drag_ = found->second.Get().GetValueBase()->ProcessMouseDown(
+            found->second.GetControlBase()->Copy(),
             click,
             this->pixelViewControl_.modifier.Get(),
             this->pixelViewControl_.cursor);
@@ -474,8 +505,9 @@ protected:
         }
 
         // There is a shape under the cursor.
-        auto shape = found->second.shape.Get();
-        auto points = shape.GetPoints();
+        auto value = found->second.Get();
+        auto shape = value.GetValueBase();
+        auto points = shape->GetPoints();
         auto foundPoint = FindPoint(click, points);
 
         if (foundPoint)
@@ -520,9 +552,10 @@ protected:
         while (count-- > 0)
         {
             auto &shapeControl = this->shapeList_[count];
-            auto shape = shapeControl.shape.Get();
+            auto value = shapeControl.Get();
+            auto shape = value.GetValueBase();
 
-            if (shape.Contains(position, 10.0))
+            if (shape->Contains(position, 10.0))
             {
                 return std::make_pair(count, shapeControl);
             }
@@ -555,7 +588,7 @@ private:
         {
             this->selectConnections_.emplace_back(
                 this,
-                this->shapeList_[i].GetNode().select,
+                GetNode(this->shapeList_, i).select,
                 std::bind(&ShapeBrain::OnSelect_, i, std::placeholders::_1));
         }
     }
@@ -580,17 +613,17 @@ private:
 
         if (wasSelected && (*wasSelected != index))
         {
-            this->shapeList_.at(*wasSelected).GetNode().isSelected.Set(false);
+            GetNode(this->shapeList_, *wasSelected).isSelected.Set(false);
         }
 
         this->shapeList_.selected.Set(index);
-        this->shapeList_.at(index).GetNode().isSelected.Set(true);
+        GetNode(this->shapeList_, index).isSelected.Set(true);
     }
 
     void Deselect(size_t index)
     {
         this->shapeList_.selected.Set({});
-        this->shapeList_.at(index).GetNode().isSelected.Set(false);
+        GetNode(this->shapeList_, index).isSelected.Set(false);
     }
 
     PixelViewControl pixelViewControl_;

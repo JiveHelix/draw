@@ -42,6 +42,7 @@ using ShearModel = typename ShearGroup::Model;
 using ShearControl = typename ShearGroup::Control;
 
 DECLARE_OUTPUT_STREAM_OPERATOR(Shear)
+DECLARE_EQUALITY_OPERATORS(Shear)
 
 
 template<typename T>
@@ -77,76 +78,80 @@ struct QuadTemplate
 };
 
 
-struct Quad: public QuadTemplate<pex::Identity>
+struct QuadGroupTemplates_
 {
-    static Quad Default()
+    struct Plain: public QuadTemplate<pex::Identity>
     {
-        return {{
-            {{960, 540}},
-            {{300, 200}},
-            1.0,
-            0.0,
-            {{0, 0}},
-            {{0, 0}},
-            {}}};
-    }
+        static Plain Default()
+        {
+            return {{
+                {{960, 540}},
+                {{300, 200}},
+                1.0,
+                0.0,
+                {0, 0},
+                {0, 0},
+                {}}};
+        }
 
-    using Affine = Eigen::Matrix<double, 3, 3>;
+        using Affine = Eigen::Matrix<double, 3, 3>;
 
-    Affine MakeTransform() const;
-    QuadMatrix GetPerspectiveMatrix() const;
-    QuadPoints GetPerspectivePoints() const;
-    QuadPoints GetPoints() const;
-    double GetSideLength(size_t index) const;
-    QuadLines GetLines() const;
-    void SetPoints(const QuadPoints &quadPoints);
-    bool Contains(const tau::Point2d<double> &point) const;
-    bool Contains(const tau::Point2d<double> &point, double margin) const;
-    double GetArea() const;
+        Affine MakeTransform() const;
+        QuadMatrix GetPerspectiveMatrix() const;
+        QuadPoints GetPerspectivePoints() const;
+        QuadPoints GetPoints() const;
+        double GetSideLength(size_t index) const;
+        QuadLines GetLines() const;
+        void SetPoints(const QuadPoints &quadPoints);
+        bool Contains(const tau::Point2d<double> &point) const;
+        bool Contains(const tau::Point2d<double> &point, double margin) const;
+        double GetArea() const;
 
-    double GetMarginScale(double margin) const;
+        double GetMarginScale(double margin) const;
 
-private:
-    QuadPoints GetPoints_(double scale_) const;
+    private:
+        QuadPoints GetPoints_(double scale_) const;
+    };
+
+    template<typename GroupBase>
+    struct Model: public GroupBase
+    {
+    public:
+        Model()
+            :
+            GroupBase(),
+            resetEndpoint_(this, this->reset, &Model::OnReset_)
+        {
+
+        }
+
+    private:
+        void OnReset_()
+        {
+            this->Set(Plain::Default());
+        }
+
+    private:
+        using ResetControl = decltype(GroupBase::ControlType::reset);
+        pex::Endpoint<Model, ResetControl> resetEndpoint_;
+    };
+
 };
-
 
 using QuadGroup = pex::Group
 <
     QuadFields,
     QuadTemplate,
-    Quad
+    QuadGroupTemplates_
 >;
 
-
-struct QuadModel: public QuadGroup::Model
-{
-public:
-    QuadModel()
-        :
-        QuadGroup::Model(),
-        resetEndpoint_(this, this->reset, &QuadModel::OnReset_)
-    {
-
-    }
-
-private:
-    void OnReset_()
-    {
-        this->Set(Quad::Default());
-    }
-
-private:
-    pex::Endpoint<QuadModel, decltype(QuadGroup::Control::reset)> resetEndpoint_;
-};
-
-
-
+using Quad = typename QuadGroup::Plain;
+using QuadModel = typename QuadGroup::Model;
 using QuadControl = typename QuadGroup::Control;
-using QuadGroupMaker = pex::MakeGroup<QuadGroup, QuadModel>;
 
 
 DECLARE_OUTPUT_STREAM_OPERATOR(Quad)
+DECLARE_EQUALITY_OPERATORS(Quad)
 
 
 } // end namespace draw
@@ -164,5 +169,5 @@ extern template struct pex::Group
 <
     draw::QuadFields,
     draw::QuadTemplate,
-    draw::Quad
+    draw::QuadGroupTemplates_
 >;

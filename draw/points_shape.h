@@ -45,7 +45,7 @@ struct PointsShapeSettings
 DECLARE_EQUALITY_OPERATORS(PointsShapeSettings)
 
 
-class PointsShape: public Shape
+class PointsShape: public DrawnShape
 {
 public:
     PointsShape(
@@ -63,7 +63,7 @@ using PointsShapeGroup = pex::Group
 <
     PointsShapeFields,
     PointsShapeTemplate,
-    PointsShapeSettings
+    pex::PlainT<PointsShapeSettings>
 >;
 
 using PointsShapeModel = typename PointsShapeGroup::Model;
@@ -72,7 +72,7 @@ using PointsShapeControl =
     typename PointsShapeGroup::Control;
 
 
-class ValuePointsShape: public Shape
+class ValuePointsShape: public DrawnShape
 {
 public:
     using ValuePoints = std::vector<ValuePoint<double>>;
@@ -96,5 +96,5 @@ extern template struct pex::Group
 <
     draw::PointsShapeFields,
     draw::PointsShapeTemplate,
-    draw::PointsShapeSettings
+    pex::PlainT<draw::PointsShapeSettings>
 >;

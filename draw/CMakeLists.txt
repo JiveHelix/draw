@@ -70,9 +70,7 @@ target_sources(
     views/pixel_view_settings.h
     views/points_shape_view.h
     views/point_view.h
-    views/polygon_shape_view.h
     views/polygon_view.h
-    views/quad_shape_view.h
     views/quad_view.h
     views/size_view.h
     views/view_settings.h
@@ -88,14 +86,12 @@ target_sources(
     look.cpp
     points_shape.cpp
     polygon.cpp
-    polygon_brain.cpp
     polygon_lines.cpp
     polygon_shape.cpp
     png.cpp
     quad.cpp
     quad_brain.cpp
     quad_lines.cpp
-    quad_shape.cpp
     shapes.cpp
     waveform.cpp
     waveform_generator.cpp
@@ -114,9 +110,7 @@ target_sources(
     views/pixel_view.cpp
     views/pixel_view_settings.cpp
     views/points_shape_view.cpp
-    views/polygon_shape_view.cpp
     views/polygon_view.cpp
-    views/quad_shape_view.cpp
     views/quad_view.cpp
     views/view_settings.cpp
     views/waveform_settings_view.cpp

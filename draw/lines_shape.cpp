@@ -89,5 +89,5 @@ template struct pex::Group
 <
     draw::LinesShapeFields,
     draw::LinesShapeTemplate,
-    draw::LinesShapeSettings
+    pex::PlainT<draw::LinesShapeSettings>
 >;

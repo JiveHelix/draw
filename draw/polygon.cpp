@@ -201,5 +201,5 @@ template struct pex::Group
     <
         draw::PolygonFields,
         draw::PolygonTemplate,
-        draw::Polygon
+        pex::PlainT<draw::Polygon>
     >;

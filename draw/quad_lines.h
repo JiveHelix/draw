@@ -46,6 +46,7 @@ using PerspectiveModel = typename PerspectiveGroup::Model;
 using PerspectiveControl = typename PerspectiveGroup::Control;
 
 DECLARE_OUTPUT_STREAM_OPERATOR(Perspective)
+DECLARE_EQUALITY_OPERATORS(Perspective)
 
 
 using QuadPoint = tau::Point2d<double>;

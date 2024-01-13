@@ -1,19 +1,26 @@
+// #define USE_OBSERVER_NAME
+// #define ENABLE_PEX_LOG
+
+
 #include <iostream>
 #include <mutex>
 #include <condition_variable>
 #include <thread>
 #include <chrono>
+
+#include <fmt/core.h>
+#include <pex/list.h>
 #include <wxpex/app.h>
 #include <wxpex/check_box.h>
 #include <wxpex/border_sizer.h>
 
 #include <draw/pixels.h>
+#include <draw/polygon_shape.h>
 #include <draw/quad_shape.h>
-#include <draw/quad_brain.h>
-#include <draw/shapes.h>
-
 #include <draw/views/pixel_view_settings.h>
 #include <draw/views/pixel_view.h>
+#include <draw/polygon_brain.h>
+#include <draw/shapes.h>
 
 #include "common/observer.h"
 #include "common/about_window.h"
@@ -21,24 +28,21 @@
 #include "shapes_interface.h"
 
 
-using ShapeValue = pex::poly::Value<draw::Shape, draw::QuadShapeTemplate>;
+using ShapeValue =
+    pex::poly::Value
+    <
+        draw::Shape,
+        draw::PolygonShapeTemplate,
+        draw::QuadShapeTemplate
+    >;
+
+using PolygonShapePolyGroup = draw::PolygonShapePolyGroup<ShapeValue>;
+using PolygonShapeValue = typename PolygonShapePolyGroup::PolyValue;
+using PolygonShapeModel = typename PolygonShapePolyGroup::Model;
+
 using QuadShapePolyGroup = draw::QuadShapePolyGroup<ShapeValue>;
 using QuadShapeValue = typename QuadShapePolyGroup::PolyValue;
 using QuadShapeModel = typename QuadShapePolyGroup::Model;
-using QuadShapeControl = typename QuadShapePolyGroup::Control;
-
-using ShapeControlUserBase = typename draw::Shape::ControlUserBase;
-
-using QuadControlMembers =
-    // typename pex::Group<draw::ShapeFields, draw::QuadShapeTemplate>::ControlMembers;
-    pex::ControlMembers_<draw::QuadShapeTemplate>;
-
-using QuadControlMembers2 =
-    typename QuadShapePolyGroup::ControlMembers;
-
-static_assert(std::is_same_v<QuadControlMembers, QuadControlMembers2>);
-static_assert(std::is_base_of_v<ShapeControlUserBase, QuadShapeControl>);
-static_assert(std::is_base_of_v<QuadControlMembers, QuadShapeControl>);
 
 using ListMaker = pex::MakePolyList<ShapeValue, draw::ShapeTemplates<void>>;
 
@@ -57,9 +61,12 @@ public:
         demoModel_(),
         demoControl_(this->demoModel_),
 
-        quadsEndpoint_(this, this->demoControl_.shapes, &DemoBrain::OnQuads_),
+        shapesEndpoint_(
+            this,
+            this->demoControl_.shapes,
+            &DemoBrain::OnShapes_),
 
-        quadBrain_(
+        polygonBrain_(
             this->demoControl_.shapes,
             this->userControl_.pixelView)
     {
@@ -88,7 +95,7 @@ public:
 
     std::string GetAppName() const
     {
-        return "Quad Demo";
+        return "Polygon Demo";
     }
 
     void Display()
@@ -110,7 +117,7 @@ public:
     }
 
 private:
-    void OnQuads_(const typename ShapesControl::Type &)
+    void OnShapes_(const typename ShapesControl::Type &)
     {
         this->Display();
     }
@@ -121,18 +128,25 @@ private:
     DemoModel demoModel_;
     DemoControl demoControl_;
 
-    using QuadsEndpoint =
-        pex::Endpoint<DemoBrain, ShapesControl>;
+    using ShapesEndpoint =
+        pex::Endpoint<
+            DemoBrain,
+            ShapesControl
+        >;
 
-    QuadsEndpoint quadsEndpoint_;
+    ShapesEndpoint shapesEndpoint_;
 
-    using QuadBrain = draw::ShapeBrain
+    using PolygonBrain = draw::ShapeBrain
     <
         ShapesControl,
-        draw::DragCreateQuad<ShapesControl, QuadShapeValue>
+        draw::DragCreatePolygon
+        <
+            ShapesControl,
+            PolygonShapeValue
+        >
     >;
 
-    QuadBrain quadBrain_;
+    PolygonBrain polygonBrain_;
 };
 
 

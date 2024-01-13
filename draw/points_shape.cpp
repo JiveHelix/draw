@@ -78,5 +78,5 @@ template struct pex::Group
 <
     draw::PointsShapeFields,
     draw::PointsShapeTemplate,
-    draw::PointsShapeSettings
+    pex::PlainT<draw::PointsShapeSettings>
 >;

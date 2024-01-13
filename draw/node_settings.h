@@ -53,7 +53,7 @@ using NodeSettingsGroup =
     <
         NodeSettingsFields,
         NodeSettingsTemplate,
-        NodeSettings
+        pex::PlainT<NodeSettings>
     >;
 
 using NodeSettingsModel = typename NodeSettingsGroup::Model;

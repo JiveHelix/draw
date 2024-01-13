@@ -19,6 +19,11 @@ public:
         const std::string &name,
         QuadControl control,
         const wxpex::LayoutOptions &layoutOptions);
+
+    QuadView(
+        wxWindow *parent,
+        QuadControl control,
+        const wxpex::LayoutOptions &layoutOptions);
 };
 
 

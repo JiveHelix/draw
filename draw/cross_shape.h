@@ -40,7 +40,7 @@ void DrawCross(
 
 
 class CrossShape:
-    public Shape,
+    public DrawnShape,
     public CrossShapeTemplate<pex::Identity>
 {
 public:
@@ -54,7 +54,7 @@ using CrossShapeGroup = pex::Group
 <
     CrossShapeFields,
     CrossShapeTemplate,
-    CrossShape
+    pex::PlainT<CrossShape>
 >;
 
 using CrossShapeModel = typename CrossShapeGroup::Model;

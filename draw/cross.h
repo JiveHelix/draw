@@ -39,19 +39,20 @@ struct CrossTemplate
 };
 
 
-struct Cross: public CrossTemplate<pex::Identity>
+template<typename Base>
+struct Cross_: public Base
 {
-    Cross()
+    Cross_()
         :
-        CrossTemplate<pex::Identity>{
-            {{0.0, 0.0}},
+        Base{
+            {0.0, 0.0},
             25.0,
             0.0}
     {
 
     }
 
-    static Cross Default()
+    static Cross_ Default()
     {
         return {};
     }
@@ -59,8 +60,9 @@ struct Cross: public CrossTemplate<pex::Identity>
 
 
 
-using CrossGroup = pex::Group<CrossFields, CrossTemplate, Cross>;
+using CrossGroup = pex::Group<CrossFields, CrossTemplate, pex::PlainU<Cross_>>;
 using CrossControl = typename CrossGroup::Control;
+using Cross = typename CrossGroup::Plain;
 
 
 DECLARE_OUTPUT_STREAM_OPERATOR(Cross)
@@ -76,5 +78,5 @@ extern template struct pex::Group
     <
         draw::CrossFields,
         draw::CrossTemplate,
-        draw::Cross
+        pex::PlainU<draw::Cross_>
     >;

@@ -36,7 +36,7 @@ public:
 
 
 class EllipseShape:
-    public Shape,
+    public DrawnShape,
     public EllipseShapeTemplate<pex::Identity>
 {
 public:
@@ -74,7 +74,7 @@ using EllipseShapeGroup = pex::Group
 <
     EllipseShapeFields,
     EllipseShapeTemplate,
-    EllipseShape
+    pex::PlainT<EllipseShape>
 >;
 
 using EllipseShapeModel = typename EllipseShapeGroup::Model;
@@ -89,5 +89,5 @@ extern template struct pex::Group
     <
         draw::EllipseShapeFields,
         draw::EllipseShapeTemplate,
-        draw::EllipseShape
+        pex::PlainT<draw::EllipseShape>
     >;

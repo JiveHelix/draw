@@ -37,7 +37,7 @@ struct PixelViewTemplate
     using AsyncPixels = wxpex::MakeAsync<std::shared_ptr<draw::Pixels>>;
     using AsyncShapes = wxpex::MakeAsync<Shapes>;
 
-    T<ViewSettingsGroupMaker> viewSettings;
+    T<ViewSettingsGroup> viewSettings;
     T<PointGroup> mousePosition;
     T<PointGroup> logicalPosition;
     T<bool> mouseDown;
@@ -52,49 +52,78 @@ struct PixelViewTemplate
 };
 
 
-using PixelViewGroup = pex::Group<PixelViewFields, PixelViewTemplate>;
+struct PixelViewTemplates
+{
+    template<typename GroupBase>
+    struct Model: public GroupBase
+    {
+        Model()
+            :
+            GroupBase(),
+
+            viewSettings_(
+                this,
+                this->viewSettings,
+                &Model::OnViewSettings_),
+
+            mousePosition_(
+                this,
+                this->mousePosition,
+                &Model::OnMousePosition_)
+        {
+            this->OnViewSettings_(this->viewSettings.Get());
+        }
+
+        void OnViewSettings_(const ViewSettings &settings)
+        {
+            this->logicalPosition.Set(
+                settings.GetLogicalPosition(this->mousePosition.Get()));
+        }
+
+        void OnMousePosition_(const Point &point)
+        {
+            this->logicalPosition.Set(
+                this->viewSettings.Get().GetLogicalPosition(point));
+        }
+
+    private:
+        pex::Endpoint<Model, ViewSettingsControl> viewSettings_;
+        pex::Endpoint<Model, PointControl> mousePosition_;
+    };
+
+
+    template<typename GroupBase>
+    struct Control: public GroupBase
+    {
+        using AsyncPixelsControl =
+            typename GroupBase::AsyncPixels::Control;
+
+        using AsyncShapesControl =
+            typename GroupBase::AsyncShapes::Control;
+
+        AsyncPixelsControl asyncPixels;
+        AsyncShapesControl asyncShapes;
+
+        Control() = default;
+
+        Control(typename GroupBase::Upstream &dataViewModel)
+            :
+            GroupBase(dataViewModel),
+            asyncPixels(dataViewModel.pixels.GetWorkerControl()),
+            asyncShapes(dataViewModel.shapes.GetWorkerControl())
+        {
+
+        }
+    };
+};
+
+
+using PixelViewGroup =
+    pex::Group<PixelViewFields, PixelViewTemplate, PixelViewTemplates>;
 
 using PixelViewSettings = typename PixelViewGroup::Plain;
-
-struct PixelViewModel: public PixelViewGroup::Model
-{
-    PixelViewModel();
-    void OnViewSettings_(const ViewSettings &settings);
-    void OnMousePosition_(const Point &point);
-
-private:
-    pex::Endpoint<PixelViewModel, ViewSettingsControl> viewSettings_;
-    pex::Endpoint<PixelViewModel, PointControl> mousePosition_;
-};
-
-
-struct PixelViewControl: public PixelViewGroup::Control
-{
-    using AsyncPixelsControl =
-        typename PixelViewTemplate::AsyncPixels::Control;
-
-    using AsyncShapesControl =
-        typename PixelViewTemplate::AsyncShapes::Control;
-
-    AsyncPixelsControl asyncPixels;
-    AsyncShapesControl asyncShapes;
-
-    PixelViewControl() = default;
-
-    PixelViewControl(PixelViewModel &dataViewModel);
-};
-
-
-using CursorControl = decltype(PixelViewControl::cursor);
-
-
-using PixelViewGroupMaker = pex::MakeGroup
-    <
-        PixelViewGroup,
-        PixelViewModel,
-        PixelViewControl
-    >;
-
+using PixelViewModel = typename PixelViewGroup::Model;
+using PixelViewControl = typename PixelViewGroup::Control;
 
 
 } // end namespace draw
@@ -103,13 +132,6 @@ using PixelViewGroupMaker = pex::MakeGroup
 extern template struct pex::Group
     <
         draw::PixelViewFields,
-        draw::PixelViewTemplate
-    >;
-
-
-extern template struct pex::MakeGroup
-    <
-        draw::PixelViewGroup,
-        draw::PixelViewModel,
-        draw::PixelViewControl
+        draw::PixelViewTemplate,
+        draw::PixelViewTemplates
     >;

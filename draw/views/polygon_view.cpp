@@ -79,4 +79,15 @@ PolygonView::PolygonView(
 }
 
 
+PolygonView::PolygonView(
+    wxWindow *parent,
+    PolygonControl control,
+    const LayoutOptions &layoutOptions)
+    :
+    PolygonView(parent, "Polygon", control, layoutOptions)
+{
+
+}
+
+
 } // end namespace draw

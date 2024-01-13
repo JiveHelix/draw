@@ -46,5 +46,5 @@ template struct pex::Group
 <
     draw::EllipseFields,
     draw::EllipseTemplate,
-    draw::Ellipse
+    pex::PlainT<draw::Ellipse>
 >;

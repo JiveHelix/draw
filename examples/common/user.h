@@ -34,7 +34,7 @@ struct UserTemplate
     T<pex::MakeSignal> quit;
     T<pex::MakeSignal> about;
     T<pex::MakeSignal> showPixelViewLayout;
-    T<draw::PixelViewGroupMaker> pixelView;
+    T<draw::PixelViewGroup> pixelView;
     T<std::string> errors;
 
     static constexpr auto fields = UserFields<UserTemplate>::fields;
