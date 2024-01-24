@@ -144,7 +144,6 @@ public:
 };
 
 
-
 template<typename Value>
 using PolygonShapePolyGroup = pex::poly::PolyGroup
 <

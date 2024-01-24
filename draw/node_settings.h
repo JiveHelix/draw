@@ -5,6 +5,11 @@
 #include <fields/fields.h>
 #include <pex/group.h>
 #include <tau/color.h>
+#include <pex/endpoint.h>
+
+
+namespace draw
+{
 
 
 template<typename T>
@@ -64,3 +69,6 @@ using OptionalNodeSettings = std::optional<NodeSettingsControl>;
 
 template<typename Observer>
 using NodeSelectEndpoint = pex::Endpoint<Observer, NodeSelectSignal>;
+
+
+} // end namespace draw

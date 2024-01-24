@@ -30,7 +30,6 @@
 using ShapeValue = pex::poly::Value<draw::Shape, draw::PolygonShapeTemplate>;
 using PolygonShapePolyGroup = draw::PolygonShapePolyGroup<ShapeValue>;
 using PolygonShapeValue = typename PolygonShapePolyGroup::PolyValue;
-using PolygonShapeModel = typename PolygonShapePolyGroup::Model;
 
 using ListMaker = pex::MakePolyList<ShapeValue, draw::ShapeTemplates<void>>;
 

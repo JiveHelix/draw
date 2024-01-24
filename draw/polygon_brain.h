@@ -39,6 +39,11 @@ using DragCreatePolygon =
     DragCreateShape<ListControl, CreatePolygon<Value>>;
 
 
+template<typename ListControl, typename Value>
+using DragReplacePolygon =
+    DragReplaceShape<ListControl, CreatePolygon<Value>>;
+
+
 template<typename DerivedShape>
 class DragPolygonPoint: public DragEditPoint<DerivedShape>
 {

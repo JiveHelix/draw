@@ -230,6 +230,59 @@ protected:
 };
 
 
+template<typename ListControl, typename CreateShape>
+class DragReplaceShape: public Drag
+{
+public:
+    DragReplaceShape(
+        const tau::Point2d<int> &start,
+        const ListControl &shapeList)
+        :
+        Drag(start, start),
+        shapeList_(shapeList),
+        position_(start)
+    {
+
+    }
+
+    virtual ~DragReplaceShape()
+    {
+        try
+        {
+            this->ReplaceShape_();
+        }
+        catch (std::exception &e)
+        {
+            std::cerr << "Error creating shape: " << e.what() << std::endl;
+        }
+    }
+
+    void ReportLogicalPosition(const tau::Point2d<int> &position) override
+    {
+        this->position_ = position;
+    }
+
+protected:
+    void ReplaceShape_()
+    {
+        auto shape = CreateShape{}(*this, this->position_);
+
+        if (!shape)
+        {
+            return;
+        }
+
+        this->shapeList_.count.Set(0);
+        this->shapeList_.Append(*shape);
+    }
+
+protected:
+    ListControl shapeList_;
+    tau::Point2d<int> position_;
+};
+
+
+
 template<typename DerivedShape>
 class DragEditPoint: public DragEditShape<DerivedShape>
 {
