@@ -43,8 +43,11 @@ tau::Region<T> UnscaleRegion(
 }
 
 template<typename T>
-void ConstrainRegion(tau::Region<T> &region, const tau::Size<T> &size)
+void ConstrainRegion(tau::Region<T> &region, tau::Size<T> size)
 {
+    size.width = std::max<T>(1, size.width);
+    size.height = std::max<T>(1, size.height);
+
     // topLeft must be < size
     region.topLeft.x = std::min<T>(region.topLeft.x, size.width - 1);
     region.topLeft.y = std::min<T>(region.topLeft.y, size.height - 1);
@@ -61,6 +64,31 @@ void ConstrainRegion(tau::Region<T> &region, const tau::Size<T> &size)
     bottomRight.x = std::min(bottomRight.x, size.width);
     bottomRight.y = std::min(bottomRight.y, size.height);
     region.size = bottomRight - region.topLeft;
+
+    if constexpr (std::is_floating_point_v<T>)
+    {
+        // floating-point rounding error can cause the computed bottomRight
+        // corner to extend beyond the size limit.
+        // (bottomRight - region.topLeft) + region.topLeft may be greater than
+        // bottomRight.
+        auto checkBottomRight = region.GetBottomRight();
+
+        while (checkBottomRight.x > size.width)
+        {
+            region.size.width =
+                std::nexttoward(region.size.width, 0);
+
+            checkBottomRight = region.GetBottomRight();
+        }
+
+        while (checkBottomRight.y > size.height)
+        {
+            region.size.height =
+                std::nexttoward(region.size.height, 0);
+
+            checkBottomRight = region.GetBottomRight();
+        }
+    }
 }
 
 
