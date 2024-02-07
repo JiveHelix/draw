@@ -9,13 +9,13 @@ namespace detail
 {
 
 
-std::set<ssize_t> polyShapeIds;
+std::set<int64_t> polyShapeIds;
 
 
 
 PolyShapeId::PolyShapeId()
     :
-    UniqueId<ssize_t>(polyShapeIds)
+    UniqueId<int64_t>(polyShapeIds)
 {
 
 }

@@ -2,6 +2,7 @@
 
 #include <set>
 #include <cassert>
+#include <stdexcept>
 
 
 namespace draw

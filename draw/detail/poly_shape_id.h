@@ -12,7 +12,7 @@ namespace detail
 {
 
 
-class PolyShapeId: public UniqueId<ssize_t>
+class PolyShapeId: public UniqueId<int64_t>
 {
 public:
     PolyShapeId();
