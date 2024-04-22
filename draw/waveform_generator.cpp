@@ -202,6 +202,13 @@ void WaveformGenerator::Shutdown()
 }
 
 
+bool WaveformGenerator::Enabled() const
+{
+    pex::ReadLock lock(this->mutex_);
+    return this->waveformSettings_.enable;
+}
+
+
 void WaveformGenerator::OnColorMapChanged_(const WaveformColor &waveformColor)
 {
     pex::WriteLock lock(this->mutex_);

@@ -104,6 +104,7 @@ PixelCanvas::PixelCanvas(
 }
 
 
+
 void PixelCanvas::ScrollWindow(int dx, int dy, const wxRect *rect)
 {
     this->Scrolled::ScrollWindow(dx, dy, rect);
@@ -314,9 +315,21 @@ void PixelCanvas::SizeVirtualPanel_(const Scale &scale)
 
 void PixelCanvas::OnPixels_(const std::shared_ptr<Pixels> &pixels)
 {
+    if (!pixels)
+    {
+        throw std::logic_error("pixels must not be NULL");
+    }
+
+    auto dataSize = pixels->size;
+
+    if (dataSize.width == 0 || dataSize.height == 0)
+    {
+        throw std::logic_error("pixels must not be empty");
+    }
+
     this->pixelData_ = pixels;
+
     auto imageSize = wxpex::ToSize<Pixels::Index>(this->image_.GetSize());
-    auto dataSize = this->pixelData_->size;
 
     if (imageSize != dataSize)
     {
@@ -324,6 +337,7 @@ void PixelCanvas::OnPixels_(const std::shared_ptr<Pixels> &pixels)
     }
 
     this->image_.SetData(this->pixelData_->data.data(), true);
+
     this->Refresh(false);
     this->Update();
 }

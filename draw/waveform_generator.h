@@ -86,7 +86,7 @@ struct WaveformInput
     {
         if (highlights_)
         {
-            this->highlights = std::make_shared<Highlights>(*highlights);
+            this->highlights = std::make_shared<Highlights>(*highlights_);
         }
     }
 };
@@ -110,6 +110,8 @@ public:
         const std::optional<Highlights> &highlights = {});
 
     void Shutdown();
+
+    bool Enabled() const;
 
 private:
     void OnColorMapChanged_(const WaveformColor &);
