@@ -10,6 +10,9 @@
 #include "draw/pixels.h"
 #include "draw/waveform_settings.h"
 #include "draw/views/pixel_view_settings.h"
+#include "draw/views/pixel_canvas.h"
+#include "draw/views/view_link.h"
+#include "draw/shapes.h"
 
 
 namespace draw
@@ -23,24 +26,24 @@ public:
 
     WaveformPixels(
         wxWindow *parent,
+        PixelViewControl mainViewControl,
         PixelViewControl pixelViewControl,
         WaveformControl waveformControl);
 
     Eigen::Vector<wxCoord, Eigen::Dynamic> GetLines() const;
 
 private:
-    void OnPaint_(wxPaintEvent &);
-
-    void OnPixels_(const std::shared_ptr<Pixels> &pixels);
-
-    void OnSize_(wxSizeEvent &);
+    void OnViewSize_(const Size &viewSize);
+    void OnImageSize_(const Size &imageSize);
 
 private:
-    WaveformControl waveformControl_;
+    ShapesId oddLinesId_;
+    ShapesId evenLinesId_;
+    ViewLink viewLink_;
     PixelViewControl pixelViewControl_;
-    pex::Endpoint<WaveformPixels, PixelsControl> waveformPixels_;
-    std::shared_ptr<Pixels> waveformData_;
-    wxImage image_;
+    WaveformControl waveformControl_;
+    SizeEndpoint<WaveformPixels> viewSize_;
+    SizeEndpoint<WaveformPixels> imageSize_;
 };
 
 
@@ -51,6 +54,7 @@ public:
 
     WaveformView(
         wxWindow *parent,
+        PixelViewControl mainViewControl,
         PixelViewControl pixelViewControl,
         WaveformControl waveformControl);
 
@@ -83,7 +87,7 @@ class PixelViewAndWaveform: public wxPanel
 public:
     PixelViewAndWaveform(
         wxWindow *parent,
-        PixelViewControl pixelView,
+        PixelViewControl mainViewControl,
         PixelViewControl waveformPixelView,
         WaveformControl waveformControl);
 

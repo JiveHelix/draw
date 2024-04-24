@@ -135,13 +135,13 @@ WaveformGenerator::WaveformGenerator(
         waveformControl,
         &WaveformGenerator::OnWaveformSettings_),
 
-    viewSizeEndpoint_(
+    imageSizeEndpoint_(
         this,
-        pixelViewControl.viewSettings.viewSize,
-        &WaveformGenerator::OnViewSize_),
+        pixelViewControl.viewSettings.imageSize,
+        &WaveformGenerator::OnImageSize_),
 
     waveformSettings_(this->waveformControl_.Get()),
-    viewSize_(this->pixelViewControl_.viewSettings.viewSize),
+    imageSize_(this->pixelViewControl_.viewSettings.imageSize),
 
     isRunning_(true),
     inputs_(),
@@ -177,7 +177,7 @@ void WaveformGenerator::operator()(
 
     this->inputs_.emplace(
         this->waveformSettings_,
-        this->viewSize_,
+        this->imageSize_,
         data,
         highlights);
 
@@ -224,10 +224,10 @@ void WaveformGenerator::OnWaveformSettings_(
 }
 
 
-void WaveformGenerator::OnViewSize_(const Size &viewSize)
+void WaveformGenerator::OnImageSize_(const Size &imageSize)
 {
     pex::WriteLock lock(this->mutex_);
-    this->viewSize_ = viewSize;
+    this->imageSize_ = imageSize;
 }
 
 
@@ -258,14 +258,24 @@ void WaveformGenerator::Run_()
             this->inputs_.pop();
         }
 
-        auto waveformPixels = Pixels::CreateShared(input.viewSize);
+        if (input.imageSize.width == 0 || input.imageSize.height == 0)
+        {
+            continue;
+        }
+
+        auto waveformPixels = Pixels::CreateShared(input.imageSize);
 
         this->colorMap_.Filter(
             input.waveformSettings,
-            input.viewSize,
+            input.imageSize,
             *input.data,
             input.highlights.get(),
             &waveformPixels->data);
+
+        if (waveformPixels->data.rows() == 0 || waveformPixels->data.cols() == 0)
+        {
+            throw std::logic_error("Must not be empty");
+        }
 
         this->pixelViewControl_.asyncPixels.Set(waveformPixels);
     }
@@ -289,13 +299,13 @@ WaveformGenerator::WaveformGenerator(
         this->waveformControl_,
         &WaveformGenerator::OnWaveformSettings_),
 
-    viewSizeEndpoint_(
+    imageSizeEndpoint_(
         this,
-        this->pixelViewControl_.viewSettings.viewSize,
-        &WaveformGenerator::OnViewSize_),
+        this->pixelViewControl_.viewSettings.imageSize,
+        &WaveformGenerator::OnImageSize_),
 
     waveformSettings_(other.waveformSettings_),
-    viewSize_(other.viewSize_),
+    imageSize_(other.imageSize_),
 
     isRunning_(true),
     inputs_(),

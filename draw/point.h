@@ -3,6 +3,7 @@
 
 #include <tau/vector2d.h>
 #include <pex/interface.h>
+#include <pex/endpoint.h>
 #include <wxpex/point.h>
 
 
@@ -13,6 +14,9 @@ namespace draw
 using PointGroup = tau::Point2dGroup<int>;
 using Point = typename PointGroup::Plain;
 using PointControl = typename PointGroup::Control;
+
+template<typename Observer>
+using PointEndpoint = pex::EndpointGroup<Observer, PointControl>;
 
 
 template<typename T>

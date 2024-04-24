@@ -5,6 +5,7 @@
 #include <pex/group.h>
 #include <pex/range.h>
 #include <pex/selectors.h>
+#include <pex/endpoint.h>
 #include <wxpex/slider.h>
 
 
@@ -49,6 +50,10 @@ using ScaleGroup =
 
 using ScaleModel = typename ScaleGroup::Model;
 using ScaleControl = typename ScaleGroup::Control;
+
+template<typename Observer>
+using ScaleEndpoint = pex::EndpointGroup<Observer, ScaleControl>;
+
 
 using LogarithmicScale = pex::control::LogarithmicRange
     <

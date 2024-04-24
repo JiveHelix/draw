@@ -55,7 +55,7 @@ public:
 
     LinesShape(
         const LinesShapeSettings &settings,
-        const Lines &points);
+        const Lines &lines);
 
     void Draw(wxpex::GraphicsContext &context) override;
 

@@ -59,14 +59,14 @@ private:
 struct WaveformInput
 {
     WaveformSettings waveformSettings;
-    Size viewSize;
+    Size imageSize;
     std::shared_ptr<DataMatrix> data;
     std::shared_ptr<Highlights> highlights;
 
     WaveformInput()
         :
         waveformSettings{},
-        viewSize{},
+        imageSize{},
         data{},
         highlights{}
     {
@@ -75,12 +75,12 @@ struct WaveformInput
 
     WaveformInput(
         const WaveformSettings &waveformSettings_,
-        const Size &viewSize_,
+        const Size &imageSize_,
         const DataMatrix &data_,
         const std::optional<Highlights> &highlights_ = {})
         :
         waveformSettings(waveformSettings_),
-        viewSize(viewSize_),
+        imageSize(imageSize_),
         data(std::make_shared<DataMatrix>(data_)),
         highlights()
     {
@@ -116,7 +116,7 @@ public:
 private:
     void OnColorMapChanged_(const WaveformColor &);
     void OnWaveformSettings_(const WaveformSettings &);
-    void OnViewSize_(const Size &);
+    void OnImageSize_(const Size &);
 
     void Run_();
 
@@ -129,9 +129,9 @@ private:
     PixelViewControl pixelViewControl_;
     pex::Endpoint<WaveformGenerator, WaveformColorControl> colorEndpoint_;
     pex::Endpoint<WaveformGenerator, WaveformControl> waveformSettingsEndpoint_;
-    pex::Endpoint<WaveformGenerator, SizeControl> viewSizeEndpoint_;
+    pex::Endpoint<WaveformGenerator, SizeControl> imageSizeEndpoint_;
     WaveformSettings waveformSettings_;
-    Size viewSize_;
+    Size imageSize_;
     bool isRunning_;
     std::queue<WaveformInput> inputs_;
 

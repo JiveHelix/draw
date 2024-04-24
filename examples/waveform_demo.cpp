@@ -91,7 +91,9 @@ public:
             0,
             static_cast<int32_t>(valueCount - 1))
     {
-        this->user_.pixelView.viewSettings.scale.Set({.5, .5});
+        // this->user_.pixelView.viewSettings.scale.Set({.5, .5});
+        this->waveformPixelModel_.viewSettings.linkZoom.Set(false);
+        this->waveformPixelModel_.viewSettings.scale.vertical.Set(1.0);
     }
 
     ~DemoBrain()

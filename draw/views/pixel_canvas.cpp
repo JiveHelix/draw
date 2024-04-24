@@ -135,9 +135,10 @@ void PixelCanvas::OnImageSize_(const Size &imageSize)
 void PixelCanvas::OnSize_(wxSizeEvent &event)
 {
     event.Skip();
-
-    this->control_.viewSettings.viewSize.Set(
-        wxpex::ToSize<int>(this->GetClientSize()));
+    auto size = wxpex::ToSize<int>(this->GetClientSize());
+    auto position = wxpex::ToPoint<int>(this->GetScreenPosition());
+    this->control_.viewSettings.viewSize.Set(size);
+    this->control_.viewSettings.screenPosition.Set(position);
 }
 
 void PixelCanvas::OnMouseMotion_(wxMouseEvent &event)

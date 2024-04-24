@@ -17,6 +17,7 @@ template<typename T>
 struct ViewFields
 {
     static constexpr auto fields = std::make_tuple(
+        fields::Field(&T::screenPosition, "screenPosition"),
         fields::Field(&T::imageSize, "imageSize"),
         fields::Field(&T::viewSize, "viewSize"),
         fields::Field(&T::viewPosition, "viewPosition"),
@@ -24,13 +25,15 @@ struct ViewFields
         fields::Field(&T::scale, "scale"),
         fields::Field(&T::linkZoom, "linkZoom"),
         fields::Field(&T::resetZoom, "resetZoom"),
-        fields::Field(&T::fitZoom, "fitZoom"));
+        fields::Field(&T::fitZoom, "fitZoom"),
+        fields::Field(&T::bypass, "bypass"));
 };
 
 
 template<template<typename> typename T>
 struct ViewTemplate
 {
+    T<PointGroup> screenPosition;
     T<SizeGroup> imageSize;
     T<SizeGroup> viewSize;
     T<PointGroup> viewPosition;
@@ -39,6 +42,7 @@ struct ViewTemplate
     T<bool> linkZoom;
     T<pex::MakeSignal> resetZoom;
     T<pex::MakeSignal> fitZoom;
+    T<bool> bypass;
 
     static constexpr auto fields = ViewFields<ViewTemplate>::fields;
 };
@@ -55,6 +59,7 @@ struct ViewGroupTemplates_
         static Plain Default()
         {
             return Plain{
+                Point{0, 0},
                 Size{defaultWidth, defaultHeight},
                 Size{defaultWidth, defaultHeight},
                 Point{0, 0},
@@ -62,7 +67,8 @@ struct ViewGroupTemplates_
                 Scale(1.0, 1.0),
                 true,
                 {},
-                {}};
+                {},
+                false};
         }
 
         // Compute the coordinates of an unscaled point using current zoom.
@@ -230,6 +236,11 @@ struct ViewGroupTemplates_
                 return;
             }
 
+            if (this->bypass.Get())
+            {
+                return;
+            }
+
             if (this->linkZoom.Get())
             {
                 this->ignoreZoom_ = true;
@@ -243,6 +254,11 @@ struct ViewGroupTemplates_
         void OnVerticalZoom_(double verticalZoom)
         {
             if (this->ignoreZoom_)
+            {
+                return;
+            }
+
+            if (this->bypass.Get())
             {
                 return;
             }
@@ -285,6 +301,11 @@ struct ViewGroupTemplates_
 
         void ResetView_(const Size &imageSize_)
         {
+            if (this->bypass.Get())
+            {
+                return;
+            }
+
             this->SetImageCenterPixel_(
                 imageSize_.ToPoint2d().template Convert<double>() / 2.0);
 
@@ -302,8 +323,33 @@ using ViewSettings = typename ViewSettingsGroup::Plain;
 using ViewSettingsModel = typename ViewSettingsGroup::Model;
 using ViewSettingsControl = typename ViewSettingsGroup::Control;
 
+template<typename Observer>
+using ViewSettingsEndpoint = pex::EndpointGroup<Observer, ViewSettingsControl>;
+
 
 DECLARE_OUTPUT_STREAM_OPERATOR(ViewSettings)
+
+
+class ViewSettingsBypass
+{
+public:
+    ViewSettingsBypass(ViewSettingsControl &viewSettings)
+        :
+        bypass_(viewSettings.bypass)
+    {
+        this->bypass_.Set(true);
+    }
+
+    ~ViewSettingsBypass()
+    {
+        this->bypass_.Set(false);
+    }
+
+private:
+    using BoolControl = decltype(ViewSettingsControl::bypass);
+
+    BoolControl &bypass_;
+};
 
 
 } // end namespace draw

@@ -3,6 +3,7 @@
 
 #include <wxpex/window.h>
 #include <wxpex/splitter.h>
+#include <wxpex/file_field.h>
 
 #include <draw/views/pixel_view.h>
 #include <draw/png.h>
@@ -72,6 +73,34 @@ public:
 
     void OpenFile()
     {
+        auto fileName = this->user_.fileName.Get();
+
+        if (!jive::path::IsFile(fileName))
+        {
+            auto [directory, file] = jive::path::Split(fileName);
+
+            wxpex::FileDialogOptions options{};
+            options.message = "Choose a PNG file";
+            options.wildcard = "*.png";
+
+            wxFileDialog openFile(
+                nullptr,
+                wxString(options.message),
+                wxString(directory),
+                wxString(file),
+                wxString(options.wildcard),
+                options.style);
+
+            if (openFile.ShowModal() == wxID_CANCEL)
+            {
+                return;
+            }
+
+            this->user_.fileName.Set(openFile.GetPath());
+
+            return;
+        }
+
         // Open PNG file, and read data into Eigen matrix.
         // Display pixel view.
         draw::GrayPng<PngPixel> png(this->user_.fileName.Get());

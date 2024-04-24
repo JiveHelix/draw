@@ -6,8 +6,10 @@
 #include <wxpex/slider.h>
 #include <wxpex/field.h>
 #include <wxpex/labeled_widget.h>
+#include <wxpex/size.h>
 #include "draw/size.h"
 #include "draw/views/pixel_view.h"
+#include "draw/lines_shape.h"
 
 
 namespace draw
@@ -16,109 +18,97 @@ namespace draw
 
 WaveformPixels::WaveformPixels(
     wxWindow *parent,
+    PixelViewControl mainViewControl,
     PixelViewControl pixelViewControl,
     WaveformControl waveformControl)
     :
     wxPanel(parent, wxID_ANY),
+
+    oddLinesId_(),
+    evenLinesId_(),
+
+    viewLink_(
+        mainViewControl.viewSettings,
+        pixelViewControl.viewSettings,
+        LinkType::horizontal),
+
     pixelViewControl_(pixelViewControl),
     waveformControl_(waveformControl),
-    waveformPixels_(this, pixelViewControl.pixels, &WaveformPixels::OnPixels_),
-    waveformData_(),
 
-    image_(
-        this->pixelViewControl_.viewSettings.viewSize.Get().width,
-        this->pixelViewControl_.viewSettings.viewSize.Get().height)
+    viewSize_(
+        this,
+        pixelViewControl.viewSettings.viewSize,
+        &WaveformPixels::OnViewSize_),
+
+    imageSize_(
+        this,
+        mainViewControl.viewSettings.imageSize,
+        &WaveformPixels::OnImageSize_)
 {
-    this->Bind(wxEVT_PAINT, &WaveformPixels::OnPaint_, this);
-    this->Bind(wxEVT_SIZE, &WaveformPixels::OnSize_, this);
-    this->SetMinSize(wxSize(300, 250));
+    auto canvas = new PixelCanvas(this, pixelViewControl);
+
+    auto sizer = std::make_unique<wxBoxSizer>(wxVERTICAL);
+    sizer->Add(canvas, 1, wxEXPAND);
+    this->SetSizer(sizer.release());
 }
 
 
-Eigen::Vector<wxCoord, Eigen::Dynamic> WaveformPixels::GetLines() const
+void WaveformPixels::OnViewSize_(const Size &viewSize)
 {
-    auto size = this->GetClientSize();
+    // Let the generated waveform height match the height of the view.
+    this->pixelViewControl_.viewSettings.imageSize.height.Set(viewSize.height);
 
-    float scale = static_cast<float>(
-        this->waveformControl_.verticalScale.Get());
-
-    float height = static_cast<float>(size.GetHeight() - 1);
-
-    auto lines =
-        Eigen::Vector<float, 11>::LinSpaced(0, scale * height);
-
-    Eigen::Vector<float, Eigen::Dynamic> filtered = tau::Filter(
-        lines,
-        lines.array() < height + 1.0f);
-
-    filtered.array() = filtered.array() * -1.0f + height;
-
-    return filtered.array().round().template cast<wxCoord>();
-}
-
-
-void WaveformPixels::OnPixels_(const std::shared_ptr<Pixels> &waveform)
-{
-    this->waveformData_ = waveform;
-
-    // Pixels are sent asynchronously using the wx event system.
-    // When the size of the frame is changing rapidly, it is possible that
-    // there are pixels of the wrong size in the event queue.
-    // Ignore any that do not match.
-
-    auto imageSize = wxpex::ToSize<Pixels::Index>(this->image_.GetSize());
-    auto dataSize = this->waveformData_->size;
-
-    if (imageSize != dataSize)
-    {
-        this->image_ = wxImage(dataSize.width, dataSize.height, false);
-    }
-
-    this->image_.SetData(this->waveformData_->data.data(), true);
-    this->Refresh(false);
-    this->Update();
-}
-
-
-void WaveformPixels::OnSize_(wxSizeEvent &event)
-{
-    event.Skip();
-
-    auto size = this->GetClientSize();
-
-    if (size.GetHeight() < 1 || size.GetWidth() < 1)
+    if (viewSize.height < 20)
     {
         return;
     }
 
-    auto imageSize = Size{{
-        static_cast<uint16_t>(size.GetWidth()),
-        static_cast<uint16_t>(size.GetHeight())}};
+    auto linesVector = this->GetLines();
 
-    this->image_ = wxImage(
-        size.GetWidth(),
-        size.GetHeight());
+    auto evenLinesSettings = LinesShapeSettings::Default();
+    auto oddLinesSettings = LinesShapeSettings::Default();
 
-    this->pixelViewControl_.viewSettings.viewSize.Set(imageSize);
+    // Draw even lines heavy
+    evenLinesSettings.look.strokeWeight = 1;
+    evenLinesSettings.look.strokeColor.value = 0.8;
+
+    oddLinesSettings.look.strokeWeight = 1;
+    oddLinesSettings.look.strokeColor.value = 0.5;
+
+    LinesShape::Lines oddLines;
+    LinesShape::Lines evenLines;
+
+    auto lines = this->GetLines();
+
+    for (Eigen::Index i = 0; i < lines.size(); ++i)
+    {
+        auto line = LinesShape::Line(
+            tau::Point2d<double>(0.0, lines(i)),
+            tau::Vector2d<double>(1.0, 0.0));
+
+        if (i % 2 == 0)
+        {
+            evenLines.push_back(line);
+        }
+        else
+        {
+            oddLines.push_back(line);
+        }
+    }
+
+    Shapes oddShapes(this->oddLinesId_.Get());
+    Shapes evenShapes(this->evenLinesId_.Get());
+
+    oddShapes.EmplaceBack<LinesShape>(oddLinesSettings, oddLines);
+    evenShapes.EmplaceBack<LinesShape>(evenLinesSettings, evenLines);
+
+    this->pixelViewControl_.shapes.Set(oddShapes);
+    this->pixelViewControl_.shapes.Set(evenShapes);
 }
 
 
-void WaveformPixels::OnPaint_(wxPaintEvent &)
-{
-    auto paintDc = wxPaintDC(this);
-    auto bitmap = wxBitmap(this->image_);
-    auto source = wxMemoryDC(bitmap);
-    auto size = this->GetSize();
-
-    paintDc.Blit(
-        0,
-        0,
-        size.GetWidth(),
-        size.GetHeight(),
-        &source,
-        0,
-        0);
-
+#if 0
+// TODO
     auto lines = this->GetLines();
     auto farEdge = size.GetWidth();
 
@@ -140,18 +130,56 @@ void WaveformPixels::OnPaint_(wxPaintEvent &)
         auto index = lines(i);
         paintDc.DrawLine(0, index, farEdge, index);
     }
+#endif
+
+
+
+void WaveformPixels::OnImageSize_(const Size &imageSize)
+{
+    // Let the generated waveform width match the width of the original
+    // image.
+    this->pixelViewControl_.viewSettings.imageSize.width.Set(imageSize.width);
 }
+
+
+Eigen::Vector<wxCoord, Eigen::Dynamic> WaveformPixels::GetLines() const
+{
+    auto imageHeight =
+        this->pixelViewControl_.viewSettings.imageSize.height.Get();
+
+    float scale = static_cast<float>(
+        this->waveformControl_.verticalScale.Get());
+
+    float height = static_cast<float>(imageHeight - 1);
+
+    auto lines =
+        Eigen::Vector<float, 11>::LinSpaced(0, scale * height);
+
+    Eigen::Vector<float, Eigen::Dynamic> filtered = tau::Filter(
+        lines,
+        lines.array() < height + 1.0f);
+
+    filtered.array() = filtered.array() * -1.0f + height;
+
+    return filtered.array().round().template cast<wxCoord>();
+}
+
 
 
 WaveformView::WaveformView(
     wxWindow *parent,
+    PixelViewControl mainViewControl,
     PixelViewControl pixelViewControl,
     WaveformControl waveformControl)
     :
     wxPanel(parent, wxID_ANY),
 
     waveformPixels_(
-        new WaveformPixels(this, pixelViewControl, waveformControl)),
+        new WaveformPixels(
+            this,
+            mainViewControl,
+            pixelViewControl,
+            waveformControl)),
 
     columnCountEndpoint_(
         this,
@@ -264,6 +292,7 @@ PixelViewAndWaveform::PixelViewAndWaveform(
     auto waveformView =
         new WaveformView(
             this->splitter_,
+            pixelViewControl,
             waveformPixelViewControl,
             waveformControl);
 
