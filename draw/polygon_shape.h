@@ -121,7 +121,7 @@ public:
             const tau::Point2d<int> &click) override
         {
             auto points = this->shape.GetPoints();
-            points.push_back(click.Convert<double>());
+            points.push_back(click.template Cast<double>());
             this->shape = Polygon(points);
             control.SetValueBase(*this);
 

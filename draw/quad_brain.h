@@ -214,7 +214,7 @@ public:
         DragEditShape<DerivedShape>(
             index,
             start,
-            start.template Convert<double>(),
+            start.template Cast<double>(),
             control,
             startingShape),
         lines_(quadLines)

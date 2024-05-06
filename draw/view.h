@@ -17,8 +17,8 @@ tau::Region<T> ScaleRegion(
 {
     if constexpr (!std::is_same_v<T, U>)
     {
-        return (region.template Convert<U>() * scale)
-            .template Convert<T, tau::Round>();
+        return (region.template Cast<U>() * scale)
+            .template Cast<T, tau::Round>();
     }
     else
     {
@@ -33,8 +33,8 @@ tau::Region<T> UnscaleRegion(
 {
     if constexpr (!std::is_same_v<T, U>)
     {
-        return (region.template Convert<U>() / scale)
-            .template Convert<T, tau::Round>();
+        return (region.template Cast<U>() / scale)
+            .template Cast<T, tau::Round>();
     }
     else
     {
@@ -158,12 +158,12 @@ struct View
     }
 
     template<typename U, typename Style = tau::Round>
-    View<U, ScaleType> Convert() const
+    View<U, ScaleType> Cast() const
     {
         View<U, ScaleType> result;
 
-        result.source = this->source.template Convert<U, Style>();
-        result.target = this->target.template Convert<U, Style>();
+        result.source = this->source.template Cast<U, Style>();
+        result.target = this->target.template Cast<U, Style>();
         result.scale = this->scale;
 
         return result;

@@ -41,17 +41,17 @@ public:
     tau::Point2d<double> GetPosition(const tau::Point2d<int> &end) const
     {
         tau::Point2d<int> delta = end - this->start_;
-        return this->offset_ + delta.template Convert<double>();
+        return this->offset_ + delta.template Cast<double>();
     }
 
     tau::Point2d<double> GetDragCenter(const tau::Point2d<int> &end) const
     {
-        return (this->start_ + end).template Convert<double>() / 2.0;
+        return (this->start_ + end).template Cast<double>() / 2.0;
     }
 
     tau::Size<double> GetSize(const tau::Point2d<int> &end) const
     {
-        return (end - this->start_).template Convert<double>();
+        return (end - this->start_).template Cast<double>();
     }
 
     double GetMagnitude(const tau::Point2d<int> &end) const

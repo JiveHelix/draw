@@ -365,7 +365,7 @@ std::unique_ptr<Drag> ProcessMouseDown(
     }
 
     auto lines = PolygonLines(points);
-    auto lineIndex = lines.Find(click.template Convert<double>(), 10.0);
+    auto lineIndex = lines.Find(click.template Cast<double>(), 10.0);
 
     if (lineIndex)
     {
@@ -470,7 +470,7 @@ protected:
         auto click = this->pixelViewControl_.logicalPosition.Get();
         auto wasSelected = this->shapeList_.selected.Get();
 
-        auto found = this->FindSelected_(click.template Convert<double>());
+        auto found = this->FindSelected_(click.template Cast<double>());
 
         if (!found)
         {
@@ -529,7 +529,7 @@ protected:
 
         auto modifier = this->pixelViewControl_.modifier.Get();
         auto click = this->pixelViewControl_.logicalPosition.Get();
-        auto found = this->FindSelected_(click.template Convert<double>());
+        auto found = this->FindSelected_(click.template Cast<double>());
 
 #if 0
         std::cout << std::boolalpha;
@@ -584,7 +584,7 @@ protected:
         }
 
         auto lineIndex =
-            PolygonLines(points).Find(click.template Convert<double>(), 10.0);
+            PolygonLines(points).Find(click.template Cast<double>(), 10.0);
 
         if (lineIndex)
         {

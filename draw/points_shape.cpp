@@ -32,7 +32,7 @@ void PointsShape::Draw(wxpex::GraphicsContext &context)
 
     for (auto &point: this->points_)
     {
-        auto rounded = point.Convert<int>();
+        auto rounded = point.template Cast<int>();
         path.AddCircle(rounded.x, rounded.y, this->settings_.radius);
         path.CloseSubpath();
     }
@@ -61,7 +61,7 @@ void ValuePointsShape::Draw(wxpex::GraphicsContext &context)
         auto path = context->CreatePath();
 
         ConfigureColors(context, this->settings_.look, point.value);
-        auto rounded = point.Convert<int>();
+        auto rounded = point.template Cast<int>();
         path.AddCircle(rounded.x, rounded.y, this->settings_.radius);
         path.CloseSubpath();
 

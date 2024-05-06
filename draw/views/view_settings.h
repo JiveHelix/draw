@@ -135,16 +135,19 @@ struct ViewGroupTemplates_
 
         tau::Point2d<double> ComputeImageCenterPixel() const
         {
-            auto viewPosition_ = this->viewPosition.Get().template Convert<double>();
+            auto viewPosition_ =
+                this->viewPosition.Get().template Cast<double>();
 
             auto halfView =
-                this->viewSize.Get().ToPoint2d().template Convert<double>() / 2.0;
+                this->viewSize.Get().ToPoint2d().template Cast<double>() / 2.0;
 
             auto viewCenterPixel = viewPosition_ + halfView;
 
             auto imageCenterPixel_ = viewCenterPixel / this->scale.Get();
 
-            auto asIntegers = imageCenterPixel_.template Convert<int, tau::Floor>();
+            auto asIntegers =
+                imageCenterPixel_.template Cast<int, tau::Floor>();
+
             auto size = this->imageSize.Get();
 
             if (asIntegers.x >= size.width)
@@ -174,11 +177,11 @@ struct ViewGroupTemplates_
                 this->imageCenterPixel.Get() * this->scale.Get();
 
             auto halfView =
-                (this->viewSize.Get().ToPoint2d().template Convert<double>() / 2.0);
+                this->viewSize.Get().ToPoint2d().template Cast<double>() / 2.0;
 
             auto result = (scaledCenterPixel - halfView);
 
-            return result.template Convert<int, tau::Round>();
+            return result.template Cast<int, tau::Round>();
         }
 
         void ResetZoom()
@@ -190,7 +193,7 @@ struct ViewGroupTemplates_
         void FitZoom()
         {
             auto imageSize_ = tau::Size<double>(this->imageSize.Get());
-            auto viewSize_ = this->viewSize.Get().template Convert<double>();
+            auto viewSize_ = this->viewSize.Get().template Cast<double>();
 
             // imageSize_ * fit = viewSize_
             viewSize_ /= imageSize_;
@@ -307,7 +310,7 @@ struct ViewGroupTemplates_
             }
 
             this->SetImageCenterPixel_(
-                imageSize_.ToPoint2d().template Convert<double>() / 2.0);
+                imageSize_.ToPoint2d().template Cast<double>() / 2.0);
 
             this->RecenterView();
         }

@@ -244,7 +244,10 @@ void WaveformGenerator::Run_()
             {
                 this->hasFrameCondition_.wait(
                     lock,
-                    [this]{ return !this->inputs_.empty() || !this->isRunning_; });
+                    [this]
+                    {
+                        return !this->inputs_.empty() || !this->isRunning_;
+                    });
             }
 
             if (!this->isRunning_)
@@ -272,7 +275,8 @@ void WaveformGenerator::Run_()
             input.highlights.get(),
             &waveformPixels->data);
 
-        if (waveformPixels->data.rows() == 0 || waveformPixels->data.cols() == 0)
+        if (waveformPixels->data.rows() == 0
+                || waveformPixels->data.cols() == 0)
         {
             throw std::logic_error("Must not be empty");
         }

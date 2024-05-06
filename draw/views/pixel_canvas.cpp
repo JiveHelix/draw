@@ -286,11 +286,11 @@ void PixelCanvas::OnViewPosition_(const Point &viewPosition)
 void PixelCanvas::SizeVirtualPanel_(const Scale &scale)
 {
     auto imageSize = this->imageSizeEndpoint_.Get();
-    auto virtualSize = imageSize.template Convert<double>();
+    auto virtualSize = imageSize.template Cast<double>();
 
     virtualSize.width *= scale.horizontal;
     virtualSize.height *= scale.vertical;
-    this->virtualSize_ = virtualSize.template Convert<int, tau::Floor>();
+    this->virtualSize_ = virtualSize.template Cast<int, tau::Floor>();
 
     auto unitCount = this->virtualSize_ / PixelCanvas::pixelsPerScrollUnit;
 
@@ -403,7 +403,7 @@ void PixelCanvas::OnPaint_(wxPaintEvent &)
  **/
 tau::Point2d<int> PixelCanvas::CorrectCenterPixel_(draw::View<int> &view) const
 {
-    auto sourceAsDouble = view.source.template Convert<double>();
+    auto sourceAsDouble = view.source.template Cast<double>();
 
     auto apparentCenter =
         sourceAsDouble.topLeft + (sourceAsDouble.size / 2.0);
@@ -415,7 +415,7 @@ tau::Point2d<int> PixelCanvas::CorrectCenterPixel_(draw::View<int> &view) const
     if (error.Magnitude() <= 1.0)
     {
         auto correction =
-            (error * view.scale).template Convert<int, tau::Round>();
+            (error * view.scale).template Cast<int, tau::Round>();
 
         view.target.topLeft += correction;
 

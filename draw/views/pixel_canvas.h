@@ -132,7 +132,7 @@ private:
 
         auto viewPosition =
             (this->viewPositionEndpoint_.Get() + correction)
-                .template Convert<double>();
+                .template Cast<double>();
 
         gc->Translate(-viewPosition.x, -viewPosition.y);
         gc->Scale(scale.horizontal, scale.vertical);

@@ -184,7 +184,7 @@ private:
         auto ellipse = this->demoModel_.ellipse.ellipse.Get();
         auto position = this->user_.pixelView.logicalPosition.Get();
 
-        if (ellipse.Contains(position.template Convert<double>()))
+        if (ellipse.Contains(position.template Cast<double>()))
         {
             this->user_.pixelView.cursor.Set(wxpex::Cursor::openHand);
         }
