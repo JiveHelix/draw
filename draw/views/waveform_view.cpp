@@ -27,11 +27,6 @@ WaveformPixels::WaveformPixels(
     oddLinesId_(),
     evenLinesId_(),
 
-    viewLink_(
-        mainViewControl.viewSettings,
-        pixelViewControl.viewSettings,
-        LinkType::horizontal),
-
     pixelViewControl_(pixelViewControl),
     waveformControl_(waveformControl),
 
@@ -283,6 +278,12 @@ PixelViewAndWaveform::PixelViewAndWaveform(
     WaveformControl waveformControl)
     :
     wxPanel(parent, wxID_ANY),
+
+    viewLink_(
+        pixelViewControl.viewSettings,
+        waveformPixelViewControl.viewSettings,
+        LinkType::horizontal),
+
     splitter_(new wxpex::Splitter(this))
 {
     auto pixelView = new PixelView(

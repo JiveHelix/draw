@@ -39,7 +39,6 @@ private:
 private:
     ShapesId oddLinesId_;
     ShapesId evenLinesId_;
-    ViewLink viewLink_;
     PixelViewControl pixelViewControl_;
     WaveformControl waveformControl_;
     SizeEndpoint<WaveformPixels> viewSize_;
@@ -96,6 +95,7 @@ public:
     bool Layout() override;
 
 private:
+    ViewLink viewLink_;
     wxpex::Splitter * splitter_;
 };
 
