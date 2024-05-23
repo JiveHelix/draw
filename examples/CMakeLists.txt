@@ -38,6 +38,16 @@ target_link_libraries(
     common)
 
 
+add_executable(segments_demo segments_demo.cpp)
+
+target_link_libraries(
+    segments_demo
+    PRIVATE
+    project_warnings
+    project_options
+    common)
+
+
 add_executable(quad_demo quad_demo.cpp)
 
 target_link_libraries(

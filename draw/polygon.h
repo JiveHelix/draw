@@ -4,7 +4,7 @@
 #include <pex/group.h>
 #include <pex/range.h>
 #include <tau/vector2d.h>
-#include "draw/oddeven.h"
+#include "draw/points.h"
 #include "draw/polygon_lines.h"
 #include "draw/scale.h"
 
@@ -33,9 +33,9 @@ using RotationRange =
 struct CenteredPoints
 {
     tau::Point2d<double> center;
-    Points points;
+    PointsDouble points;
 
-    CenteredPoints(const Points &points_);
+    CenteredPoints(const PointsDouble &points_);
 };
 
 
@@ -59,7 +59,7 @@ struct Polygon: public PolygonTemplate<pex::Identity>
             {{0.0, 0.0}},
             1.0,
             0.0,
-            Points{
+            PointsDouble{
                 {-100.0, -100.0},
                 {100.0, -100.0},
                 {100.0, 100.0},
@@ -74,8 +74,8 @@ struct Polygon: public PolygonTemplate<pex::Identity>
     }
 
     Polygon(const CenteredPoints &centeredPoints);
-    Polygon(const Points &points_);
-    Points GetPoints() const;
+    Polygon(const PointsDouble &points_);
+    PointsDouble GetPoints() const;
     PolygonLines GetLines() const;
     bool Contains(const tau::Point2d<double> &point) const;
     bool Contains(const tau::Point2d<double> &point, double margin) const;
@@ -83,7 +83,7 @@ struct Polygon: public PolygonTemplate<pex::Identity>
     double GetMarginScale(double margin) const;
 
 private:
-    Points GetPoints_(double scale_) const;
+    PointsDouble GetPoints_(double scale_) const;
 };
 
 

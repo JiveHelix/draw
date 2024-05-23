@@ -1,17 +1,13 @@
-#include <fmt/core.h>
-#include "draw/polygon_shape.h"
-#include "draw/polygon_brain.h"
-#include "draw/views/polygon_view.h"
-#include "draw/views/look_view.h"
+#include "draw/draw_segments.h"
 
 
 namespace draw
 {
 
 
-void DrawPolygon(
+void DrawSegments(
     wxpex::GraphicsContext &context,
-    const Points &points)
+    const PointsDouble &points)
 {
     auto path = context->CreatePath();
     auto point = std::begin(points);

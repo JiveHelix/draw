@@ -128,7 +128,7 @@ public:
     virtual bool HandlesControlClick() const { return false; }
 
     virtual ssize_t GetId() const = 0;
-    virtual Points GetPoints() const = 0;
+    virtual PointsDouble GetPoints() const = 0;
 
     virtual bool Contains(
         const tau::Point2d<int> &point,
@@ -152,7 +152,7 @@ public:
     virtual bool ProcessAltClick(
         ControlUserBase &,
         PointsIterator,
-        Points &)
+        PointsDouble &)
     {
         return false;
     }

@@ -5,7 +5,7 @@ namespace draw
 {
 
 
-CenteredPoints::CenteredPoints(const Points &points_)
+CenteredPoints::CenteredPoints(const PointsDouble &points_)
     :
     center(0, 0),
     points(points_)
@@ -92,7 +92,7 @@ Polygon::Polygon(const CenteredPoints &centeredPoints)
 }
 
 
-Polygon::Polygon(const Points &points_)
+Polygon::Polygon(const PointsDouble &points_)
     :
     Polygon(CenteredPoints(points_))
 {
@@ -100,7 +100,7 @@ Polygon::Polygon(const Points &points_)
 }
 
 
-Points Polygon::GetPoints() const
+PointsDouble Polygon::GetPoints() const
 {
     return this->GetPoints_(this->scale);
 }
@@ -179,9 +179,9 @@ double Polygon::GetMarginScale(double margin) const
 }
 
 
-Points Polygon::GetPoints_(double scale_) const
+PointsDouble Polygon::GetPoints_(double scale_) const
 {
-    Points result = this->points;
+    PointsDouble result = this->points;
 
     for (auto &point: result)
     {

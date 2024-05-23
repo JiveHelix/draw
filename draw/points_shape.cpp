@@ -15,7 +15,7 @@ PointsShapeSettings PointsShapeSettings::Default()
 
 PointsShape::PointsShape(
     const PointsShapeSettings &settings,
-    const Points &points)
+    const PointsDouble &points)
     :
     settings_(settings),
     points_(points)

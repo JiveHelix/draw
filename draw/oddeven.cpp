@@ -10,9 +10,9 @@ namespace oddeven
 
 
 bool SegmentIntersects(
-    tau::Point2d<double> point,
-    const tau::Point2d<double> &start,
-    const tau::Point2d<double> &end)
+    PointDouble point,
+    const PointDouble &start,
+    const PointDouble &end)
 {
     static const auto epsilon = 1.0e-3;
     static const auto infinity = std::numeric_limits<double>::infinity();
@@ -81,8 +81,8 @@ bool SegmentIntersects(
 
 
 bool Contains(
-    const Points &points,
-    const tau::Point2d<double> &point)
+    const PointsDouble &points,
+    const PointDouble &point)
 {
     if (points.size() < 3)
     {

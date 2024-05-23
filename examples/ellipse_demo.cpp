@@ -122,7 +122,6 @@ public:
             &DemoBrain::OnLogicalPosition_);
 
         this->pixelViewEndpoint_.modifier.Connect(&DemoBrain::OnModifier_);
-
     }
 
     std::string GetAppName() const

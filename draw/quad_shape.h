@@ -16,7 +16,7 @@
 #include "draw/detail/poly_shape_id.h"
 #include "draw/node_settings.h"
 #include "draw/quad_brain.h"
-#include "draw/polygon_shape.h"
+#include "draw/draw_segments.h"
 
 
 namespace draw
@@ -72,7 +72,7 @@ public:
             }
 
             ConfigureLook(context, this->look);
-            DrawPolygon(context, this->shape.GetPoints());
+            DrawSegments(context, this->shape.GetPoints());
         }
 
         ssize_t GetId() const override
@@ -80,7 +80,7 @@ public:
             return this->id;
         }
 
-        Points GetPoints() const override
+        PointsDouble GetPoints() const override
         {
             return this->shape.GetPoints();
         }

@@ -44,7 +44,7 @@ inline constexpr bool HandlesAltClick = HandlesAltClick_<T>::value;
 
 std::optional<PointsIterator> FindPoint(
     const tau::Point2d<int> &click,
-    const Points &points);
+    const PointsDouble &points);
 
 
 double DragAngleDifference(double first, double second);
@@ -294,7 +294,7 @@ public:
         const tau::Point2d<int> &start,
         std::shared_ptr<ShapeControl> control,
         const DerivedShape &startingShape,
-        const Points &points)
+        const PointsDouble &points)
         :
         Base(index, start, points.at(index), control, startingShape),
         points_(points)
@@ -303,7 +303,7 @@ public:
     }
 
 protected:
-    Points points_;
+    PointsDouble points_;
 };
 
 

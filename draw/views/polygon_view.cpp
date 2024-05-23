@@ -22,7 +22,7 @@ PointsView::PointsView(wxWindow *parent, Control control)
     }
 }
 
-void PointsView::OnPoints_(const Points &points)
+void PointsView::OnPoints_(const PointsDouble &points)
 {
     this->DeleteAllItems();
 

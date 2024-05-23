@@ -16,15 +16,11 @@
 #include "draw/detail/poly_shape_id.h"
 #include "draw/node_settings.h"
 #include "draw/polygon_brain.h"
+#include "draw/draw_segments.h"
 
 
 namespace draw
 {
-
-
-void DrawPolygon(
-    wxpex::GraphicsContext &context,
-    const Points &points);
 
 
 template<template<typename> typename T>
@@ -67,7 +63,7 @@ public:
             }
 
             ConfigureLook(context, this->look);
-            DrawPolygon(context, points);
+            DrawSegments(context, points);
         }
 
         ssize_t GetId() const override
@@ -75,7 +71,7 @@ public:
             return this->id;
         }
 
-        Points GetPoints() const override
+        PointsDouble GetPoints() const override
         {
             return this->shape.GetPoints();
         }
@@ -131,7 +127,7 @@ public:
         bool ProcessAltClick(
             ShapeControl &control,
             PointsIterator iterator,
-            Points &points) override
+            PointsDouble &points) override
         {
             // Subtract a point
             points.erase(iterator);

@@ -12,7 +12,7 @@ namespace draw
 {
 
 
-using PolygonPoint = typename Points::value_type;
+using PolygonPoint = typename PointsDouble::value_type;
 
 
 struct PolygonLines
@@ -55,9 +55,9 @@ struct PolygonLines
 
     PolygonLines(double halfWidth, double halfHeight);
     PolygonLines(const tau::Size<double> &size);
-    PolygonLines(const Points &points);
+    PolygonLines(const PointsDouble &points);
 
-    Points GetPoints() const;
+    PointsDouble GetPoints() const;
 
     std::optional<size_t> Find(
         const tau::Point2d<double> &point,

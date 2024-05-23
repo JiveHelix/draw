@@ -27,6 +27,7 @@ target_sources(
     drag.h
     draw_ellipse.h
     draw_lines.h
+    draw_segments.h
     ellipse.h
     ellipse_shape.h
     error.h
@@ -48,6 +49,7 @@ target_sources(
     quad_lines.h
     quad_shape.h
     scale.h
+    segments_shape.h
     shapes.h
     shape_edit.cpp
     size.h
@@ -78,6 +80,7 @@ target_sources(
     views/waveform_view.h
     cross.cpp
     cross_shape.cpp
+    draw_segments.cpp
     ellipse.cpp
     ellipse_shape.cpp
     oddeven.cpp
@@ -87,11 +90,11 @@ target_sources(
     points_shape.cpp
     polygon.cpp
     polygon_lines.cpp
-    polygon_shape.cpp
     png.cpp
     quad.cpp
     quad_brain.cpp
     quad_lines.cpp
+    segments_shape.cpp
     shapes.cpp
     waveform.cpp
     waveform_generator.cpp

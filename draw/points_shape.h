@@ -50,12 +50,12 @@ class PointsShape: public DrawnShape
 public:
     PointsShape(
         const PointsShapeSettings &settings,
-        const Points &points);
+        const PointsDouble &points);
 
     void Draw(wxpex::GraphicsContext &context) override;
 
     PointsShapeSettings settings_;
-    Points points_;
+    PointsDouble points_;
 };
 
 

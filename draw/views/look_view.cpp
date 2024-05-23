@@ -7,8 +7,86 @@
 #include <wxpex/color_picker.h>
 
 
+#ifdef __WXMSW__
+inline constexpr auto borderStyle = wxBORDER_NONE;
+#else
+inline constexpr auto borderStyle = wxBORDER_SIMPLE;
+#endif
+
+
 namespace draw
 {
+
+
+StrokeControls::StrokeControls(
+    wxWindow *parent,
+    LookControl control,
+    const wxpex::LayoutOptions &layoutOptions)
+    :
+    wxpex::Collapsible(parent, "Stroke", borderStyle)
+{
+    using namespace wxpex;
+
+    auto panel = this->GetPanel();
+
+    auto strokeEnable =
+        new CheckBox(panel, "Stroke Enable", control.strokeEnable);
+
+    auto strokeWeight = wxpex::LabeledWidget(
+        panel,
+        "Stroke Weight",
+        new FieldSlider(
+            panel,
+            control.strokeWeight,
+            control.strokeWeight.value));
+
+    auto strokeColor =
+        new HsvPicker(
+            panel,
+            "Stroke Color",
+            control.strokeColor);
+
+    auto antialias =
+        new CheckBox(panel, "Anti-alias", control.antialias);
+
+    auto sizer = wxpex::LayoutItems(
+        wxpex::ItemOptions(verticalItems).SetProportion(1),
+        strokeEnable,
+        strokeWeight.Layout(wxHORIZONTAL).release(),
+        strokeColor,
+        antialias);
+
+    this->ConfigureTopSizer(std::move(sizer));
+}
+
+
+FillControls::FillControls(
+    wxWindow *parent,
+    LookControl control,
+    const wxpex::LayoutOptions &layoutOptions)
+    :
+    wxpex::Collapsible(parent, "Fill", borderStyle)
+{
+    using namespace wxpex;
+
+    auto panel = this->GetPanel();
+
+    auto fillEnable =
+        new CheckBox(panel, "Fill Enable", control.fillEnable);
+
+    auto fillColor =
+        new HsvPicker(
+            panel,
+            "Fill Color",
+            control.fillColor);
+
+    auto sizer = wxpex::LayoutItems(
+        wxpex::ItemOptions(verticalItems).SetProportion(1),
+        fillEnable,
+        fillColor);
+
+    this->ConfigureTopSizer(std::move(sizer));
+}
 
 
 LookView::LookView(
@@ -17,49 +95,24 @@ LookView::LookView(
     LookControl control,
     const LayoutOptions &layoutOptions)
     :
-    wxpex::StaticBox(parent, name)
+    wxpex::Collapsible(parent, name, borderStyle)
 {
-    using namespace wxpex;
+    auto strokeControls = new StrokeControls(
+        this->GetPanel(),
+        control,
+        layoutOptions);
 
-    auto strokeEnable =
-        new CheckBox(this, "Stroke Enable", control.strokeEnable);
-
-    auto strokeWeight = wxpex::LabeledWidget(
-        this,
-        "Stroke Weight",
-        new FieldSlider(
-            this,
-            control.strokeWeight,
-            control.strokeWeight.value));
-
-    auto strokeColor =
-        new HsvPicker(
-            this,
-            "Stroke Color",
-            control.strokeColor);
-
-    auto fillEnable =
-        new CheckBox(this, "Fill Enable", control.fillEnable);
-
-    auto fillColor =
-        new HsvPicker(
-            this,
-            "Fill Color",
-            control.fillColor);
-
-    auto antialias =
-        new CheckBox(this, "Anti-alias", control.antialias);
+    auto fillControls = new FillControls(
+        this->GetPanel(),
+        control,
+        layoutOptions);
 
     auto sizer = wxpex::LayoutItems(
-        verticalItems,
-        strokeEnable,
-        strokeWeight.Layout(wxHORIZONTAL).release(),
-        strokeColor,
-        fillEnable,
-        fillColor,
-        antialias);
+        wxpex::ItemOptions(wxpex::verticalItems).SetProportion(1),
+        strokeControls,
+        fillControls);
 
-    this->ConfigureSizer(std::move(sizer));
+    this->ConfigureTopSizer(std::move(sizer));
 }
 
 
@@ -80,38 +133,18 @@ StrokeView::StrokeView(
     LookControl control,
     const LayoutOptions &layoutOptions)
     :
-    wxpex::StaticBox(parent, name)
+    wxpex::Collapsible(parent, name, borderStyle)
 {
-    using namespace wxpex;
-
-    auto strokeEnable =
-        new CheckBox(this, "Stroke Enable", control.strokeEnable);
-
-    auto strokeWeight = wxpex::LabeledWidget(
-        this,
-        "Stroke Weight",
-        new FieldSlider(
-            this,
-            control.strokeWeight,
-            control.strokeWeight.value));
-
-    auto strokeColor =
-        new HsvPicker(
-            this,
-            "Stroke Color",
-            control.strokeColor);
-
-    auto antialias =
-        new CheckBox(this, "Anti-alias", control.antialias);
+    auto strokeControls = new StrokeControls(
+        this->GetPanel(),
+        control,
+        layoutOptions);
 
     auto sizer = wxpex::LayoutItems(
-        verticalItems,
-        strokeEnable,
-        strokeWeight.Layout(wxHORIZONTAL).release(),
-        strokeColor,
-        antialias);
+        wxpex::verticalItems,
+        strokeControls);
 
-    this->ConfigureSizer(std::move(sizer));
+    this->ConfigureTopSizer(std::move(sizer));
 }
 
 

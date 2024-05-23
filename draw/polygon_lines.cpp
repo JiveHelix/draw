@@ -19,7 +19,7 @@ PolygonLines::PolygonLines(
     const PolygonPoint &bottomRight,
     const PolygonPoint &bottomLeft)
     :
-    PolygonLines(Points({topLeft, topRight, bottomRight, bottomLeft}))
+    PolygonLines(PointsDouble({topLeft, topRight, bottomRight, bottomLeft}))
 {
 
 }
@@ -45,7 +45,7 @@ PolygonLines::PolygonLines(const tau::Size<double> &size)
 }
 
 
-PolygonLines::PolygonLines(const Points &points)
+PolygonLines::PolygonLines(const PointsDouble &points)
     :
     lines(points.size())
 {
@@ -71,14 +71,14 @@ PolygonLines::PolygonLines(const Points &points)
 }
 
 
-Points PolygonLines::GetPoints() const
+PointsDouble PolygonLines::GetPoints() const
 {
     if (this->lines.size() < 3)
     {
         return {};
     }
 
-    Points points(this->lines.size());
+    PointsDouble points(this->lines.size());
 
     // First point is intersection of last line with first line.
     points[0] = this->lines.back().Intersect(this->lines.front());
