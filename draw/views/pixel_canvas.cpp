@@ -117,6 +117,7 @@ void PixelCanvas::ScrollWindow(int dx, int dy, const wxRect *rect)
     this->ignoreViewPosition_ = true;
     auto delta = tau::Point2d<int>(-dx, -dy);
     auto position = this->viewPositionEndpoint_.Get();
+
     this->viewPositionEndpoint_.Set(position + delta);
     this->ignoreViewPosition_ = false;
 }
@@ -135,9 +136,12 @@ void PixelCanvas::OnImageSize_(const Size &imageSize)
 void PixelCanvas::OnSize_(wxSizeEvent &event)
 {
     event.Skip();
-    auto size = wxpex::ToSize<int>(this->GetClientSize());
+    auto clientSize = wxpex::ToSize<int>(this->GetClientSize());
+    auto windowSize = wxpex::ToSize<int>(this->GetSize());
     auto position = wxpex::ToPoint<int>(this->GetScreenPosition());
-    this->control_.viewSettings.viewSize.Set(size);
+
+    this->control_.viewSettings.viewSize.Set(clientSize);
+    this->control_.viewSettings.windowSize.Set(windowSize);
     this->control_.viewSettings.screenPosition.Set(position);
 }
 

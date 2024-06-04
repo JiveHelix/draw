@@ -36,7 +36,7 @@ struct FormatScale:
 using ScaleType = double;
 using Scale = tau::Scale<ScaleType>;
 
-// Initial range for Scale is from 0.25x to 8.0x
+// Initial range for Scale is from 0.25x to 16.0x
 using ScaleRange =
     pex::MakeRange<ScaleType, pex::Limit<0, 25, 100>, pex::Limit<16>>;
 

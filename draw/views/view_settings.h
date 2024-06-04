@@ -1,5 +1,6 @@
 #pragma once
 
+#include <jive/scope_flag.h>
 #include <fields/fields.h>
 #include <pex/group.h>
 #include <pex/endpoint.h>
@@ -20,6 +21,7 @@ struct ViewFields
         fields::Field(&T::screenPosition, "screenPosition"),
         fields::Field(&T::imageSize, "imageSize"),
         fields::Field(&T::viewSize, "viewSize"),
+        fields::Field(&T::windowSize, "windowSize"),
         fields::Field(&T::viewPosition, "viewPosition"),
         fields::Field(&T::imageCenterPixel, "imageCenterPixel"),
         fields::Field(&T::scale, "scale"),
@@ -36,6 +38,7 @@ struct ViewTemplate
     T<PointGroup> screenPosition;
     T<SizeGroup> imageSize;
     T<SizeGroup> viewSize;
+    T<SizeGroup> windowSize;
     T<PointGroup> viewPosition;
     T<tau::Point2dGroup<double>> imageCenterPixel;
     T<ScaleGroup> scale;
@@ -60,6 +63,7 @@ struct ViewGroupTemplates_
         {
             return Plain{
                 Point{0, 0},
+                Size{defaultWidth, defaultHeight},
                 Size{defaultWidth, defaultHeight},
                 Size{defaultWidth, defaultHeight},
                 Point{0, 0},
@@ -125,7 +129,7 @@ struct ViewGroupTemplates_
             this->resetZoomTerminus_.Connect(&Model::ResetZoom);
             this->fitZoomTerminus_.Connect(&Model::FitZoom);
 
-            this->ResetView_(this->imageSize.Get());
+            this->ResetView_(this->imageSize.Get(), this->viewSize.Get());
         }
 
         void SetImageCenterPixel_(const tau::Point2d<double> &point)
@@ -171,67 +175,59 @@ struct ViewGroupTemplates_
             return imageCenterPixel_;
         }
 
-        Point GetViewPositionFromCenterImagePixel() const
-        {
-            auto scaledCenterPixel =
-                this->imageCenterPixel.Get() * this->scale.Get();
-
-            auto halfView =
-                this->viewSize.Get().ToPoint2d().template Cast<double>() / 2.0;
-
-            auto result = (scaledCenterPixel - halfView);
-
-            return result.template Cast<int, tau::Round>();
-        }
-
         void ResetZoom()
         {
             this->scale.Set(Scale{});
-            this->ResetView_(this->imageSize.Get());
+            this->ResetView_(this->imageSize.Get(), this->viewSize.Get());
         }
 
         void FitZoom()
         {
             auto imageSize_ = tau::Size<double>(this->imageSize.Get());
-            auto viewSize_ = this->viewSize.Get().template Cast<double>();
 
-            // imageSize_ * fit = viewSize_
-            viewSize_ /= imageSize_;
-            auto fit = Scale{viewSize_.height, viewSize_.width};
-            auto scaleDeferred = pex::MakeDefer(this->scale);
+            // Fit without scrollbars.
+            auto windowSize_ = this->windowSize.Get().template Cast<double>();
+
+            // imageSize_ * fit = windowSize_
+            windowSize_ /= imageSize_;
+            auto fit = Scale{windowSize_.height, windowSize_.width};
 
             if (this->linkZoom.Get())
             {
                 double smaller = std::min(fit.horizontal, fit.vertical);
                 fit.horizontal = smaller;
                 fit.vertical = smaller;
-                scaleDeferred.Set(fit);
             }
-            else
-            {
-                // Fit horizontal and vertical zoom independently
-                scaleDeferred.Set(fit);
-            }
+
+            jive::ScopeFlag ignoreZoom(this->ignoreZoom_);
+            auto deferScale = pex::MakeDefer(this->scale);
+            deferScale.Set(fit);
 
             // Reset the imageCenterPixel_ before the zoom scale is notified.
-            this->ResetView_(this->imageSize.Get());
+            this->ResetView_(this->imageSize.Get(), this->windowSize.Get());
         }
 
-        void RecenterView()
+        void RecenterView(const Size &viewSize_)
         {
-            this->SetViewPosition_(this->GetViewPositionFromCenterImagePixel());
-        }
+            auto scaledCenterPixel =
+                this->imageCenterPixel.Get() * this->scale.Get();
 
-    private:
-        void SetViewPosition_(const Point &point)
-        {
+            auto halfView =
+                viewSize_.ToPoint2d().template Cast<double>() / 2.0;
+
+            auto viewPosition_ = (scaledCenterPixel - halfView);
+
             // We need to notify observers of the change to view position
             // without calling our own handler `OnViewPosition_`
             this->ignoreViewPosition_ = true;
-            this->viewPosition.Set(point);
+
+            this->viewPosition.Set(
+                viewPosition_.template Cast<int, tau::Round>());
+
             this->ignoreViewPosition_ = false;
         }
 
+    private:
         void OnHorizontalZoom_(double horizontalZoom)
         {
             if (this->ignoreZoom_)
@@ -251,7 +247,7 @@ struct ViewGroupTemplates_
                 this->ignoreZoom_ = false;
             }
 
-            this->RecenterView();
+            this->RecenterView(this->viewSize.Get());
         }
 
         void OnVerticalZoom_(double verticalZoom)
@@ -273,7 +269,7 @@ struct ViewGroupTemplates_
                 this->ignoreZoom_ = false;
             }
 
-            this->RecenterView();
+            this->RecenterView(this->viewSize.Get());
         }
 
         void OnLinkZoom_(bool isLinked)
@@ -299,10 +295,10 @@ struct ViewGroupTemplates_
         void OnImageSize_(const Size &imageSize_)
         {
             // Reset the view when the image size changes.
-            this->ResetView_(imageSize_);
+            this->ResetView_(imageSize_, this->viewSize.Get());
         }
 
-        void ResetView_(const Size &imageSize_)
+        void ResetView_(const Size &imageSize_, const Size &viewSize_)
         {
             if (this->bypass.Get())
             {
@@ -312,7 +308,7 @@ struct ViewGroupTemplates_
             this->SetImageCenterPixel_(
                 imageSize_.ToPoint2d().template Cast<double>() / 2.0);
 
-            this->RecenterView();
+            this->RecenterView(viewSize_);
         }
     };
 };
