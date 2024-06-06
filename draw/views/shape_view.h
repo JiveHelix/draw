@@ -21,14 +21,11 @@ public:
         :
         NodeSettingsView(
             parent,
-            control.Get().GetValueBase()->GetName(),
-            control.GetControlBase()->GetNode())
+            control.GetName(),
+            control.GetNode())
     {
-        auto shape =
-            control.GetControlBase()->CreateShapeView(this->GetPanel());
-
-        auto look =
-            control.GetControlBase()->CreateLookView(this->GetPanel());
+        auto shape = control.CreateShapeView(this->GetPanel());
+        auto look = control.CreateLookView(this->GetPanel());
 
         this->ConfigureTopSizer(
             wxpex::LayoutItems(wxpex::verticalItems, shape, look));

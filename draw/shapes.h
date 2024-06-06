@@ -47,14 +47,22 @@ public:
     virtual ~ShapeControlUserBase() {}
 
     virtual ssize_t GetId() const = 0;
+    virtual std::string GetName() const = 0;
     virtual NodeSettingsControl & GetNode() = 0;
     virtual wxWindow * CreateShapeView(wxWindow *parent) const = 0;
     virtual wxWindow * CreateLookView(wxWindow *parent) const = 0;
 };
 
 
-template<typename View>
 struct ShapeTemplates
+{
+    template<typename Base>
+    using ControlUserBase = ShapeControlUserBase<Base>;
+};
+
+
+template<typename View>
+struct ShapeCustom
 {
     template<typename Base>
     using ControlUserBase = ShapeControlUserBase<Base>;
@@ -87,6 +95,11 @@ struct ShapeTemplates
         ssize_t GetId() const override
         {
             return this->id.Get();
+        }
+
+        std::string GetName() const override
+        {
+            return this->Get().GetName();
         }
 
         NodeSettingsControl & GetNode() override
@@ -122,7 +135,7 @@ public:
     static constexpr auto polyTypeName = "Shape";
 
     using ControlUserBase =
-        pex::poly::detail::MakeControlUserBase<ShapeTemplates<void>, Shape>;
+        pex::poly::detail::MakeControlUserBase<ShapeTemplates, Shape>;
 
     virtual bool HandlesAltClick() const { return false; }
     virtual bool HandlesControlClick() const { return false; }

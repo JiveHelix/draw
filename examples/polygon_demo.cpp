@@ -31,7 +31,7 @@ using ShapeValue = pex::poly::Value<draw::Shape, draw::PolygonShapeTemplate>;
 using PolygonShapePolyGroup = draw::PolygonShapePolyGroup<ShapeValue>;
 using PolygonShapeValue = typename PolygonShapePolyGroup::PolyValue;
 
-using ListMaker = pex::MakePolyList<ShapeValue, draw::ShapeTemplates<void>>;
+using ListMaker = pex::MakePolyList<ShapeValue, draw::ShapeTemplates>;
 
 using DemoModel = typename DemoGroup<ListMaker>::Model;
 using DemoControl = typename DemoGroup<ListMaker>::Control;
@@ -65,9 +65,7 @@ public:
         this->userControl_.pixelView.viewSettings.imageSize.Set(
             draw::Size(1920, 1080));
 
-        return new DemoInterface<DemoControl>(
-            parent,
-            this->demoControl_);
+        return CreateDemoInterface(parent, this->demoControl_);
     }
 
     void SaveSettings() const

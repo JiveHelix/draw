@@ -29,10 +29,11 @@ NodeSettingsView::NodeSettingsView(
     {
         this->Bind(wxEVT_LEFT_DOWN, &NodeSettingsView::OnLeftDown_, this);
 
-        this->highlightEndpoint_ = Endpoint(
-            this,
-            this->control_->isSelected,
-            &NodeSettingsView::OnHighlight_);
+        this->highlightEndpoint_ =
+            Endpoint(
+                this,
+                this->control_->isSelected,
+                &NodeSettingsView::OnHighlight_);
     }
 }
 

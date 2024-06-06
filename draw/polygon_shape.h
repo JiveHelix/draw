@@ -146,7 +146,7 @@ using PolygonShapePolyGroup = pex::poly::PolyGroup
     ShapeFields,
     PolygonShapeTemplate,
     Value,
-    ShapeTemplates<PolygonView>
+    ShapeCustom<PolygonView>
 >;
 
 

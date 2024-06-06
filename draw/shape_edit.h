@@ -157,7 +157,7 @@ template<typename List>
 NodeSettingsControl & GetNode(List &list, size_t index)
 {
     auto &shapeControl = list.at(index);
-    return shapeControl.GetControlBase()->GetNode();
+    return shapeControl.GetVirtual()->GetNode();
 }
 
 
@@ -486,7 +486,7 @@ protected:
                         // There was a selected shape.
                         // Keep it selected and handle a control modifier.
                         shape.GetValueBase()->ProcessControlClick(
-                            *selected.GetControlBase(),
+                            *selected.GetVirtual(),
                             click);
 
                         return;
@@ -514,7 +514,7 @@ protected:
         this->Select(found->first);
 
         this->drag_ = found->second.Get().GetValueBase()->ProcessMouseDown(
-            found->second.GetControlBase()->Copy(),
+            found->second.GetVirtual()->Copy(),
             click,
             this->pixelViewControl_.modifier.Get(),
             this->pixelViewControl_.cursor);

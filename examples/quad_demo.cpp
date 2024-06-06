@@ -28,19 +28,12 @@ using QuadShapeModel = typename QuadShapePolyGroup::Model;
 using QuadShapeControl = typename QuadShapePolyGroup::Control;
 
 using ShapeControlUserBase = typename draw::Shape::ControlUserBase;
+using QuadControlMembers = typename QuadShapePolyGroup::ControlMembers;
 
-using QuadControlMembers =
-    // typename pex::Group<draw::ShapeFields, draw::QuadShapeTemplate>::ControlMembers;
-    pex::ControlMembers_<draw::QuadShapeTemplate>;
-
-using QuadControlMembers2 =
-    typename QuadShapePolyGroup::ControlMembers;
-
-static_assert(std::is_same_v<QuadControlMembers, QuadControlMembers2>);
 static_assert(std::is_base_of_v<ShapeControlUserBase, QuadShapeControl>);
 static_assert(std::is_base_of_v<QuadControlMembers, QuadShapeControl>);
 
-using ListMaker = pex::MakePolyList<ShapeValue, draw::ShapeTemplates<void>>;
+using ListMaker = pex::MakePolyList<ShapeValue, draw::ShapeTemplates>;
 
 using DemoModel = typename DemoGroup<ListMaker>::Model;
 using DemoControl = typename DemoGroup<ListMaker>::Control;
@@ -71,9 +64,7 @@ public:
         this->userControl_.pixelView.viewSettings.imageSize.Set(
             draw::Size(1920, 1080));
 
-        return new DemoInterface<DemoControl>(
-            parent,
-            this->demoControl_);
+        return CreateDemoInterface(parent, this->demoControl_);
     }
 
     void SaveSettings() const

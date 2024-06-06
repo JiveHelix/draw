@@ -129,7 +129,7 @@ using QuadShapePolyGroup = pex::poly::PolyGroup
     ShapeFields,
     QuadShapeTemplate,
     Value,
-    ShapeTemplates<QuadView>
+    ShapeCustom<QuadView>
 >;
 
 
