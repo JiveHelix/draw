@@ -25,6 +25,24 @@ StrokeControls::StrokeControls(
     :
     wxpex::Collapsible(parent, "Stroke", borderStyle)
 {
+    this->Initialize_(control);
+}
+
+
+StrokeControls::StrokeControls(
+    wxWindow *parent,
+    LookControl control,
+    wxpex::Collapsible::StateControl expandControl,
+    const wxpex::LayoutOptions &layoutOptions)
+    :
+    wxpex::Collapsible(parent, "Stroke", expandControl, borderStyle)
+{
+    this->Initialize_(control);
+}
+
+
+void StrokeControls::Initialize_(LookControl control)
+{
     using namespace wxpex;
 
     auto panel = this->GetPanel();
@@ -50,7 +68,7 @@ StrokeControls::StrokeControls(
         new CheckBox(panel, "Anti-alias", control.antialias);
 
     auto sizer = wxpex::LayoutItems(
-        wxpex::ItemOptions(verticalItems).SetProportion(1),
+        wxpex::verticalItems,
         strokeEnable,
         strokeWeight.Layout(wxHORIZONTAL).release(),
         strokeColor,
@@ -67,6 +85,24 @@ FillControls::FillControls(
     :
     wxpex::Collapsible(parent, "Fill", borderStyle)
 {
+    this->Initialize_(control);
+}
+
+
+FillControls::FillControls(
+    wxWindow *parent,
+    LookControl control,
+    wxpex::Collapsible::StateControl expandControl,
+    const wxpex::LayoutOptions &layoutOptions)
+    :
+    wxpex::Collapsible(parent, "Fill", expandControl, borderStyle)
+{
+    this->Initialize_(control);
+}
+
+
+void FillControls::Initialize_(LookControl control)
+{
     using namespace wxpex;
 
     auto panel = this->GetPanel();
@@ -81,7 +117,7 @@ FillControls::FillControls(
             control.fillColor);
 
     auto sizer = wxpex::LayoutItems(
-        wxpex::ItemOptions(verticalItems).SetProportion(1),
+        wxpex::verticalItems,
         fillEnable,
         fillColor);
 
@@ -108,7 +144,7 @@ LookView::LookView(
         layoutOptions);
 
     auto sizer = wxpex::LayoutItems(
-        wxpex::ItemOptions(wxpex::verticalItems).SetProportion(1),
+        wxpex::verticalItems,
         strokeControls,
         fillControls);
 
@@ -122,6 +158,48 @@ LookView::LookView(
     const LayoutOptions &layoutOptions)
     :
     LookView(parent, "Look", control, layoutOptions)
+{
+
+}
+
+
+LookView::LookView(
+    wxWindow *parent,
+    const std::string &name,
+    LookControl control,
+    LookDisplayControl displayControl,
+    const LayoutOptions &layoutOptions)
+    :
+    wxpex::Collapsible(parent, name, displayControl.lookExpand, borderStyle)
+{
+    auto strokeControls = new StrokeControls(
+        this->GetPanel(),
+        control,
+        displayControl.strokeExpand,
+        layoutOptions);
+
+    auto fillControls = new FillControls(
+        this->GetPanel(),
+        control,
+        displayControl.fillExpand,
+        layoutOptions);
+
+    auto sizer = wxpex::LayoutItems(
+        wxpex::verticalItems,
+        strokeControls,
+        fillControls);
+
+    this->ConfigureTopSizer(std::move(sizer));
+}
+
+
+LookView::LookView(
+    wxWindow *parent,
+    LookControl control,
+    LookDisplayControl displayControl,
+    const LayoutOptions &layoutOptions)
+    :
+    LookView(parent, "Look", control, displayControl, layoutOptions)
 {
 
 }
@@ -154,6 +232,41 @@ StrokeView::StrokeView(
     const LayoutOptions &layoutOptions)
     :
     StrokeView(parent, "Stroke", control, layoutOptions)
+{
+
+}
+
+
+StrokeView::StrokeView(
+    wxWindow *parent,
+    const std::string &name,
+    LookControl control,
+    LookDisplayControl displayControl,
+    const LayoutOptions &layoutOptions)
+    :
+    wxpex::Collapsible(parent, name, displayControl.lookExpand, borderStyle)
+{
+    auto strokeControls = new StrokeControls(
+        this->GetPanel(),
+        control,
+        displayControl.strokeExpand,
+        layoutOptions);
+
+    auto sizer = wxpex::LayoutItems(
+        wxpex::verticalItems,
+        strokeControls);
+
+    this->ConfigureTopSizer(std::move(sizer));
+}
+
+
+StrokeView::StrokeView(
+    wxWindow *parent,
+    LookControl control,
+    LookDisplayControl displayControl,
+    const LayoutOptions &layoutOptions)
+    :
+    StrokeView(parent, "Stroke", control, displayControl, layoutOptions)
 {
 
 }

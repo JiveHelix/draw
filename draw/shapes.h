@@ -17,6 +17,7 @@
 #include "draw/oddeven.h"
 #include "draw/node_settings.h"
 #include "draw/views/look_view.h"
+#include "draw/views/shape_view.h"
 
 
 namespace draw
@@ -49,8 +50,12 @@ public:
     virtual ssize_t GetId() const = 0;
     virtual std::string GetName() const = 0;
     virtual NodeSettingsControl & GetNode() = 0;
+
     virtual wxWindow * CreateShapeView(wxWindow *parent) const = 0;
-    virtual wxWindow * CreateLookView(wxWindow *parent) const = 0;
+
+    virtual wxWindow * CreateLookView(
+        wxWindow *parent,
+        LookDisplayControl displayControl) const = 0;
 };
 
 
@@ -115,11 +120,14 @@ struct ShapeCustom
                 wxpex::LayoutOptions{});
         }
 
-        wxWindow * CreateLookView(wxWindow *parent) const override
+        wxWindow * CreateLookView(
+            wxWindow *parent,
+            LookDisplayControl displayControl) const override
         {
             return new LookView(
                 parent,
                 this->look,
+                displayControl,
                 wxpex::LayoutOptions{});
         }
     };

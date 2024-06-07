@@ -6,7 +6,6 @@
 #include "draw/quad.h"
 
 
-
 namespace draw
 {
 

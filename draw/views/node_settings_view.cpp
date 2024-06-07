@@ -19,9 +19,10 @@ inline constexpr auto borderStyle = wxBORDER_SIMPLE;
 NodeSettingsView::NodeSettingsView(
     wxWindow *parent,
     const std::string &nodeName,
+    ShapeExpandControl expandControl,
     std::optional<NodeSettingsControl> control)
     :
-    wxpex::Collapsible(parent, nodeName, borderStyle),
+    wxpex::Collapsible(parent, nodeName, expandControl, borderStyle),
     control_(control),
     highlightEndpoint_()
 {

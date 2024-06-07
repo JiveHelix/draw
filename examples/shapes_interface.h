@@ -17,6 +17,7 @@ public:
     ShapesInterface(
         wxWindow *parent,
         ShapesControl shapesControl,
+        draw::ShapeDisplayListControl displayControls,
         pex::control::Signal<> reorder)
         :
         wxPanel(parent, wxID_ANY),
@@ -34,10 +35,14 @@ public:
         auto sizer = std::make_unique<wxBoxSizer>(wxVERTICAL);
         this->sizer_ = sizer.get();
 
-        for (auto &it: this->shapesControl_)
+        size_t count = this->shapesControl_.count.Get();
+        assert(count == displayControls.count.Get());
+
+        for (size_t i = 0; i < count; ++i)
         {
+            auto &it = this->shapesControl_[i];
             auto id = it.GetId();
-            auto view = new draw::ShapeView(this, it);
+            auto view = new draw::ShapeView(this, it, displayControls[i]);
             this->viewsByShapeId_[id] = view;
             sizer->Add(view);
         }
@@ -64,6 +69,7 @@ public:
 
 private:
     ShapesControl shapesControl_;
+    draw::ShapeDisplayListControl displayControls_;
     std::map<ssize_t, wxWindow *> viewsByShapeId_;
     wxBoxSizer *sizer_;
     pex::Endpoint<ShapesInterface, pex::control::Signal<>> onReorder_;
@@ -101,9 +107,12 @@ public:
         return this->control_.GetVirtual()->CreateShapeView(parent);
     }
 
-    wxWindow * CreateLookView(wxWindow *parent) const
+    wxWindow * CreateLookView(
+        wxWindow *parent,
+        draw::LookDisplayControl displayControl) const
     {
-        return this->control_.GetVirtual()->CreateLookView(parent);
+        return this->control_.GetVirtual()
+            ->CreateLookView(parent, displayControl);
     }
 
 private:
@@ -216,10 +225,12 @@ public:
     DemoInterface(
         wxWindow *parent,
         ShapesControl control,
+        draw::ShapeDisplayListControl displayControls,
         pex::control::Signal<> reorder)
         :
         wxPanel(parent, wxID_ANY),
         control_(control),
+        displayControls_(displayControls),
         reorder_(reorder),
         sizer_(),
         shapesInterface_(this->MakeInterface()),
@@ -257,6 +268,7 @@ public:
         return new ShapesInterface<ShapesControl>(
             this,
             this->control_,
+            this->displayControls_,
             this->reorder_);
     }
 
@@ -296,6 +308,7 @@ private:
 
 private:
     ShapesControl control_;
+    draw::ShapeDisplayListControl displayControls_;
     pex::control::Signal<> reorder_;
     wxSizer * sizer_;
     wxWindow * shapesInterface_;
@@ -318,6 +331,7 @@ struct DemoFields
 {
     static constexpr auto fields = std::make_tuple(
         fields::Field(&T::shapes, "shapes"),
+        fields::Field(&T::shapesDisplay, "shapesDisplay"),
         fields::Field(&T::reorder, "reorder"));
 };
 
@@ -329,7 +343,36 @@ struct DemoTemplate
     struct Template
     {
         T<ShapeListMaker> shapes;
+        T<draw::ShapeDisplayListMaker> shapesDisplay;
         T<pex::MakeSignal> reorder;
+    };
+};
+
+
+struct DemoCustom
+{
+    template<typename GroupBase>
+    class Model: public GroupBase
+    {
+    public:
+        Model()
+            :
+            GroupBase(),
+            countEndpoint_(this, this->shapes.count, &Model::OnShapesCount_)
+        {
+            this->OnShapesCount_(this->shapes.count.Get());
+        }
+
+    private:
+        void OnShapesCount_(size_t value)
+        {
+            this->shapesDisplay.count.Set(value);
+        }
+
+    private:
+        using CountEndpoint = pex::Endpoint<Model, pex::model::ListCount>;
+
+        CountEndpoint countEndpoint_;
     };
 };
 
@@ -338,7 +381,8 @@ template<typename ShapeListMaker>
 using DemoGroup = pex::Group
     <
         DemoFields,
-        DemoTemplate<ShapeListMaker>::template Template
+        DemoTemplate<ShapeListMaker>::template Template,
+        DemoCustom
     >;
 
 
@@ -350,5 +394,6 @@ wxWindow * CreateDemoInterface(
     return new DemoInterface(
         parent,
         VirtualShapes(control.shapes),
+        control.shapesDisplay,
         control.reorder);
 }

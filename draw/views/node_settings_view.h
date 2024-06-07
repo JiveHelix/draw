@@ -5,6 +5,7 @@
 #include <pex/endpoint.h>
 
 #include "draw/node_settings.h"
+#include "draw/views/shape_display.h"
 
 
 
@@ -29,6 +30,7 @@ public:
     NodeSettingsView(
         wxWindow *parent,
         const std::string &nodeName,
+        ShapeExpandControl expandControl,
         std::optional<NodeSettingsControl> control);
 
 private:
