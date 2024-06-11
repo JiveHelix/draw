@@ -1,4 +1,4 @@
-// #define USE_OBSERVER_NAME
+#define USE_OBSERVER_NAME
 // #define ENABLE_PEX_LOG
 
 
@@ -21,11 +21,12 @@
 #include <draw/views/pixel_view.h>
 #include <draw/polygon_brain.h>
 #include <draw/shapes.h>
+#include <draw/shape_list.h>
+#include <draw/views/shape_list_view.h>
 
 #include "common/observer.h"
 #include "common/about_window.h"
 #include "common/brain.h"
-#include "shapes_interface.h"
 
 
 using ShapeValue =
@@ -46,8 +47,8 @@ using QuadShapeModel = typename QuadShapePolyGroup::Model;
 
 using ListMaker = pex::MakePolyList<ShapeValue, draw::ShapeTemplates>;
 
-using DemoModel = typename DemoGroup<ListMaker>::Model;
-using DemoControl = typename DemoGroup<ListMaker>::Control;
+using DemoModel = typename draw::ShapeListGroup<ListMaker>::Model;
+using DemoControl = typename draw::ShapeListGroup<ListMaker>::Control;
 using ShapesControl = decltype(DemoControl::shapes);
 
 
@@ -78,7 +79,7 @@ public:
         this->userControl_.pixelView.viewSettings.imageSize.Set(
             draw::Size(1920, 1080));
 
-        return CreateDemoInterface(parent, this->demoControl_);
+        return new draw::ShapeListView<ListMaker>(parent, this->demoControl_);
     }
 
     void SaveSettings() const

@@ -27,6 +27,8 @@ namespace draw
 class NodeSettingsView: public wxpex::Collapsible
 {
 public:
+    static constexpr auto observerName = "draw::views::NodeSettingsView";
+
     NodeSettingsView(
         wxWindow *parent,
         const std::string &nodeName,
@@ -47,6 +49,7 @@ private:
 
     std::optional<NodeSettingsControl> control_;
     Endpoint highlightEndpoint_;
+    std::string nodeName_;
 };
 
 

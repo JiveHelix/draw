@@ -29,7 +29,7 @@ struct CreatePolygon
         auto polygon = Polygon(lines.GetPoints());
         polygon.center = drag.GetDragCenter(position);
 
-        return Value{{0, polygon, Look::Default(), NodeSettings::Default()}};
+        return Value{{0, {}, polygon, Look::Default(), NodeSettings::Default()}};
     }
 };
 
@@ -67,6 +67,7 @@ protected:
         return std::make_shared<DerivedShape>(
             typename DerivedShape::TemplateBase{
                 this->startingShape_.id,
+                {},
                 Polygon(points),
                 this->startingShape_.look,
                 this->startingShape_.node});
@@ -148,6 +149,7 @@ protected:
         return std::make_shared<DerivedShape>(
             typename DerivedShape::TemplateBase{
                 this->startingShape_.id,
+                {},
                 Polygon(lines.GetPoints()),
                 this->startingShape_.look,
                 this->startingShape_.node});

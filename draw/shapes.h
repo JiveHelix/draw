@@ -16,6 +16,7 @@
 #include "draw/drag.h"
 #include "draw/oddeven.h"
 #include "draw/node_settings.h"
+#include "draw/depth_order.h"
 #include "draw/views/look_view.h"
 #include "draw/views/shape_view.h"
 
@@ -50,6 +51,7 @@ public:
     virtual ssize_t GetId() const = 0;
     virtual std::string GetName() const = 0;
     virtual NodeSettingsControl & GetNode() = 0;
+    virtual DepthOrderControl & GetDepthOrder() = 0;
 
     virtual wxWindow * CreateShapeView(wxWindow *parent) const = 0;
 
@@ -59,16 +61,35 @@ public:
 };
 
 
+template<typename Base>
+class ShapeModelUserBase: public Base
+{
+public:
+    using Base::Base;
+
+    virtual ~ShapeModelUserBase() {}
+
+    virtual DepthOrderControl GetDepthOrder() = 0;
+};
+
+
 struct ShapeTemplates
 {
     template<typename Base>
+    using ModelUserBase = ShapeModelUserBase<Base>;
+
+    template<typename Base>
     using ControlUserBase = ShapeControlUserBase<Base>;
+
 };
 
 
 template<typename View>
 struct ShapeCustom
 {
+    template<typename Base>
+    using ModelUserBase = ShapeModelUserBase<Base>;
+
     template<typename Base>
     using ControlUserBase = ShapeControlUserBase<Base>;
 
@@ -84,6 +105,11 @@ struct ShapeCustom
             polyShapeId_()
         {
             pex::SetOverride(this->id, this->polyShapeId_.Get());
+        }
+
+        DepthOrderControl GetDepthOrder() override
+        {
+            return this->depthOrder;
         }
 
     private:
@@ -110,6 +136,11 @@ struct ShapeCustom
         NodeSettingsControl & GetNode() override
         {
             return this->node;
+        }
+
+        DepthOrderControl & GetDepthOrder() override
+        {
+            return this->depthOrder;
         }
 
         wxWindow * CreateShapeView(wxWindow *parent) const override
@@ -265,6 +296,7 @@ struct ShapeFields
 {
     static constexpr auto fields = std::make_tuple(
         fields::Field(&T::id, "id"),
+        fields::Field(&T::depthOrder, "depthOrder"),
         fields::Field(&T::shape, "shape"),
         fields::Field(&T::look, "look"),
         fields::Field(&T::node, "node"));

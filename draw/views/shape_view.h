@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include <wxpex/button.h>
 #include "draw/views/node_settings_view.h"
 #include "draw/views/shape_display.h"
 
@@ -35,8 +36,22 @@ public:
             this->GetPanel(),
             displayControl.lookExpand);
 
+        auto depthOrder = control.GetDepthOrder();
+
+        auto down =
+            new wxpex::Button(this->GetPanel(), "Down", depthOrder.moveDown);
+
+        auto up =
+            new wxpex::Button(this->GetPanel(), "Up", depthOrder.moveUp);
+
+        auto upDownSizer = wxpex::LayoutItems(wxpex::horizontalItems, down, up);
+
         this->ConfigureTopSizer(
-            wxpex::LayoutItems(wxpex::verticalItems, shape, look));
+            wxpex::LayoutItems(
+                wxpex::verticalItems,
+                shape,
+                look,
+                upDownSizer.release()));
     }
 };
 

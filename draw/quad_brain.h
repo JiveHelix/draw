@@ -54,7 +54,7 @@ struct CreateQuad
         quad.center = drag.GetDragCenter(position);
         quad.size = drag.GetSize(position);
 
-        return Value{{0, quad, Look::Default(), NodeSettings::Default()}};
+        return Value{{0, {}, quad, Look::Default(), NodeSettings::Default()}};
     }
 };
 

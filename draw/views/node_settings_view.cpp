@@ -24,7 +24,8 @@ NodeSettingsView::NodeSettingsView(
     :
     wxpex::Collapsible(parent, nodeName, expandControl, borderStyle),
     control_(control),
-    highlightEndpoint_()
+    highlightEndpoint_(),
+    nodeName_(nodeName)
 {
     if (this->control_)
     {

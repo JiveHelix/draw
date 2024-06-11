@@ -29,6 +29,7 @@ class QuadShapeTemplate
 public:
     // id is read-only to a control
     T<pex::ReadOnly<ssize_t>> id;
+    T<DepthOrderGroup> depthOrder;
     T<QuadGroup> shape;
     T<LookGroup> look;
     T<NodeSettingsGroup> node;
@@ -59,6 +60,7 @@ public:
         {
             return {{
                 0,
+                {},
                 Quad::Default(),
                 Look::Default(),
                 NodeSettings::Default()}};

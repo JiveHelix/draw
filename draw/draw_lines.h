@@ -22,10 +22,6 @@ void DrawLines(
 
     auto region = tau::Region<double>{{tau::Point2d<double>(0, 0), size}};
 
-    std::cout << "size: " << size << std::endl;
-    std::cout << "scale: " << scale << std::endl;
-    std::cout << "region: " << region << std::endl;
-
     for (auto &line: lines)
     {
         auto endPoints = line.Intersect(region);
