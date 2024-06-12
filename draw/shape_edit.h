@@ -12,36 +12,6 @@ namespace draw
 {
 
 
-template<typename T, typename = void>
-struct HandlesControlClick_: std::false_type {};
-
-template<typename T>
-struct HandlesControlClick_
-<
-    T,
-    std::enable_if_t<T::handlesControlClick>
->: std::true_type {};
-
-
-template<typename T>
-inline constexpr bool HandlesControlClick = HandlesControlClick_<T>::value;
-
-
-template<typename T, typename = void>
-struct HandlesAltClick_: std::false_type {};
-
-template<typename T>
-struct HandlesAltClick_
-<
-    T,
-    std::enable_if_t<T::handlesAltClick>
->: std::true_type {};
-
-
-template<typename T>
-inline constexpr bool HandlesAltClick = HandlesAltClick_<T>::value;
-
-
 std::optional<PointsIterator> FindPoint(
     const tau::Point2d<int> &click,
     const PointsDouble &points);
@@ -154,10 +124,25 @@ protected:
 
 
 template<typename List>
-NodeSettingsControl & GetNode(List &list, size_t unordered)
+auto GetVirtual(List &list, size_t unordered)
 {
     auto &shapeControl = list.GetUnordered(unordered);
-    return shapeControl.GetVirtual()->GetNode();
+    return shapeControl.GetVirtual();
+}
+
+
+template<typename List>
+auto GetValueBase(List &list, size_t unordered)
+{
+    auto &shapeControl = list.GetUnordered(unordered);
+    return shapeControl.Get().GetValueBase();
+}
+
+
+template<typename List>
+NodeSettingsControl & GetNode(List &list, size_t unordered)
+{
+    return GetVirtual(list, unordered)->GetNode();
 }
 
 
@@ -309,6 +294,12 @@ protected:
 };
 
 
+struct IgnoreMouse {};
+
+/*
+ * DragShape is required. RotatePoint, DragPoint, and DragLine can be bypassed
+ * with IgnoreMouse.
+ */
 template
 <
     typename RotatePoint,
@@ -319,7 +310,7 @@ template
 >
 std::unique_ptr<Drag> ProcessMouseDown(
     std::shared_ptr<ShapeControl> shapeControl,
-    const DerivedShape &shape,
+    DerivedShape &shape,
     const tau::Point2d<int> &click,
     const wxpex::Modifier &modifier,
     CursorControl cursor)
@@ -329,14 +320,11 @@ std::unique_ptr<Drag> ProcessMouseDown(
 
     if (foundPoint)
     {
-        if (modifier.IsAlt())
+        if (modifier.IsAlt() && shape.HandlesAltClick())
         {
-            if constexpr (HandlesAltClick<DerivedShape>)
+            if (shape.ProcessAltClick(*shapeControl, *foundPoint, points))
             {
-                if (shape.ProcessAltClick(*shapeControl, *foundPoint, points))
-                {
-                    return {};
-                }
+                return {};
             }
         }
 
@@ -346,37 +334,44 @@ std::unique_ptr<Drag> ProcessMouseDown(
 
         if (modifier.IsControl())
         {
-            // DragEditPoint
-            return std::make_unique<RotatePoint>(
-                pointIndex,
-                click,
-                shapeControl,
-                shape,
-                points);
+            if constexpr (!std::is_same_v<IgnoreMouse, RotatePoint>)
+            {
+                return std::make_unique<RotatePoint>(
+                    pointIndex,
+                    click,
+                    shapeControl,
+                    shape,
+                    points);
+            }
         }
         else
         {
-            // DragEditPoint
-            return std::make_unique<DragPoint>(
-                pointIndex,
-                click,
-                shapeControl,
-                shape,
-                points);
+            if constexpr (!std::is_same_v<IgnoreMouse, DragPoint>)
+            {
+                return std::make_unique<DragPoint>(
+                    pointIndex,
+                    click,
+                    shapeControl,
+                    shape,
+                    points);
+            }
         }
     }
 
-    auto lines = PolygonLines(points);
-    auto lineIndex = lines.Find(click.template Cast<double>(), 10.0);
-
-    if (lineIndex)
+    if constexpr (!std::is_same_v<DragLine, IgnoreMouse>)
     {
-        return std::make_unique<DragLine>(
-            *lineIndex,
-            click,
-            lines,
-            shapeControl,
-            shape);
+        auto lines = PolygonLines(points);
+        auto lineIndex = lines.Find(click.template Cast<double>(), 10.0);
+
+        if (lineIndex)
+        {
+            return std::make_unique<DragLine>(
+                *lineIndex,
+                click,
+                lines,
+                shapeControl,
+                shape);
+        }
     }
 
     cursor.Set(wxpex::Cursor::closedHand);
@@ -485,7 +480,7 @@ protected:
         {
             if (wasSelected)
             {
-                auto selected = this->shapeList_[*wasSelected];
+                auto selected = this->shapeList_.GetUnordered(*wasSelected);
                 auto shape = selected.Get();
 
                 if (shape.GetValueBase()->HandlesControlClick())
@@ -494,6 +489,7 @@ protected:
                     {
                         // There was a selected shape.
                         // Keep it selected and handle a control modifier.
+                        // Handles
                         shape.GetValueBase()->ProcessControlClick(
                             *selected.GetVirtual(),
                             click);
@@ -543,11 +539,21 @@ protected:
         if (!found)
         {
             // The cursor is not contained by any of the shapes.
-            if (modifier.IsControl() && this->shapeList_.selected.Get())
+            if (
+                modifier.IsControl()
+                && this->shapeList_.selected.Get())
             {
-                this->pixelViewControl_.cursor.Set(wxpex::Cursor::pencil);
+                auto shape =
+                    GetValueBase(
+                        this->shapeList_,
+                        *this->shapeList_.selected.Get());
 
-                return;
+                if (shape->HandlesControlClick())
+                {
+                    this->pixelViewControl_.cursor.Set(wxpex::Cursor::pencil);
+
+                    return;
+                }
             }
 
             if (this->pixelViewControl_.cursor.Get() != wxpex::Cursor::arrow)
@@ -567,31 +573,38 @@ protected:
         if (foundPoint)
         {
             // Hovering over a point, change cursor
-            if (modifier.IsControl())
+            if (modifier.IsControl() && shape->HandlesRotate())
             {
                 // TODO: Create a rotate cursor
                 this->pixelViewControl_.cursor.Set(wxpex::Cursor::pointRight);
             }
-            else if (modifier.IsAlt() && HandlesAltClick<ItemControl>)
+            else if (modifier.IsAlt() && shape->HandlesAltClick())
             {
                 this->pixelViewControl_.cursor.Set(wxpex::Cursor::bullseye);
             }
-            else
+            else if (shape->HandlesEditPoint())
             {
                 this->pixelViewControl_.cursor.Set(wxpex::Cursor::cross);
+            }
+            else
+            {
+                this->pixelViewControl_.cursor.Set(wxpex::Cursor::openHand);
             }
 
             return;
         }
 
-        auto lineIndex =
-            PolygonLines(points).Find(click.template Cast<double>(), 10.0);
-
-        if (lineIndex)
+        if (shape->HandlesEditLine())
         {
-            // Hovering over a line, change cursor
-            this->pixelViewControl_.cursor.Set(wxpex::Cursor::sizing);
-            return;
+            auto lineIndex =
+                PolygonLines(points).Find(click.template Cast<double>(), 10.0);
+
+            if (lineIndex)
+            {
+                // Hovering over a line, change cursor
+                this->pixelViewControl_.cursor.Set(wxpex::Cursor::sizing);
+                return;
+            }
         }
 
         // The mouse is over a shape, but not over a line or a point.
@@ -667,14 +680,6 @@ private:
     static void OnSelect_(size_t unordered, void *context)
     {
         auto self = static_cast<ShapeBrain *>(context);
-        auto selected = self->shapeList_.selected.Get();
-
-        if (selected && (*selected == unordered))
-        {
-            self->Deselect(unordered);
-            return;
-        }
-
         self->Select(unordered);
     }
 

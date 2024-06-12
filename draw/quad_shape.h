@@ -99,6 +99,12 @@ public:
             return std::make_shared<Impl>(*this);
         }
 
+        bool HandlesAltClick() const override { return false; }
+        bool HandlesControlClick() const override { return false; }
+        bool HandlesRotate() const override { return true; }
+        bool HandlesEditPoint() const override { return true; }
+        bool HandlesEditLine() const override { return true; }
+
         std::string GetName() const override
         {
             return fmt::format("Quad {}", this->id);

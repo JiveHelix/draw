@@ -178,6 +178,9 @@ public:
 
     virtual bool HandlesAltClick() const { return false; }
     virtual bool HandlesControlClick() const { return false; }
+    virtual bool HandlesRotate() const { return false; }
+    virtual bool HandlesEditPoint() const { return false; }
+    virtual bool HandlesEditLine() const { return false; }
 
     virtual ssize_t GetId() const = 0;
     virtual PointsDouble GetPoints() const = 0;

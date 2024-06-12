@@ -29,7 +29,12 @@ struct CreatePolygon
         auto polygon = Polygon(lines.GetPoints());
         polygon.center = drag.GetDragCenter(position);
 
-        return Value{{0, {}, polygon, Look::Default(), NodeSettings::Default()}};
+        return Value{{
+            0,
+            {},
+            polygon,
+            Look::Default(),
+            NodeSettings::Default()}};
     }
 };
 

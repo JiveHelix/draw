@@ -92,6 +92,9 @@ public:
 
         bool HandlesAltClick() const override { return true; }
         bool HandlesControlClick() const override { return true; }
+        bool HandlesRotate() const override { return true; }
+        bool HandlesEditPoint() const override { return true; }
+        bool HandlesEditLine() const override { return true; }
 
         std::string GetName() const override
         {

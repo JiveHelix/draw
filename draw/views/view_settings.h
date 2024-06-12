@@ -67,7 +67,7 @@ struct ViewGroupTemplates_
                 Size{defaultWidth, defaultHeight},
                 Size{defaultWidth, defaultHeight},
                 Point{0, 0},
-                Point{0, 0},
+                {double(defaultWidth) / 2.0, double(defaultHeight) / 2.0},
                 Scale(1.0, 1.0),
                 true,
                 {},
@@ -91,10 +91,12 @@ struct ViewGroupTemplates_
 
     private:
         using ScaleEndpoint = pex::EndpointGroup<Model, ScaleControl>;
+        using SizeEndpoint = pex::Endpoint<Model, SizeControl>;
 
         pex::Endpoint<Model, PointControl> viewPositionEndpoint_;
         ScaleEndpoint scaleEndpoint_;
-        pex::Endpoint<Model, SizeControl> imageSizeEndpoint_;
+        SizeEndpoint imageSizeEndpoint_;
+        SizeEndpoint viewSizeEndpoint_;
         pex::Terminus<Model, pex::model::Value<bool>> linkZoomTerminus_;
         pex::Terminus<Model, pex::model::Signal> resetZoomTerminus_;
         pex::Terminus<Model, pex::model::Signal> fitZoomTerminus_;
@@ -113,6 +115,7 @@ struct ViewGroupTemplates_
                 this,
                 ScaleControl(this->scale)),
             imageSizeEndpoint_(this, this->imageSize, &Model::OnImageSize_),
+            viewSizeEndpoint_(this, this->viewSize, &Model::OnViewSize_),
             linkZoomTerminus_(this, this->linkZoom),
             resetZoomTerminus_(this, this->resetZoom),
             fitZoomTerminus_(this, this->fitZoom),
@@ -296,6 +299,12 @@ struct ViewGroupTemplates_
         {
             // Reset the view when the image size changes.
             this->ResetView_(imageSize_, this->viewSize.Get());
+        }
+
+        void OnViewSize_(const Size &)
+        {
+            // Recompute the image center pixel.
+            this->SetImageCenterPixel_(this->ComputeImageCenterPixel());
         }
 
         void ResetView_(const Size &imageSize_, const Size &viewSize_)

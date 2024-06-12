@@ -274,7 +274,7 @@ void PixelCanvas::OnViewPosition_(const Point &viewPosition)
     if (this->ignoreViewPosition_)
     {
         // Ignoring because this viewPosition originated with this class
-        // and is being echoed from the model.
+        // and is now echoed from the model.
         return;
     }
 
