@@ -28,10 +28,15 @@ using QuadShapeModel = typename QuadShapePolyGroup::Model;
 using QuadShapeControl = typename QuadShapePolyGroup::Control;
 
 using ShapeControlUserBase = typename draw::Shape::ControlUserBase;
-using QuadControlMembers = typename QuadShapePolyGroup::ControlMembers;
 
 static_assert(std::is_base_of_v<ShapeControlUserBase, QuadShapeControl>);
-static_assert(std::is_base_of_v<QuadControlMembers, QuadShapeControl>);
+
+static_assert(
+    std::is_base_of_v
+    <
+        pex::ControlMembers_<draw::QuadShapeTemplate>,
+        QuadShapeControl
+    >);
 
 using ListMaker = pex::MakePolyList<ShapeValue, draw::ShapeTemplates>;
 

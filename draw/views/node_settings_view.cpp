@@ -27,6 +27,26 @@ NodeSettingsView::NodeSettingsView(
     highlightEndpoint_(),
     nodeName_(nodeName)
 {
+    this->InitializeHighlight_();
+}
+
+
+NodeSettingsView::NodeSettingsView(
+    wxWindow *parent,
+    const std::string &nodeName,
+    std::optional<NodeSettingsControl> control)
+    :
+    wxpex::Collapsible(parent, nodeName, borderStyle),
+    control_(control),
+    highlightEndpoint_(),
+    nodeName_(nodeName)
+{
+    this->InitializeHighlight_();
+}
+
+
+void NodeSettingsView::InitializeHighlight_()
+{
     if (this->control_)
     {
         this->Bind(wxEVT_LEFT_DOWN, &NodeSettingsView::OnLeftDown_, this);

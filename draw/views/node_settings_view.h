@@ -35,7 +35,14 @@ public:
         ShapeExpandControl expandControl,
         std::optional<NodeSettingsControl> control);
 
+    NodeSettingsView(
+        wxWindow *parent,
+        const std::string &nodeName,
+        std::optional<NodeSettingsControl> control);
+
 private:
+    void InitializeHighlight_();
+
     void OnHighlight_(bool isHighlighted);
 
     void OnLeftDown_(wxMouseEvent &event);

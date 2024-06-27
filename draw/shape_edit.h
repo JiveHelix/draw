@@ -1,6 +1,7 @@
 #pragma once
 
 #include <pex/endpoint.h>
+#include <pex/list_observer.h>
 #include "draw/oddeven.h"
 #include "draw/drag.h"
 #include "draw/views/pixel_view_settings.h"
@@ -215,7 +216,7 @@ protected:
 };
 
 
-// Drag in empty space to create a new shape that replaces any shape in the
+// Drag in empty space to create a new shape that replaces all shapes in the
 // list.
 template<typename ListControl, typename CreateShape>
 class DragReplaceShape: public Drag
@@ -395,33 +396,40 @@ class ShapeBrain
 public:
     static constexpr auto observerName = "ShapeBrain";
 
+    using ListObserver = pex::ListObserver<ShapeBrain, ListControl>;
+
     using ItemControl = typename ListControl::ItemControl;
 
     ShapeBrain(
         ListControl shapeList,
         PixelViewControl pixelViewControl)
         :
+        shapeList_(shapeList),
+
+        listObserver_(
+            this,
+            shapeList,
+            &ShapeBrain::OnCountWillChange_,
+            &ShapeBrain::OnCount_),
+
         pixelViewControl_(pixelViewControl),
+
         mouseDownEndpoint_(
             this,
             pixelViewControl.mouseDown,
             &ShapeBrain::OnMouseDown_),
+
         logicalPositionEndpoint_(
             this,
             pixelViewControl.logicalPosition,
             &ShapeBrain::OnLogicalPosition_),
+
         modifierEndpoint_(
             this,
             pixelViewControl.modifier,
             &ShapeBrain::OnModifier_),
-        drag_(),
-        shapeList_(shapeList),
-        listCount_(this, this->shapeList_.count, &ShapeBrain::OnCount_),
 
-        countWillChange_(
-            this,
-            this->shapeList_.countWillChange,
-            &ShapeBrain::OnCountWillChange_),
+        drag_(),
 
         indicesEndpoint_(
             this,
@@ -702,6 +710,9 @@ private:
         GetNode(this->shapeList_, unordered).isSelected.Set(false);
     }
 
+    ListControl shapeList_;
+    ListObserver listObserver_;
+
     PixelViewControl pixelViewControl_;
 
     pex::Endpoint<ShapeBrain, decltype(PixelViewControl::mouseDown)>
@@ -712,22 +723,11 @@ private:
     pex::Endpoint<ShapeBrain, decltype(PixelViewControl::modifier)>
         modifierEndpoint_;
 
-    using ListCountEndpoint =
-        pex::Endpoint<ShapeBrain, pex::control::ListCount>;
-
-    using CountWillChange =
-        pex::Endpoint<ShapeBrain, pex::control::Signal<pex::GetTag>>;
-
     using OrderedIndicesEndpoint =
         pex::Endpoint<ShapeBrain, draw::OrderedIndicesControl>;
 
     std::unique_ptr<Drag> drag_;
-
-    ListControl shapeList_;
-    ListCountEndpoint listCount_;
-    CountWillChange countWillChange_;
     OrderedIndicesEndpoint indicesEndpoint_;
-
     std::vector<NodeSelectSignal> selectConnections_;
 };
 

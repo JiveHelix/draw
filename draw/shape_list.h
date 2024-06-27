@@ -20,16 +20,25 @@ struct ShapeListFields
 
 
 template<typename ShapeListMaker>
+using OrderedShapesMaker = OrderedListGroup<ShapeListMaker, true>;
+
+
+template<typename ShapeListMaker>
 struct ShapeListTemplate
 {
     template<template<typename> typename T>
     struct Template
     {
-        T<OrderedListGroup<ShapeListMaker, true>> shapes;
+        T<OrderedShapesMaker<ShapeListMaker>> shapes;
         T<ShapeDisplayListMaker> shapesDisplay;
         T<pex::MakeSignal> reorder;
     };
 };
+
+
+template<typename ShapeListMaker>
+using OrderedShapesControl =
+    pex::ControlSelector<OrderedShapesMaker<ShapeListMaker>>;
 
 
 struct ShapeListCustom

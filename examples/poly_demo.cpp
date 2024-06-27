@@ -39,11 +39,9 @@ using ShapeValue =
 
 using PolygonShapePolyGroup = draw::PolygonShapePolyGroup<ShapeValue>;
 using PolygonShapeValue = typename PolygonShapePolyGroup::PolyValue;
-using PolygonShapeModel = typename PolygonShapePolyGroup::Model;
 
 using QuadShapePolyGroup = draw::QuadShapePolyGroup<ShapeValue>;
 using QuadShapeValue = typename QuadShapePolyGroup::PolyValue;
-using QuadShapeModel = typename QuadShapePolyGroup::Model;
 
 using ListMaker = pex::MakePolyList<ShapeValue, draw::ShapeTemplates>;
 
