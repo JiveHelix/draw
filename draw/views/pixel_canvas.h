@@ -183,7 +183,7 @@ private:
     pex::Endpoint<PixelCanvas, PixelsControl> pixelsEndpoint_;
     std::shared_ptr<Pixels> pixelData_;
 
-    pex::Endpoint<PixelCanvas, ShapesControl> shapesEndpoint_;
+    AsyncShapesEndpoint<PixelCanvas> shapesEndpoint_;
     std::map<ssize_t, Shapes> shapesById_;
 };
 

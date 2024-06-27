@@ -229,6 +229,7 @@ public:
 };
 
 
+using ShapeValue = pex::poly::Value<Shape>;
 using ShapeControl = typename Shape::ControlUserBase;
 
 
@@ -288,10 +289,10 @@ private:
 
 
 using AsyncShapes = wxpex::MakeAsync<Shapes>;
-using ShapesControl = typename AsyncShapes::Control;
+using AsyncShapesControl = typename AsyncShapes::Control;
 
 template<typename Observer>
-using ShapesEndpoint = pex::Endpoint<Observer, ShapesControl>;
+using AsyncShapesEndpoint = pex::Endpoint<Observer, AsyncShapesControl>;
 
 
 template<typename T>

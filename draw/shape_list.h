@@ -3,10 +3,15 @@
 
 #include <fields/fields.h>
 #include "draw/depth_order.h"
+#include "draw/shapes.h"
 
 
 namespace draw
 {
+
+
+using ShapeListMaker = pex::MakePolyList<Shape, ShapeTemplates>;
+
 
 
 template<typename T>
@@ -19,26 +24,21 @@ struct ShapeListFields
 };
 
 
-template<typename ShapeListMaker>
 using OrderedShapesMaker = OrderedListGroup<ShapeListMaker, true>;
 
 
-template<typename ShapeListMaker>
+template<template<typename> typename T>
 struct ShapeListTemplate
 {
-    template<template<typename> typename T>
-    struct Template
-    {
-        T<OrderedShapesMaker<ShapeListMaker>> shapes;
-        T<ShapeDisplayListMaker> shapesDisplay;
-        T<pex::MakeSignal> reorder;
-    };
+    T<OrderedShapesMaker> shapes;
+    T<ShapeDisplayListMaker> shapesDisplay;
+    T<pex::MakeSignal> reorder;
+
+    static constexpr auto fields = ShapeListFields<ShapeListTemplate>::fields;
 };
 
 
-template<typename ShapeListMaker>
-using OrderedShapesControl =
-    pex::ControlSelector<OrderedShapesMaker<ShapeListMaker>>;
+using OrderedShapesControl = pex::ControlSelector<OrderedShapesMaker>;
 
 
 struct ShapeListCustom
@@ -84,17 +84,15 @@ struct ShapeListCustom
 };
 
 
-template<typename ShapeListMaker>
-using ShapeListGroup = pex::Group
-    <
-        ShapeListFields,
-        ShapeListTemplate<ShapeListMaker>::template Template,
-        ShapeListCustom
-    >;
+using ShapeListGroup =
+    pex::Group<ShapeListFields, ShapeListTemplate, ShapeListCustom>;
 
+using ShapeListModel = typename ShapeListGroup::Model;
+using ShapeListControl = typename ShapeListGroup::Control;
+using ShapesControl = decltype(ShapeListControl::shapes);
 
-template<typename ShapeListMaker>
-using ShapeListControl = typename ShapeListGroup<ShapeListMaker>::Control;
+template<typename Observer>
+using ShapesEndpoint = pex::Endpoint<Observer, ShapesControl>;
 
 
 } // end namespace draw

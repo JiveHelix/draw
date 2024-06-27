@@ -21,28 +21,17 @@
 #include "common/brain.h"
 
 
-using ShapeValue = pex::poly::Value<draw::Shape, draw::QuadShapeTemplate>;
-using QuadShapePolyGroup = draw::QuadShapePolyGroup<ShapeValue>;
-using QuadShapeValue = typename QuadShapePolyGroup::PolyValue;
-using QuadShapeModel = typename QuadShapePolyGroup::Model;
-using QuadShapeControl = typename QuadShapePolyGroup::Control;
 
 using ShapeControlUserBase = typename draw::Shape::ControlUserBase;
 
-static_assert(std::is_base_of_v<ShapeControlUserBase, QuadShapeControl>);
+static_assert(std::is_base_of_v<ShapeControlUserBase, draw::QuadShapeControl>);
 
 static_assert(
     std::is_base_of_v
     <
         pex::ControlMembers_<draw::QuadShapeTemplate>,
-        QuadShapeControl
+        draw::QuadShapeControl
     >);
-
-using ListMaker = pex::MakePolyList<ShapeValue, draw::ShapeTemplates>;
-
-using DemoModel = typename draw::ShapeListGroup<ListMaker>::Model;
-using DemoControl = typename draw::ShapeListGroup<ListMaker>::Control;
-using ShapesControl = decltype(DemoControl::shapes);
 
 
 class DemoBrain: public Brain<DemoBrain>
@@ -55,13 +44,13 @@ public:
         demoModel_(),
         demoControl_(this->demoModel_),
 
-        quadsEndpoint_(this, this->demoControl_.shapes, &DemoBrain::OnQuads_),
+        shapesEndpoint_(this, this->demoControl_.shapes, &DemoBrain::OnQuads_),
 
         quadBrain_(
             this->demoControl_.shapes,
             this->userControl_.pixelView)
     {
-        this->demoControl_.shapes.Append(QuadShapeValue::Default());
+        this->demoControl_.shapes.Append(draw::QuadShapeValue::Default());
     }
 
     wxWindow * CreateControls(wxWindow *parent)
@@ -69,7 +58,7 @@ public:
         this->userControl_.pixelView.viewSettings.imageSize.Set(
             draw::Size(1920, 1080));
 
-        return new draw::ShapeListView<ListMaker>(parent, this->demoControl_);
+        return new draw::ShapeListView(parent, this->demoControl_);
     }
 
     void SaveSettings() const
@@ -106,7 +95,7 @@ public:
     }
 
 private:
-    void OnQuads_(const typename ShapesControl::Type &)
+    void OnQuads_(const typename draw::ShapesControl::Type &)
     {
         this->Display();
     }
@@ -114,18 +103,16 @@ private:
 private:
     draw::ShapesId shapesId_;
     Observer<DemoBrain> observer_;
-    DemoModel demoModel_;
-    DemoControl demoControl_;
+    draw::ShapeListModel demoModel_;
+    draw::ShapeListControl demoControl_;
 
-    using QuadsEndpoint =
-        pex::Endpoint<DemoBrain, ShapesControl>;
-
-    QuadsEndpoint quadsEndpoint_;
+    using ShapesEndpoint = draw::ShapesEndpoint<DemoBrain>;
+    ShapesEndpoint shapesEndpoint_;
 
     using QuadBrain = draw::ShapeBrain
     <
-        ShapesControl,
-        draw::DragCreateQuad<ShapesControl, QuadShapeValue>
+        draw::ShapesControl,
+        draw::DragCreateQuad<draw::ShapesControl, draw::QuadShapeValue>
     >;
 
     QuadBrain quadBrain_;

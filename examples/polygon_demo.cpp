@@ -28,17 +28,6 @@
 #include "common/brain.h"
 
 
-using ShapeValue = pex::poly::Value<draw::Shape, draw::PolygonShapeTemplate>;
-using PolygonShapePolyGroup = draw::PolygonShapePolyGroup<ShapeValue>;
-using PolygonShapeValue = typename PolygonShapePolyGroup::PolyValue;
-
-using ListMaker = pex::MakePolyList<ShapeValue, draw::ShapeTemplates>;
-
-using DemoModel = typename draw::ShapeListGroup<ListMaker>::Model;
-using DemoControl = typename draw::ShapeListGroup<ListMaker>::Control;
-using ShapesControl = decltype(DemoControl::shapes);
-
-
 class DemoBrain: public Brain<DemoBrain>
 {
 public:
@@ -49,7 +38,7 @@ public:
         demoModel_(),
         demoControl_(this->demoModel_),
 
-        polygonsEndpoint_(
+        shapesEndpoint_(
             this,
             this->demoControl_.shapes,
             &DemoBrain::OnPolygons_),
@@ -58,7 +47,7 @@ public:
             this->demoControl_.shapes,
             this->userControl_.pixelView)
     {
-        this->demoControl_.shapes.Append(PolygonShapeValue::Default());
+        this->demoControl_.shapes.Append(draw::PolygonShapeValue::Default());
     }
 
     wxWindow * CreateControls(wxWindow *parent)
@@ -66,7 +55,7 @@ public:
         this->userControl_.pixelView.viewSettings.imageSize.Set(
             draw::Size(1920, 1080));
 
-        return new draw::ShapeListView<ListMaker>(parent, this->demoControl_);
+        return new draw::ShapeListView(parent, this->demoControl_);
     }
 
     void SaveSettings() const
@@ -103,7 +92,7 @@ public:
     }
 
 private:
-    void OnPolygons_(const typename ShapesControl::Type &)
+    void OnPolygons_(const typename draw::ShapesControl::Type &)
     {
         this->Display();
     }
@@ -111,24 +100,19 @@ private:
 private:
     draw::ShapesId shapesId_;
     Observer<DemoBrain> observer_;
-    DemoModel demoModel_;
-    DemoControl demoControl_;
+    draw::ShapeListModel demoModel_;
+    draw::ShapeListControl demoControl_;
 
-    using PolygonsEndpoint =
-        pex::Endpoint<
-            DemoBrain,
-            ShapesControl
-        >;
-
-    PolygonsEndpoint polygonsEndpoint_;
+    using ShapesEndpoint = draw::ShapesEndpoint<DemoBrain>;
+    ShapesEndpoint shapesEndpoint_;
 
     using PolygonBrain = draw::ShapeBrain
     <
-        ShapesControl,
+        draw::ShapesControl,
         draw::DragCreatePolygon
         <
-            ShapesControl,
-            PolygonShapeValue
+            draw::ShapesControl,
+            draw::PolygonShapeValue
         >
     >;
 

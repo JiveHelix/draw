@@ -102,15 +102,14 @@ private:
 };
 
 
-template<typename ListMaker>
-class ShapeListView: public ListView<OrderedShapesControl<ListMaker>>
+class ShapeListView: public ListView<OrderedShapesControl>
 {
 public:
     static constexpr auto observerName = "ShapeListView";
 
-    using Base = ListView<OrderedShapesControl<ListMaker>>;
+    using Base = ListView<OrderedShapesControl>;
     using ItemControl = typename Base::ItemControl;
-    using Control = ShapeListControl<ListMaker>;
+    using Control = ShapeListControl;
 
     ShapeListView(
         wxWindow *parent,

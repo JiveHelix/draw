@@ -131,14 +131,18 @@ public:
 };
 
 
-template<typename Value>
 using QuadShapePolyGroup = pex::poly::PolyGroup
 <
     ShapeFields,
     QuadShapeTemplate,
-    Value,
+    Shape,
     ShapeCustom<QuadView>
 >;
+
+
+using QuadShapeValue = typename QuadShapePolyGroup::PolyValue;
+using QuadShapeModel = typename QuadShapePolyGroup::Model;
+using QuadShapeControl = typename QuadShapePolyGroup::Control;
 
 
 } // end namespace draw

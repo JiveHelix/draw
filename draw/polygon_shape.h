@@ -145,14 +145,17 @@ public:
 };
 
 
-template<typename Value>
 using PolygonShapePolyGroup = pex::poly::PolyGroup
 <
     ShapeFields,
     PolygonShapeTemplate,
-    Value,
+    Shape,
     ShapeCustom<PolygonView>
 >;
+
+using PolygonShapeValue = typename PolygonShapePolyGroup::PolyValue;
+using PolygonShapeModel = typename PolygonShapePolyGroup::Model;
+using PolygonShapeControl = typename PolygonShapePolyGroup::Control;
 
 
 } // end namespace draw
