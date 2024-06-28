@@ -22,9 +22,9 @@
 
 
 
-using ShapeControlUserBase = typename draw::Shape::ControlUserBase;
+using ShapeControlBase = typename draw::Shape::ControlBase;
 
-static_assert(std::is_base_of_v<ShapeControlUserBase, draw::QuadShapeControl>);
+static_assert(std::is_base_of_v<ShapeControlBase, draw::QuadShapeControl>);
 
 static_assert(
     std::is_base_of_v
@@ -109,13 +109,7 @@ private:
     using ShapesEndpoint = draw::ShapesEndpoint<DemoBrain>;
     ShapesEndpoint shapesEndpoint_;
 
-    using QuadBrain = draw::ShapeBrain
-    <
-        draw::ShapesControl,
-        draw::DragCreateQuad<draw::ShapesControl, draw::QuadShapeValue>
-    >;
-
-    QuadBrain quadBrain_;
+    draw::QuadBrain quadBrain_;
 };
 
 

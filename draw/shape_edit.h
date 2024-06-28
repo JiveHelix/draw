@@ -7,6 +7,7 @@
 #include "draw/views/pixel_view_settings.h"
 #include "draw/node_settings.h"
 #include "draw/shapes.h"
+#include "draw/shape_list.h"
 
 
 namespace draw
@@ -62,7 +63,7 @@ public:
     void ReportLogicalPosition(const tau::Point2d<int> &position) override
     {
         this->startingShape_.shape.center = this->GetPosition(position);
-        this->control_->SetValueBase(this->startingShape_);
+        this->control_->SetValue(this->startingShape_);
     }
 
 protected:
@@ -111,7 +112,7 @@ public:
 
     void ReportLogicalPosition(const tau::Point2d<int> &position) override
     {
-        this->control_->SetValueBase(*this->MakeShape_(position));
+        this->control_->SetValue(*this->MakeShape_(position));
     }
 
 protected:
@@ -218,13 +219,13 @@ protected:
 
 // Drag in empty space to create a new shape that replaces all shapes in the
 // list.
-template<typename ListControl, typename CreateShape>
+template<typename CreateShape>
 class DragReplaceShape: public Drag
 {
 public:
     DragReplaceShape(
         const tau::Point2d<int> &start,
-        const ListControl &shapeList)
+        const ShapesControl &shapeList)
         :
         Drag(start, start),
         shapeList_(shapeList),
@@ -265,7 +266,7 @@ protected:
     }
 
 protected:
-    ListControl shapeList_;
+    ShapesControl shapeList_;
     tau::Point2d<int> position_;
 };
 
@@ -386,22 +387,18 @@ std::unique_ptr<Drag> ProcessMouseDown(
 }
 
 
-template
-<
-    typename ListControl,
-    typename Create
->
+template<typename Create>
 class ShapeBrain
 {
 public:
     static constexpr auto observerName = "ShapeBrain";
 
-    using ListObserver = pex::ListObserver<ShapeBrain, ListControl>;
+    using ListObserver = pex::ListObserver<ShapeBrain, ShapesControl>;
 
-    using ItemControl = typename ListControl::ItemControl;
+    using ItemControl = typename ShapesControl::ItemControl;
 
     ShapeBrain(
-        ListControl shapeList,
+        ShapesControl shapeList,
         PixelViewControl pixelViewControl)
         :
         shapeList_(shapeList),
@@ -710,7 +707,7 @@ private:
         GetNode(this->shapeList_, unordered).isSelected.Set(false);
     }
 
-    ListControl shapeList_;
+    ShapesControl shapeList_;
     ListObserver listObserver_;
 
     PixelViewControl pixelViewControl_;

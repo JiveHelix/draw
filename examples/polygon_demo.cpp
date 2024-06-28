@@ -106,17 +106,7 @@ private:
     using ShapesEndpoint = draw::ShapesEndpoint<DemoBrain>;
     ShapesEndpoint shapesEndpoint_;
 
-    using PolygonBrain = draw::ShapeBrain
-    <
-        draw::ShapesControl,
-        draw::DragCreatePolygon
-        <
-            draw::ShapesControl,
-            draw::PolygonShapeValue
-        >
-    >;
-
-    PolygonBrain polygonBrain_;
+    draw::PolygonBrain polygonBrain_;
 };
 
 

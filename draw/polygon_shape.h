@@ -124,7 +124,7 @@ public:
             auto points = this->shape.GetPoints();
             points.push_back(click.template Cast<double>());
             this->shape = Polygon(points);
-            control.SetValueBase(*this);
+            control.SetValue(*this);
 
             return true;
         }
@@ -137,7 +137,7 @@ public:
             // Subtract a point
             points.erase(iterator);
             this->shape = Polygon(points);
-            control.SetValueBase(*this);
+            control.SetValue(*this);
 
             return true;
         }
@@ -156,6 +156,18 @@ using PolygonShapePolyGroup = pex::poly::PolyGroup
 using PolygonShapeValue = typename PolygonShapePolyGroup::PolyValue;
 using PolygonShapeModel = typename PolygonShapePolyGroup::Model;
 using PolygonShapeControl = typename PolygonShapePolyGroup::Control;
+
+
+using DragCreatePolygon =
+    DragCreateShape<ShapesControl, CreatePolygon<PolygonShapeValue>>;
+
+
+using PolygonBrain = draw::ShapeBrain<DragCreatePolygon>;
+
+
+using DragReplacePolygon =
+    DragReplaceShape<CreatePolygon<PolygonShapeValue>>;
+
 
 
 } // end namespace draw

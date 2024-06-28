@@ -59,11 +59,6 @@ struct CreateQuad
 };
 
 
-template<typename ListControl, typename Value>
-using DragCreateQuad =
-    DragCreateShape<ListControl, CreateQuad<Value>>;
-
-
 template<typename DerivedShape, typename QuadControlMembers>
 class DragQuadPoint: public DragEditPoint<DerivedShape>
 {

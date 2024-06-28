@@ -40,12 +40,9 @@ public:
 };
 
 
-template<typename Base>
-class ShapeControlUserBase: public Base
+class ShapeControlUserBase
 {
 public:
-    using Base::Base;
-
     virtual ~ShapeControlUserBase() {}
 
     virtual ssize_t GetId() const = 0;
@@ -61,12 +58,9 @@ public:
 };
 
 
-template<typename Base>
-class ShapeModelUserBase: public Base
+class ShapeModelUserBase
 {
 public:
-    using Base::Base;
-
     virtual ~ShapeModelUserBase() {}
 
     virtual DepthOrderControl GetDepthOrder() = 0;
@@ -75,11 +69,8 @@ public:
 
 struct ShapeTemplates
 {
-    template<typename Base>
-    using ModelUserBase = ShapeModelUserBase<Base>;
-
-    template<typename Base>
-    using ControlUserBase = ShapeControlUserBase<Base>;
+    using ModelUserBase = ShapeModelUserBase;
+    using ControlUserBase = ShapeControlUserBase;
 
 };
 
@@ -87,11 +78,8 @@ struct ShapeTemplates
 template<typename View>
 struct ShapeCustom
 {
-    template<typename Base>
-    using ModelUserBase = ShapeModelUserBase<Base>;
-
-    template<typename Base>
-    using ControlUserBase = ShapeControlUserBase<Base>;
+    using ModelUserBase = ShapeModelUserBase;
+    using ControlUserBase = ShapeControlUserBase;
 
     template<typename GroupBase>
     class Model: public GroupBase
@@ -173,8 +161,8 @@ class Shape
 public:
     static constexpr auto polyTypeName = "Shape";
 
-    using ControlUserBase =
-        pex::poly::detail::MakeControlUserBase<ShapeTemplates, Shape>;
+    using ControlBase =
+        pex::poly::detail::MakeControlBase<ShapeTemplates, Shape>;
 
     virtual bool HandlesAltClick() const { return false; }
     virtual bool HandlesControlClick() const { return false; }
@@ -192,20 +180,20 @@ public:
     virtual std::string GetName() const = 0;
 
     virtual std::unique_ptr<Drag> ProcessMouseDown(
-        std::shared_ptr<ControlUserBase> shapeControl,
+        std::shared_ptr<ControlBase> shapeControl,
         const tau::Point2d<int> &click,
         const wxpex::Modifier &modifier,
         CursorControl cursor) = 0;
 
     virtual bool ProcessControlClick(
-        ControlUserBase &,
+        ControlBase &,
         const tau::Point2d<int> &)
     {
         return false;
     }
 
     virtual bool ProcessAltClick(
-        ControlUserBase &,
+        ControlBase &,
         PointsIterator,
         PointsDouble &)
     {
@@ -215,7 +203,7 @@ public:
     virtual std::shared_ptr<Shape> Copy() const = 0;
 
     template<typename DerivedControl>
-    static DerivedControl * GetDerivedControl(ControlUserBase &control)
+    static DerivedControl * GetDerivedControl(ControlBase &control)
     {
         auto result = dynamic_cast<DerivedControl *>(&control);
 
@@ -230,7 +218,7 @@ public:
 
 
 using ShapeValue = pex::poly::Value<Shape>;
-using ShapeControl = typename Shape::ControlUserBase;
+using ShapeControl = typename Shape::ControlBase;
 
 
 static_assert(pex::poly::detail::IsCompatibleBase<Shape>);

@@ -145,4 +145,11 @@ using QuadShapeModel = typename QuadShapePolyGroup::Model;
 using QuadShapeControl = typename QuadShapePolyGroup::Control;
 
 
+using DragCreateQuad =
+    DragCreateShape<ShapesControl, CreateQuad<QuadShapeValue>>;
+
+
+using QuadBrain = draw::ShapeBrain<DragCreateQuad>;
+
+
 } // end namespace draw

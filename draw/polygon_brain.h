@@ -5,6 +5,7 @@
 #include "draw/polygon.h"
 #include "draw/drag.h"
 #include "draw/shape_edit.h"
+#include "draw/shape_list.h"
 
 
 namespace draw
@@ -37,16 +38,6 @@ struct CreatePolygon
             NodeSettings::Default()}};
     }
 };
-
-
-template<typename ListControl, typename Value>
-using DragCreatePolygon =
-    DragCreateShape<ListControl, CreatePolygon<Value>>;
-
-
-template<typename ListControl, typename Value>
-using DragReplacePolygon =
-    DragReplaceShape<ListControl, CreatePolygon<Value>>;
 
 
 template<typename DerivedShape>
