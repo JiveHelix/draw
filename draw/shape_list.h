@@ -2,7 +2,7 @@
 
 
 #include <fields/fields.h>
-#include "draw/depth_order.h"
+#include "draw/ordered_list.h"
 #include "draw/shapes.h"
 
 
@@ -13,7 +13,7 @@ namespace draw
 using ShapeListMaker = pex::MakePolyList<ShapeSupers>;
 
 static_assert(pex::IsMakePolyList<ShapeListMaker>);
-static_assert(HasDepthOrder<ShapeListMaker>);
+static_assert(HasOrder<ShapeListMaker>);
 
 template<typename T>
 struct ShapeListFields
@@ -96,7 +96,7 @@ template<typename Observer>
 using ShapesEndpoint = pex::Endpoint<Observer, ShapesControl>;
 
 
-static_assert(decltype(ShapeListModel::shapes)::hasDepthOrder);
+static_assert(decltype(ShapeListModel::shapes)::hasOrder);
 
 
 } // end namespace draw

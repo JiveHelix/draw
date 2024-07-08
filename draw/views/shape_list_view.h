@@ -2,7 +2,7 @@
 
 
 #include "draw/views/list_view.h"
-#include "draw/depth_order.h"
+#include "draw/ordered_list.h"
 #include "draw/shape_list.h"
 #include "draw/views/shape_view.h"
 
@@ -46,15 +46,15 @@ public:
         }
     }
 
-    DepthOrderControl & GetDepthOrder()
+    OrderControl & GetOrder()
     {
         if constexpr (HasGetVirtual<Control>)
         {
-            return this->control_->GetVirtual()->GetDepthOrder();
+            return this->control_->GetVirtual()->GetOrder();
         }
         else
         {
-            return this->control_->GetDepthOrder();
+            return this->control_->GetOrder();
         }
     }
 

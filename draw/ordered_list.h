@@ -11,7 +11,7 @@ namespace draw
 
 
 template<typename T>
-struct DepthOrderFields
+struct OrderFields
 {
     static constexpr auto fields = std::make_tuple(
         fields::Field(&T::moveDown, "moveDown"),
@@ -20,21 +20,21 @@ struct DepthOrderFields
 
 
 template<template<typename> typename T>
-class DepthOrderTemplate
+class OrderTemplate
 {
 public:
     T<pex::MakeSignal> moveDown;
     T<pex::MakeSignal> moveUp;
 
     static constexpr auto fields =
-        DepthOrderFields<DepthOrderTemplate>::fields;
+        OrderFields<OrderTemplate>::fields;
 
-    static constexpr auto fieldsTypeName = "DepthOrder";
+    static constexpr auto fieldsTypeName = "Order";
 };
 
 
-using DepthOrderGroup = pex::Group<DepthOrderFields, DepthOrderTemplate>;
-using DepthOrderControl = typename DepthOrderGroup::Control;
+using OrderGroup = pex::Group<OrderFields, OrderTemplate>;
+using OrderControl = typename OrderGroup::Control;
 
 
 template<typename T>
@@ -115,21 +115,21 @@ using ControlBase = typename ListControl<ListMaker>::ControlBase;
 
 
 template<typename ListMaker>
-concept HasDepthOrder =
+concept HasOrder =
     HasModelBase<ListMaker>
     &&
     HasControlBase<ListMaker>
     &&
     std::convertible_to
     <
-        decltype(std::declval<ModelBase<ListMaker>>().GetDepthOrder()),
-        DepthOrderControl
+        decltype(std::declval<ModelBase<ListMaker>>().GetOrder()),
+        OrderControl
     >
     &&
     std::convertible_to
     <
-        decltype(std::declval<ControlBase<ListMaker>>().GetDepthOrder()),
-        DepthOrderControl
+        decltype(std::declval<ControlBase<ListMaker>>().GetOrder()),
+        OrderControl
     >;
 
 
@@ -143,7 +143,7 @@ struct OrderedListCustom
     {
     public:
 
-        static constexpr bool hasDepthOrder = HasDepthOrder<ListMaker>;
+        static constexpr bool hasOrder = HasOrder<ListMaker>;
 
         using Selected = pex::control::ListSelected;
         using CountWillChange = pex::control::ListCountWillChange;
@@ -278,19 +278,19 @@ struct OrderedListCustom
 
             this->ClearMoveOrderConnections_();
 
-            if constexpr (HasDepthOrder<ListMaker>)
+            if constexpr (HasOrder<ListMaker>)
             {
                 this->moveDownConnections_.reserve(newSize);
                 this->moveUpConnections_.reserve(newSize);
 
                 for (size_t index = 0; index < newSize; ++index)
                 {
-                    auto depthOrder =
-                        this->list[index].GetVirtual()->GetDepthOrder();
+                    auto order =
+                        this->list[index].GetVirtual()->GetOrder();
 
                     this->moveDownConnections_.emplace_back(
                         this,
-                        depthOrder.moveDown,
+                        order.moveDown,
                         std::bind(
                             Model::OnMoveDown_,
                             index,
@@ -298,7 +298,7 @@ struct OrderedListCustom
 
                     this->moveUpConnections_.emplace_back(
                         this,
-                        depthOrder.moveUp,
+                        order.moveUp,
                         std::bind(
                             Model::OnMoveUp_,
                             index,
@@ -346,7 +346,7 @@ struct OrderedListCustom
 
             this->indices.Set(previous);
 
-            if constexpr (HasDepthOrder<ListMaker>)
+            if constexpr (HasOrder<ListMaker>)
             {
                 assert(this->moveDownConnections_.size() == previousSize);
                 assert(this->moveUpConnections_.size() == previousSize);
@@ -367,7 +367,7 @@ struct OrderedListCustom
 
         void ClearMoveOrderConnections_()
         {
-            if constexpr (HasDepthOrder<ListMaker>)
+            if constexpr (HasOrder<ListMaker>)
             {
                 for (auto &connection: this->moveDownConnections_)
                 {

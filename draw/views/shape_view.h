@@ -36,13 +36,13 @@ public:
             this->GetPanel(),
             displayControl.lookExpand);
 
-        auto depthOrder = control.GetDepthOrder();
+        auto order = control.GetOrder();
 
         auto down =
-            new wxpex::Button(this->GetPanel(), "Down", depthOrder.moveDown);
+            new wxpex::Button(this->GetPanel(), "Down", order.moveDown);
 
         auto up =
-            new wxpex::Button(this->GetPanel(), "Up", depthOrder.moveUp);
+            new wxpex::Button(this->GetPanel(), "Up", order.moveUp);
 
         auto upDownSizer = wxpex::LayoutItems(wxpex::horizontalItems, down, up);
 

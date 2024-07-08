@@ -16,7 +16,7 @@
 #include "draw/drag.h"
 #include "draw/oddeven.h"
 #include "draw/node_settings.h"
-#include "draw/depth_order.h"
+#include "draw/ordered_list.h"
 #include "draw/views/look_view.h"
 #include "draw/views/shape_view.h"
 
@@ -48,7 +48,7 @@ public:
     virtual ssize_t GetId() const = 0;
     virtual std::string GetName() const = 0;
     virtual NodeSettingsControl & GetNode() = 0;
-    virtual DepthOrderControl & GetDepthOrder() = 0;
+    virtual OrderControl & GetOrder() = 0;
 
     virtual wxWindow * CreateShapeView(wxWindow *parent) const = 0;
 
@@ -63,7 +63,7 @@ class ShapeModelUserBase
 public:
     virtual ~ShapeModelUserBase() {}
 
-    virtual DepthOrderControl GetDepthOrder() = 0;
+    virtual OrderControl GetOrder() = 0;
 };
 
 
@@ -131,7 +131,7 @@ struct ShapeFields
 {
     static constexpr auto fields = std::make_tuple(
         fields::Field(&T::id, "id"),
-        fields::Field(&T::depthOrder, "depthOrder"),
+        fields::Field(&T::order, "order"),
         fields::Field(&T::shape, "shape"),
         fields::Field(&T::look, "look"),
         fields::Field(&T::node, "node"));
@@ -148,7 +148,7 @@ struct ShapeCommon
     {
         // id is read-only to a control
         T<pex::ReadOnly<ssize_t>> id;
-        T<DepthOrderGroup> depthOrder;
+        T<OrderGroup> order;
         T<ShapeGroup> shape;
         T<LookGroup> look;
         T<NodeSettingsGroup> node;
@@ -175,9 +175,9 @@ struct ShapeCommon
             pex::SetOverride(this->id, this->polyShapeId_.Get());
         }
 
-        DepthOrderControl GetDepthOrder() override
+        OrderControl GetOrder() override
         {
-            return this->depthOrder;
+            return this->order;
         }
 
     private:
@@ -205,9 +205,9 @@ struct ShapeCommon
             return this->node;
         }
 
-        DepthOrderControl & GetDepthOrder() override
+        OrderControl & GetOrder() override
         {
-            return this->depthOrder;
+            return this->order;
         }
 
         wxWindow * CreateShapeView(wxWindow *parent) const override
