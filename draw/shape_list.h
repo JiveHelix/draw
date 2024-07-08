@@ -2,7 +2,7 @@
 
 
 #include <fields/fields.h>
-#include "draw/ordered_list.h"
+#include <pex/ordered_list.h>
 #include "draw/shapes.h"
 
 
@@ -13,7 +13,7 @@ namespace draw
 using ShapeListMaker = pex::MakePolyList<ShapeSupers>;
 
 static_assert(pex::IsMakePolyList<ShapeListMaker>);
-static_assert(HasOrder<ShapeListMaker>);
+static_assert(pex::HasOrder<ShapeListMaker>);
 
 template<typename T>
 struct ShapeListFields
@@ -25,7 +25,7 @@ struct ShapeListFields
 };
 
 
-using OrderedShapesMaker = OrderedListGroup<ShapeListMaker>;
+using OrderedShapesMaker = pex::OrderedListGroup<ShapeListMaker>;
 
 
 template<template<typename> typename T>
@@ -77,7 +77,7 @@ struct ShapeListCustom
         using CountEndpoint = pex::Endpoint<Model, pex::model::ListCount>;
 
         using OrderedIndicesEndpoint =
-            pex::Endpoint<Model, OrderedIndicesControl>;
+            pex::Endpoint<Model, pex::OrderedIndicesControl>;
 
         CountEndpoint countEndpoint_;
         OrderedIndicesEndpoint orderedIndicesEndpoint_;

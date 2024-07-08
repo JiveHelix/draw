@@ -6,6 +6,7 @@
 #include <pex/poly.h>
 #include <memory>
 #include <vector>
+#include <pex/ordered_list.h>
 #include <wxpex/graphics.h>
 #include <wxpex/async.h>
 #include <wxpex/modifier.h>
@@ -16,7 +17,6 @@
 #include "draw/drag.h"
 #include "draw/oddeven.h"
 #include "draw/node_settings.h"
-#include "draw/ordered_list.h"
 #include "draw/views/look_view.h"
 #include "draw/views/shape_view.h"
 
@@ -48,7 +48,7 @@ public:
     virtual ssize_t GetId() const = 0;
     virtual std::string GetName() const = 0;
     virtual NodeSettingsControl & GetNode() = 0;
-    virtual OrderControl & GetOrder() = 0;
+    virtual pex::OrderControl & GetOrder() = 0;
 
     virtual wxWindow * CreateShapeView(wxWindow *parent) const = 0;
 
@@ -63,7 +63,7 @@ class ShapeModelUserBase
 public:
     virtual ~ShapeModelUserBase() {}
 
-    virtual OrderControl GetOrder() = 0;
+    virtual pex::OrderControl GetOrder() = 0;
 };
 
 
@@ -148,7 +148,7 @@ struct ShapeCommon
     {
         // id is read-only to a control
         T<pex::ReadOnly<ssize_t>> id;
-        T<OrderGroup> order;
+        T<pex::OrderGroup> order;
         T<ShapeGroup> shape;
         T<LookGroup> look;
         T<NodeSettingsGroup> node;
@@ -175,7 +175,7 @@ struct ShapeCommon
             pex::SetOverride(this->id, this->polyShapeId_.Get());
         }
 
-        OrderControl GetOrder() override
+        pex::OrderControl GetOrder() override
         {
             return this->order;
         }
@@ -205,7 +205,7 @@ struct ShapeCommon
             return this->node;
         }
 
-        OrderControl & GetOrder() override
+        pex::OrderControl & GetOrder() override
         {
             return this->order;
         }

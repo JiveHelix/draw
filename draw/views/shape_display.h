@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "draw/ordered_list.h"
+#include <pex/ordered_list.h>
 #include "draw/views/look_view.h"
 
 
@@ -34,7 +34,7 @@ using ShapeDisplayControl = typename ShapeDisplayGroup::Control;
 using ShapeExpandControl = decltype(ShapeDisplayControl::shapeExpand);
 
 using ShapeDisplayListMaker =
-    OrderedListGroup<pex::MakeList<ShapeDisplayGroup, 0>>;
+    pex::OrderedListGroup<pex::MakeList<ShapeDisplayGroup, 0>>;
 
 using ShapeDisplayListControl = pex::ControlSelector<ShapeDisplayListMaker>;
 

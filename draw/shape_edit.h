@@ -722,7 +722,7 @@ private:
         modifierEndpoint_;
 
     using OrderedIndicesEndpoint =
-        pex::Endpoint<ShapeBrain, draw::OrderedIndicesControl>;
+        pex::Endpoint<ShapeBrain, pex::OrderedIndicesControl>;
 
     std::unique_ptr<Drag> drag_;
     OrderedIndicesEndpoint indicesEndpoint_;
