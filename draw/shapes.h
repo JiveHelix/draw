@@ -67,29 +67,109 @@ public:
 };
 
 
-struct ShapeTemplates
+class Shape
+    :
+    public DrawnShape,
+    public pex::poly::PolyBase<nlohmann::json, Shape>
 {
-    using ModelUserBase = ShapeModelUserBase;
-    using ControlUserBase = ShapeControlUserBase;
+public:
+    static constexpr auto polyTypeName = "Shape";
 
+    using ControlBase =
+        pex::poly::ControlBase<Shape, ShapeControlUserBase>;
+
+    virtual bool HandlesAltClick() const { return false; }
+    virtual bool HandlesControlClick() const { return false; }
+    virtual bool HandlesRotate() const { return false; }
+    virtual bool HandlesEditPoint() const { return false; }
+    virtual bool HandlesEditLine() const { return false; }
+
+    virtual ssize_t GetId() const = 0;
+    virtual PointsDouble GetPoints() const = 0;
+
+    virtual bool Contains(
+        const tau::Point2d<int> &point,
+        double margin) const = 0;
+
+    virtual std::string GetName() const = 0;
+
+    virtual std::unique_ptr<Drag> ProcessMouseDown(
+        std::shared_ptr<ControlBase> shapeControl,
+        const tau::Point2d<int> &click,
+        const wxpex::Modifier &modifier,
+        CursorControl cursor) = 0;
+
+    virtual bool ProcessControlClick(
+        ControlBase &,
+        const tau::Point2d<int> &)
+    {
+        return false;
+    }
+
+    virtual bool ProcessAltClick(
+        ControlBase &,
+        PointsIterator,
+        PointsDouble &)
+    {
+        return false;
+    }
+
+    virtual std::shared_ptr<Shape> Copy() const = 0;
 };
 
 
-template<typename View>
-struct ShapeCustom
+struct ShapeSupers
 {
+    using ValueBase = Shape;
     using ModelUserBase = ShapeModelUserBase;
     using ControlUserBase = ShapeControlUserBase;
+};
 
-    template<typename GroupBase>
-    class Model: public GroupBase
+
+template<typename T>
+struct ShapeFields
+{
+    static constexpr auto fields = std::make_tuple(
+        fields::Field(&T::id, "id"),
+        fields::Field(&T::depthOrder, "depthOrder"),
+        fields::Field(&T::shape, "shape"),
+        fields::Field(&T::look, "look"),
+        fields::Field(&T::node, "node"));
+};
+
+
+template<typename ShapeGroup, typename View>
+struct ShapeCommon
+{
+    using Supers = ShapeSupers;
+
+    template<template<typename> typename T>
+    struct Template
+    {
+        // id is read-only to a control
+        T<pex::ReadOnly<ssize_t>> id;
+        T<DepthOrderGroup> depthOrder;
+        T<ShapeGroup> shape;
+        T<LookGroup> look;
+        T<NodeSettingsGroup> node;
+
+        static constexpr auto fields = ShapeFields<Template>::fields;
+
+        static constexpr auto fieldsTypeName =
+            ShapeGroup::template Template<pex::Identity>::fieldsTypeName;
+    };
+
+    using ControlMembers = pex::MakeControlMembers<Template>;
+
+    template<typename Base>
+    class Model: public Base
     {
     public:
-        using GroupBase::GroupBase;
+        using Base::Base;
 
         Model()
             :
-            GroupBase(),
+            Base(),
             polyShapeId_()
         {
             pex::SetOverride(this->id, this->polyShapeId_.Get());
@@ -103,7 +183,6 @@ struct ShapeCustom
     private:
         detail::PolyShapeId polyShapeId_;
     };
-
 
     template<typename Base>
     class Control: public Base
@@ -153,66 +232,45 @@ struct ShapeCustom
 };
 
 
-class Shape
-    :
-    public DrawnShape,
-    public pex::poly::PolyBase<nlohmann::json, Shape>
+// Common shape overrides.
+template<typename Base, typename Derived>
+class ShapeImpl: public Base
 {
 public:
-    static constexpr auto polyTypeName = "Shape";
+    using Base::Base;
+    using PlainShape = decltype(Base::shape);
+    static constexpr auto fieldsTypeName = PlainShape::fieldsTypeName;
 
-    using ControlBase =
-        pex::poly::detail::MakeControlBase<ShapeTemplates, Shape>;
+    static Derived Default()
+    {
+        return {{
+            0,
+            {},
+            PlainShape::Default(),
+            Look::Default(),
+            NodeSettings::Default()}};
+    }
 
-    virtual bool HandlesAltClick() const { return false; }
-    virtual bool HandlesControlClick() const { return false; }
-    virtual bool HandlesRotate() const { return false; }
-    virtual bool HandlesEditPoint() const { return false; }
-    virtual bool HandlesEditLine() const { return false; }
+    ssize_t GetId() const override
+    {
+        return this->id;
+    }
 
-    virtual ssize_t GetId() const = 0;
-    virtual PointsDouble GetPoints() const = 0;
+    PointsDouble GetPoints() const override
+    {
+        return this->shape.GetPoints();
+    }
 
-    virtual bool Contains(
+    bool Contains(
         const tau::Point2d<int> &point,
-        double margin) const = 0;
-
-    virtual std::string GetName() const = 0;
-
-    virtual std::unique_ptr<Drag> ProcessMouseDown(
-        std::shared_ptr<ControlBase> shapeControl,
-        const tau::Point2d<int> &click,
-        const wxpex::Modifier &modifier,
-        CursorControl cursor) = 0;
-
-    virtual bool ProcessControlClick(
-        ControlBase &,
-        const tau::Point2d<int> &)
+        double margin) const override
     {
-        return false;
+        return this->shape.Contains(point, margin);
     }
 
-    virtual bool ProcessAltClick(
-        ControlBase &,
-        PointsIterator,
-        PointsDouble &)
+    std::shared_ptr<Shape> Copy() const override
     {
-        return false;
-    }
-
-    virtual std::shared_ptr<Shape> Copy() const = 0;
-
-    template<typename DerivedControl>
-    static DerivedControl * GetDerivedControl(ControlBase &control)
-    {
-        auto result = dynamic_cast<DerivedControl *>(&control);
-
-        if (!result)
-        {
-            throw std::logic_error("DerivedControl must be a match");
-        }
-
-        return result;
+        return std::make_shared<Derived>(*this);
     }
 };
 
@@ -281,18 +339,6 @@ using AsyncShapesControl = typename AsyncShapes::Control;
 
 template<typename Observer>
 using AsyncShapesEndpoint = pex::Endpoint<Observer, AsyncShapesControl>;
-
-
-template<typename T>
-struct ShapeFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::id, "id"),
-        fields::Field(&T::depthOrder, "depthOrder"),
-        fields::Field(&T::shape, "shape"),
-        fields::Field(&T::look, "look"),
-        fields::Field(&T::node, "node"));
-};
 
 
 } // end namespace draw

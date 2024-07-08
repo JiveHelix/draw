@@ -1,96 +1,30 @@
+// #define USE_OBSERVER_NAME
+// #define ENABLE_PEX_LOG
+
+
 #include <iostream>
 #include <mutex>
 #include <condition_variable>
 #include <thread>
 #include <chrono>
+
+#include <fmt/core.h>
+#include <pex/list.h>
 #include <wxpex/app.h>
 #include <wxpex/check_box.h>
 #include <wxpex/border_sizer.h>
 
 #include <draw/pixels.h>
-#include <draw/drag.h>
 #include <draw/ellipse_shape.h>
-#include <draw/views/ellipse_shape_view.h>
-
 #include <draw/views/pixel_view_settings.h>
 #include <draw/views/pixel_view.h>
 #include <draw/shapes.h>
+#include <draw/shape_list.h>
+#include <draw/views/shape_list_view.h>
 
 #include "common/observer.h"
 #include "common/about_window.h"
 #include "common/brain.h"
-
-
-template<typename T>
-struct DemoFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::ellipse, "ellipse"));
-};
-
-
-template<template<typename> typename T>
-struct DemoTemplate
-{
-    T<draw::EllipseShapeGroup> ellipse;
-};
-
-
-using DemoGroup = pex::Group<DemoFields, DemoTemplate>;
-using DemoSettings = typename DemoGroup::Plain;
-using DemoModel = typename DemoGroup::Model;
-using DemoControl = typename DemoGroup::Control;
-
-
-class EllipseDrag: public draw::Drag
-{
-public:
-    EllipseDrag(
-        const tau::Point2d<int> &start,
-        const tau::Point2d<double> &offset,
-        draw::EllipseControl ellipseControl)
-        :
-        draw::Drag(start, offset),
-        control_(ellipseControl)
-    {
-
-    }
-
-    void ReportLogicalPosition(const tau::Point2d<int> &position) override
-    {
-        this->control_.center.Set(this->GetPosition(position));
-    }
-
-private:
-    draw::EllipseControl control_;
-};
-
-
-class DemoControls: public wxPanel
-{
-public:
-    DemoControls(
-        wxWindow *parent,
-        DemoControl control)
-        :
-        wxPanel(parent, wxID_ANY)
-    {
-        wxpex::LayoutOptions layoutOptions{};
-        layoutOptions.labelFlags = wxALIGN_RIGHT;
-
-        auto ellipseShapeView =
-            new draw::EllipseShapeView(
-                this,
-                "Ellipse Shape",
-                control.ellipse,
-                layoutOptions);
-
-        ellipseShapeView->Expand();
-
-        auto topSizer = wxpex::BorderSizer(ellipseShapeView, 5);
-        this->SetSizerAndFit(topSizer.release());
-    }
-};
 
 
 class DemoBrain: public Brain<DemoBrain>
@@ -103,30 +37,16 @@ public:
         demoModel_(),
         demoControl_(this->demoModel_),
 
-        ellipseEndpoint_(
+        shapesEndpoint_(
             this,
-            this->demoControl_.ellipse,
-            &DemoBrain::OnEllipse_),
+            this->demoControl_.shapes,
+            &DemoBrain::OnEllipses_),
 
-        pixelViewEndpoint_(
-            this,
-            this->userControl_.pixelView),
-
-        drag_()
+        ellipseBrain_(
+            this->demoControl_.shapes,
+            this->userControl_.pixelView)
     {
-        this->demoControl_.ellipse.look.strokeEnable.Set(true);
-
-        this->pixelViewEndpoint_.mouseDown.Connect(&DemoBrain::OnMouseDown_);
-
-        this->pixelViewEndpoint_.logicalPosition.Connect(
-            &DemoBrain::OnLogicalPosition_);
-
-        this->pixelViewEndpoint_.modifier.Connect(&DemoBrain::OnModifier_);
-    }
-
-    std::string GetAppName() const
-    {
-        return "Ellipse Demo";
+        this->demoControl_.shapes.Append(draw::EllipseShapeValue::Default());
     }
 
     wxWindow * CreateControls(wxWindow *parent)
@@ -134,37 +54,35 @@ public:
         this->userControl_.pixelView.viewSettings.imageSize.Set(
             draw::Size(1920, 1080));
 
-        return new DemoControls(parent, this->demoControl_);
+        return new draw::ShapeListView(parent, this->demoControl_);
     }
 
     void SaveSettings() const
     {
-        std::cout << "TODO: Persist the processing settings." << std::endl;
+        std::cout << "TODO: Persist the settings." << std::endl;
     }
 
     void LoadSettings()
     {
-        std::cout << "TODO: Restore the processing settings." << std::endl;
+        std::cout << "TODO: Restore the settings." << std::endl;
     }
 
-    void ShowAbout()
+    std::string GetAppName() const
     {
-        wxAboutBox(MakeAboutDialogInfo("Ellipse Demo"));
+        return "Ellipse Demo";
     }
 
     void Display()
     {
         auto shapes = draw::Shapes(this->shapesId_.Get());
 
-        shapes.EmplaceBack<draw::EllipseShape>(
-            this->demoModel_.ellipse.Get());
+        for (auto &shapeControl: this->demoControl_.shapes)
+        {
+            const auto &shapeValue = shapeControl.Get();
+            shapes.Append(*shapeValue.GetValueBase());
+        }
 
         this->userControl_.pixelView.asyncShapes.Set(shapes);
-    }
-
-    void Shutdown()
-    {
-        Brain<DemoBrain>::Shutdown();
     }
 
     void LoadPng(const draw::GrayPng<PngPixel> &)
@@ -173,70 +91,7 @@ public:
     }
 
 private:
-    void UpdateCursor_()
-    {
-        if (this->drag_)
-        {
-            return;
-        }
-
-        auto ellipse = this->demoModel_.ellipse.ellipse.Get();
-        auto position = this->user_.pixelView.logicalPosition.Get();
-
-        if (ellipse.Contains(position.template Cast<double>()))
-        {
-            this->user_.pixelView.cursor.Set(wxpex::Cursor::openHand);
-        }
-        else if (this->user_.pixelView.cursor.Get() != wxpex::Cursor::cross)
-        {
-            this->user_.pixelView.cursor.Set(wxpex::Cursor::cross);
-        }
-    }
-
-    void OnModifier_(const wxpex::Modifier &)
-    {
-        this->UpdateCursor_();
-    }
-
-    void OnLogicalPosition_(const tau::Point2d<int> &position)
-    {
-        this->UpdateCursor_();
-        this->drag_->ReportLogicalPosition(position);
-    }
-
-    void OnMouseDown_(bool isDown)
-    {
-        if (!isDown)
-        {
-            this->drag_.reset();
-            this->UpdateCursor_();
-            return;
-        }
-
-        auto point = this->user_.pixelView.logicalPosition.Get();
-
-        if (this->user_.pixelView.modifier.Get().IsNone())
-        {
-            auto ellipse = this->demoModel_.ellipse.ellipse.Get();
-
-            if (ellipse.Contains(point))
-            {
-                this->drag_ = std::make_unique<EllipseDrag>(
-                    point,
-                    ellipse.center,
-                    this->demoControl_.ellipse.ellipse);
-
-                this->user_.pixelView.cursor.Set(
-                    wxpex::Cursor::closedHand);
-
-                return;
-            }
-
-            return;
-        }
-    }
-
-    void OnEllipse_(const draw::EllipseShape &)
+    void OnEllipses_(const typename draw::ShapesControl::Type &)
     {
         this->Display();
     }
@@ -244,12 +99,13 @@ private:
 private:
     draw::ShapesId shapesId_;
     Observer<DemoBrain> observer_;
-    DemoModel demoModel_;
-    DemoControl demoControl_;
-    pex::Endpoint<DemoBrain, draw::EllipseShapeControl> ellipseEndpoint_;
-    pex::EndpointGroup<DemoBrain, draw::PixelViewControl> pixelViewEndpoint_;
+    draw::ShapeListModel demoModel_;
+    draw::ShapeListControl demoControl_;
 
-    std::unique_ptr<draw::Drag> drag_;
+    using ShapesEndpoint = draw::ShapesEndpoint<DemoBrain>;
+    ShapesEndpoint shapesEndpoint_;
+
+    draw::EllipseBrain ellipseBrain_;
 };
 
 

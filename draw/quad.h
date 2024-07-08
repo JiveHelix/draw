@@ -75,6 +75,7 @@ struct QuadTemplate
     T<pex::MakeSignal> reset;
 
     static constexpr auto fields = QuadFields<QuadTemplate>::fields;
+    static constexpr auto fieldsTypeName = "Quad";
 };
 
 

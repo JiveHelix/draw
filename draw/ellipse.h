@@ -5,6 +5,7 @@
 #include <pex/range.h>
 #include <tau/vector2d.h>
 #include "draw/scale.h"
+#include "draw/points.h"
 
 
 namespace draw
@@ -38,6 +39,7 @@ struct EllipseTemplate
     T<ScaleRange> scale;
 
     static constexpr auto fields = EllipseFields<EllipseTemplate>::fields;
+    static constexpr auto fieldsTypeName = "Ellipse";
 };
 
 
@@ -45,6 +47,9 @@ struct Ellipse: public EllipseTemplate<pex::Identity>
 {
     static Ellipse Default();
     bool Contains(const tau::Point2d<double> &point) const;
+    bool Contains(const tau::Point2d<double> &point, double margin) const;
+    PointsDouble GetPoints() const;
+    void EditPoint(const tau::Point2d<double> &point, size_t index);
 };
 
 

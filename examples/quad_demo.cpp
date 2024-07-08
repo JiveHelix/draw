@@ -29,7 +29,7 @@ static_assert(std::is_base_of_v<ShapeControlBase, draw::QuadShapeControl>);
 static_assert(
     std::is_base_of_v
     <
-        pex::ControlMembers_<draw::QuadShapeTemplate>,
+        typename draw::QuadShapeTemplates::ControlMembers,
         draw::QuadShapeControl
     >);
 

@@ -17,6 +17,7 @@
 #include <draw/pixels.h>
 #include <draw/polygon_shape.h>
 #include <draw/quad_shape.h>
+#include <draw/ellipse_shape.h>
 #include <draw/views/pixel_view_settings.h>
 #include <draw/views/pixel_view.h>
 #include <draw/polygon_brain.h>
@@ -49,6 +50,7 @@ public:
             this->userControl_.pixelView)
     {
         this->demoControl_.shapes.Append(draw::QuadShapeValue::Default());
+        this->demoControl_.shapes.Append(draw::EllipseShapeValue::Default());
     }
 
     wxWindow * CreateControls(wxWindow *parent)

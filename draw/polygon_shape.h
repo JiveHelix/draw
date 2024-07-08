@@ -23,37 +23,20 @@ namespace draw
 {
 
 
-template<template<typename> typename T>
-class PolygonShapeTemplate
+struct PolygonShapeTemplates: public ShapeCommon<PolygonGroup, PolygonView>
 {
-public:
-    // id is read-only to a control
-    T<pex::ReadOnly<ssize_t>> id;
-    T<DepthOrderGroup> depthOrder;
-    T<PolygonGroup> shape;
-    T<LookGroup> look;
-    T<NodeSettingsGroup> node;
-
-    static constexpr auto fields =
-        ShapeFields<PolygonShapeTemplate>::fields;
-
-    static constexpr auto fieldsTypeName = "PolygonShape";
-
     template<typename Base>
-    class Impl: public Base
+    class Impl: public ShapeImpl<Base, Impl<Base>>
     {
     public:
-        using Base::Base;
+        using ImplBase = ShapeImpl<Base, Impl<Base>>;
+        using ImplBase::ImplBase;
 
-        static Impl Default()
-        {
-            return {{
-                0,
-                {},
-                Polygon::Default(),
-                Look::Default(),
-                NodeSettings::Default()}};
-        }
+        bool HandlesAltClick() const override { return true; }
+        bool HandlesControlClick() const override { return true; }
+        bool HandlesRotate() const override { return true; }
+        bool HandlesEditPoint() const override { return true; }
+        bool HandlesEditLine() const override { return true; }
 
         void Draw(wxpex::GraphicsContext &context) override
         {
@@ -67,34 +50,6 @@ public:
             ConfigureLook(context, this->look);
             DrawSegments(context, points);
         }
-
-        ssize_t GetId() const override
-        {
-            return this->id;
-        }
-
-        PointsDouble GetPoints() const override
-        {
-            return this->shape.GetPoints();
-        }
-
-        bool Contains(
-            const tau::Point2d<int> &point,
-            double margin) const override
-        {
-            return this->shape.Contains(point, margin);
-        }
-
-        std::shared_ptr<Shape> Copy() const override
-        {
-            return std::make_shared<Impl>(*this);
-        }
-
-        bool HandlesAltClick() const override { return true; }
-        bool HandlesControlClick() const override { return true; }
-        bool HandlesRotate() const override { return true; }
-        bool HandlesEditPoint() const override { return true; }
-        bool HandlesEditLine() const override { return true; }
 
         std::string GetName() const override
         {
@@ -145,22 +100,15 @@ public:
 };
 
 
-using PolygonShapePolyGroup = pex::poly::PolyGroup
-<
-    ShapeFields,
-    PolygonShapeTemplate,
-    Shape,
-    ShapeCustom<PolygonView>
->;
+using PolygonShapePolyGroup =
+    pex::poly::PolyGroup<ShapeFields, PolygonShapeTemplates>;
 
 using PolygonShapeValue = typename PolygonShapePolyGroup::PolyValue;
 using PolygonShapeModel = typename PolygonShapePolyGroup::Model;
 using PolygonShapeControl = typename PolygonShapePolyGroup::Control;
 
-
 using DragCreatePolygon =
-    DragCreateShape<ShapesControl, CreatePolygon<PolygonShapeValue>>;
-
+    DragCreateShape<CreatePolygon<PolygonShapeValue>>;
 
 using PolygonBrain = draw::ShapeBrain<DragCreatePolygon>;
 

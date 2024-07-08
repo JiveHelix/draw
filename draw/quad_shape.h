@@ -23,48 +23,14 @@ namespace draw
 {
 
 
-template<template<typename> typename T>
-class QuadShapeTemplate
+struct QuadShapeTemplates: public ShapeCommon<QuadGroup, QuadView>
 {
-public:
-    // id is read-only to a control
-    T<pex::ReadOnly<ssize_t>> id;
-    T<DepthOrderGroup> depthOrder;
-    T<QuadGroup> shape;
-    T<LookGroup> look;
-    T<NodeSettingsGroup> node;
-
-    static constexpr auto fields =
-        ShapeFields<QuadShapeTemplate>::fields;
-
-    static constexpr auto fieldsTypeName = "QuadShape";
-
-    // pex::poly::Value generates a variadic pack of PolyDerived types using
-    // ValueBase_ and a variadic pack of templates (like this one).
-    // We need to override some of the virtual methods in draw::Shape.
-    // The template argument Base should be
-    // pex::poly::PolyDerived_<draw::Shape, QuadShapeTemplate>
-    //
-    // TODO: There must be a less labyrinthine architecture.
     template<typename Base>
-    class Impl: public Base
+    class Impl: public ShapeImpl<Base, Impl<Base>>
     {
-        static_assert(
-            std::is_base_of_v<Shape, Base>,
-            "Expected Base to be derived from Shape.");
-
     public:
-        using Base::Base;
-
-        static Impl Default()
-        {
-            return {{
-                0,
-                {},
-                Quad::Default(),
-                Look::Default(),
-                NodeSettings::Default()}};
-        }
+        using ImplBase = ShapeImpl<Base, Impl<Base>>;
+        using ImplBase::ImplBase;
 
         void Draw(wxpex::GraphicsContext &context) override
         {
@@ -75,28 +41,6 @@ public:
 
             ConfigureLook(context, this->look);
             DrawSegments(context, this->shape.GetPoints());
-        }
-
-        ssize_t GetId() const override
-        {
-            return this->id;
-        }
-
-        PointsDouble GetPoints() const override
-        {
-            return this->shape.GetPoints();
-        }
-
-        bool Contains(
-            const tau::Point2d<int> &point,
-            double margin) const override
-        {
-            return this->shape.Contains(point, margin);
-        }
-
-        std::shared_ptr<Shape> Copy() const override
-        {
-            return std::make_shared<Impl>(*this);
         }
 
         bool HandlesAltClick() const override { return false; }
@@ -116,13 +60,11 @@ public:
             const wxpex::Modifier &modifier,
             CursorControl cursor) override
         {
-            using QuadControlMembers = pex::ControlMembers_<QuadShapeTemplate>;
-
             return ::draw::ProcessMouseDown
                 <
                     DragRotateQuadPoint<Impl>,
-                    DragQuadPoint<Impl, QuadControlMembers>,
-                    DragQuadLine<Impl, QuadControlMembers>,
+                    DragQuadPoint<Impl, ControlMembers>,
+                    DragQuadLine<Impl, ControlMembers>,
                     DragShape<Impl>,
                     Impl
                 >(control, *this, click, modifier, cursor);
@@ -131,24 +73,14 @@ public:
 };
 
 
-using QuadShapePolyGroup = pex::poly::PolyGroup
-<
-    ShapeFields,
-    QuadShapeTemplate,
-    Shape,
-    ShapeCustom<QuadView>
->;
-
+using QuadShapePolyGroup =
+    pex::poly::PolyGroup<ShapeFields, QuadShapeTemplates>;
 
 using QuadShapeValue = typename QuadShapePolyGroup::PolyValue;
 using QuadShapeModel = typename QuadShapePolyGroup::Model;
 using QuadShapeControl = typename QuadShapePolyGroup::Control;
 
-
-using DragCreateQuad =
-    DragCreateShape<ShapesControl, CreateQuad<QuadShapeValue>>;
-
-
+using DragCreateQuad = DragCreateShape<CreateQuad<QuadShapeValue>>;
 using QuadBrain = draw::ShapeBrain<DragCreateQuad>;
 
 

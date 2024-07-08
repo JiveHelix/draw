@@ -54,7 +54,7 @@ public:
         }
         else
         {
-            return this-control_->GetDepthOrder();
+            return this->control_->GetDepthOrder();
         }
     }
 

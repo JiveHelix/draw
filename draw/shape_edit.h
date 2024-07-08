@@ -8,6 +8,7 @@
 #include "draw/node_settings.h"
 #include "draw/shapes.h"
 #include "draw/shape_list.h"
+#include "draw/polygon_lines.h"
 
 
 namespace draw
@@ -148,13 +149,13 @@ NodeSettingsControl & GetNode(List &list, size_t unordered)
 }
 
 
-template<typename ListControl, typename CreateShape>
+template<typename CreateShape>
 class DragCreateShape: public Drag
 {
 public:
     DragCreateShape(
         const tau::Point2d<int> &start,
-        const ListControl &shapeList)
+        const ShapesControl &shapeList)
         :
         Drag(start, start),
         shapeList_(shapeList),
@@ -212,7 +213,7 @@ protected:
     }
 
 protected:
-    ListControl shapeList_;
+    ShapesControl shapeList_;
     tau::Point2d<int> position_;
 };
 
@@ -727,6 +728,39 @@ private:
     OrderedIndicesEndpoint indicesEndpoint_;
     std::vector<NodeSelectSignal> selectConnections_;
 };
+
+
+template<typename T>
+T Modulo(T a, T b)
+{
+    if constexpr (std::is_floating_point_v<T>)
+    {
+        return std::fmod(std::fmod(a, b) + b, b);
+    }
+    else
+    {
+        return (a % b + b) % b;
+    }
+}
+
+
+template<typename DerivedShape>
+void RotatePoint(
+    DerivedShape &derivedShape,
+    const tau::Point2d<double> &referencePoint,
+    const tau::Point2d<double> &endPoint)
+{
+    auto & center = derivedShape.shape.center;
+    auto beginAngle = (referencePoint - center).GetAngle();
+    auto endAngle = (endPoint - center).GetAngle();
+
+    auto difference = endAngle - beginAngle;
+    derivedShape.shape.rotation += difference;
+
+    derivedShape.shape.rotation =
+        Modulo(derivedShape.shape.rotation + 180.0, 360.0) - 180.0;
+}
+
 
 
 

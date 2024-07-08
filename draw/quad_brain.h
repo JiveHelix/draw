@@ -69,13 +69,12 @@ protected:
     std::shared_ptr<Shape> MakeShape_(
         const tau::Point2d<int> &end) const override
     {
-        auto adjusted = this->startingShape_;
-        double magnitude = this->GetMagnitude(end);
-
-        if (magnitude < 1.0)
+        if (end == this->start_)
         {
-            return std::make_shared<DerivedShape>(adjusted);
+            return std::make_shared<DerivedShape>(this->startingShape_);
         }
+
+        auto adjusted = this->startingShape_;
 
         const auto &point = this->points_[this->index_];
 
@@ -170,25 +169,17 @@ protected:
     std::shared_ptr<Shape> MakeShape_(
         const tau::Point2d<int> &end) const override
     {
-        auto adjusted = this->startingShape_;
-        double magnitude = this->GetMagnitude(end);
-
-        if (magnitude < 1.0)
+        if (end == this->start_)
         {
-            return std::make_shared<DerivedShape>(adjusted);
+            return std::make_shared<DerivedShape>(this->startingShape_);
         }
 
-        const auto &point = this->points_[this->index_];
+        auto adjusted = this->startingShape_;
 
-        auto center = adjusted.shape.center;
-        auto baseline = (center - point).GetAngle();
-        auto change = (center - end).GetAngle();
-        auto difference = DragAngleDifference(change, baseline);
-
-        adjusted.shape.rotation += difference;
-
-        adjusted.shape.rotation =
-            std::fmod(adjusted.shape.rotation + 180, 360.0) - 180.0;
+        RotatePoint(
+            adjusted,
+            this->points_[this->index_],
+            end.template Cast<double>());
 
         return std::make_shared<DerivedShape>(adjusted);
     }

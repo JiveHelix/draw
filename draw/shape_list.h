@@ -10,9 +10,10 @@ namespace draw
 {
 
 
-using ShapeListMaker = pex::MakePolyList<Shape, ShapeTemplates>;
+using ShapeListMaker = pex::MakePolyList<ShapeSupers>;
 
-
+static_assert(pex::IsMakePolyList<ShapeListMaker>);
+static_assert(HasDepthOrder<ShapeListMaker>);
 
 template<typename T>
 struct ShapeListFields
@@ -24,7 +25,7 @@ struct ShapeListFields
 };
 
 
-using OrderedShapesMaker = OrderedListGroup<ShapeListMaker, true>;
+using OrderedShapesMaker = OrderedListGroup<ShapeListMaker>;
 
 
 template<template<typename> typename T>
@@ -93,6 +94,9 @@ using ShapesControl = decltype(ShapeListControl::shapes);
 
 template<typename Observer>
 using ShapesEndpoint = pex::Endpoint<Observer, ShapesControl>;
+
+
+static_assert(decltype(ShapeListModel::shapes)::hasDepthOrder);
 
 
 } // end namespace draw

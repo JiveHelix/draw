@@ -37,7 +37,6 @@ using DepthOrderGroup = pex::Group<DepthOrderFields, DepthOrderTemplate>;
 using DepthOrderControl = typename DepthOrderGroup::Control;
 
 
-
 template<typename T>
 struct OrderedListFields
 {
@@ -64,15 +63,87 @@ struct OrderedListTemplate
 };
 
 
-template<bool react>
+namespace detail
+{
+
+
+template<typename T>
+concept HasItemControl = requires { typename T::ItemControl; };
+
+
+template<typename T, typename Enable = void>
+struct ValueType
+{
+    using Type = typename T::value_type;
+};
+
+
+template<typename T>
+struct ValueType<T, std::enable_if_t<HasItemControl<T>>>
+{
+    using Type = typename T::ItemControl;
+};
+
+
+} // end namespace detail
+
+
+template<typename ListMaker>
+using ListModel = typename pex::ModelSelector<ListMaker>::Model;
+
+
+template<typename ListMaker>
+using ListControl = typename pex::ControlSelector<ListMaker>::ItemControl;
+
+
+template<typename ListMaker>
+concept HasModelBase =
+    requires { typename ListModel<ListMaker>::ModelBase; };
+
+
+template<typename ListMaker>
+concept HasControlBase =
+    requires { typename ListControl<ListMaker>::ControlBase; };
+
+
+template<typename ListMaker>
+using ModelBase = typename ListModel<ListMaker>::ModelBase;
+
+
+template<typename ListMaker>
+using ControlBase = typename ListControl<ListMaker>::ControlBase;
+
+
+template<typename ListMaker>
+concept HasDepthOrder =
+    HasModelBase<ListMaker>
+    &&
+    HasControlBase<ListMaker>
+    &&
+    std::convertible_to
+    <
+        decltype(std::declval<ModelBase<ListMaker>>().GetDepthOrder()),
+        DepthOrderControl
+    >
+    &&
+    std::convertible_to
+    <
+        decltype(std::declval<ControlBase<ListMaker>>().GetDepthOrder()),
+        DepthOrderControl
+    >;
+
+
+template<typename ListMaker>
 struct OrderedListCustom
 {
-    template<typename GroupBase>
+    template<typename Base>
     class Model
         :
-        public GroupBase
+        public Base
     {
     public:
+
+        static constexpr bool hasDepthOrder = HasDepthOrder<ListMaker>;
 
         using Selected = pex::control::ListSelected;
         using CountWillChange = pex::control::ListCountWillChange;
@@ -87,7 +158,7 @@ struct OrderedListCustom
 
         Model()
             :
-            GroupBase(),
+            Base(),
             selected(this->list.selected),
             countWillChange(this->list.countWillChange),
             count(this->list.count),
@@ -207,7 +278,7 @@ struct OrderedListCustom
 
             this->ClearMoveOrderConnections_();
 
-            if constexpr (react)
+            if constexpr (HasDepthOrder<ListMaker>)
             {
                 this->moveDownConnections_.reserve(newSize);
                 this->moveUpConnections_.reserve(newSize);
@@ -275,7 +346,7 @@ struct OrderedListCustom
 
             this->indices.Set(previous);
 
-            if constexpr (react)
+            if constexpr (HasDepthOrder<ListMaker>)
             {
                 assert(this->moveDownConnections_.size() == previousSize);
                 assert(this->moveUpConnections_.size() == previousSize);
@@ -296,7 +367,7 @@ struct OrderedListCustom
 
         void ClearMoveOrderConnections_()
         {
-            if constexpr (react)
+            if constexpr (HasDepthOrder<ListMaker>)
             {
                 for (auto &connection: this->moveDownConnections_)
                 {
@@ -324,36 +395,47 @@ struct OrderedListCustom
     };
 
 
-    template<typename ListControl, typename IndicesControl>
+    template<typename List, typename Indices>
     class OrderedListIterator
     {
     public:
-        using ItemControl = typename ListControl::ItemControl;
+        using Value = typename detail::ValueType<List>::Type;
 
         OrderedListIterator(
-            ListControl &listControl,
-            IndicesControl &indices,
+            List &list,
+            const Indices &indices,
             size_t initialIndex)
             :
-            listControl_(listControl),
+            list_(list),
             indices_(indices),
             index_(initialIndex)
         {
-            assert(this->listControl_.count.Get() == this->indices_.count.Get());
-            assert(this->indices_.Get().size() == this->indices_.count.Get());
-            assert(this->listControl_.Get().size() == this->listControl_.count.Get());
+            assert(
+                this->list_.size() == this->indices_.size());
         }
 
-        ItemControl & operator*()
+        Value & operator*()
         {
-            return this->listControl_.at(
-                this->indices_.at(this->index_).Get());
+            return this->list_.at(
+                size_t(this->indices_.at(this->index_)));
         }
 
-        ItemControl * operator->()
+        Value * operator->()
         {
-            return &this->listControl_.at(
-                this->indices_.at(this->index_).Get());
+            return &this->list_.at(
+                size_t(this->indices_.at(this->index_)));
+        }
+
+        const Value & operator*() const
+        {
+            return this->list_.at(
+                size_t(this->indices_.at(this->index_)));
+        }
+
+        const Value * operator->() const
+        {
+            return &this->list_.at(
+                size_t(this->indices_.at(this->index_)));
         }
 
         // Prefix Increment
@@ -401,36 +483,142 @@ struct OrderedListCustom
         }
 
     private:
-        ListControl &listControl_;
-        IndicesControl &indices_;
+        List &list_;
+        const Indices &indices_;
         size_t index_;
     };
 
 
-    template<typename GroupBase>
-    class Control: public GroupBase
+    template<typename Derived, typename Base>
+    class Iterable
     {
     public:
-        using GroupBase::GroupBase;
-        using ListControl = decltype(GroupBase::list);
-        using ItemControl = typename ListControl::ItemControl;
-
-        using IndicesControl = decltype(GroupBase::indices);
+        using List = decltype(Base::list);
+        using Indices = decltype(Base::indices);
+        using Value = typename detail::ValueType<List>::Type;
 
         using Iterator =
-            OrderedListIterator<ListControl, decltype(GroupBase::indices)>;
+            OrderedListIterator<List, Indices>;
 
-        using Selected = typename ListControl::Selected;
-        using CountWillChange = typename ListControl::CountWillChange;
-        using Count = typename ListControl::Count;
+        const Value & operator[](size_t index) const
+        {
+            auto self = this->GetDerived();
+
+            return self->list.at(size_t(self->indices.at(index)));
+        }
+
+        Value & operator[](size_t index)
+        {
+            auto self = this->GetDerived();
+
+            return self->list.at(size_t(self->indices.at(index)));
+        }
+
+        const Value & at(size_t index) const
+        {
+            auto self = this->GetDerived();
+
+            return self->list.at(size_t(self->indices.at(index)));
+        }
+
+        Value & at(size_t index)
+        {
+            auto self = this->GetDerived();
+
+            return self->list.at(size_t(self->indices.at(index)));
+        }
+
+        const Value & GetUnordered(size_t index) const
+        {
+            return this->GetDerived()->list.at(index);
+        }
+
+        Value & GetUnordered(size_t index)
+        {
+            return this->GetDerived()->list.at(index);
+        }
+
+        Iterator begin()
+        {
+            auto self = this->GetDerived();
+
+            return Iterator(self->list, self->indices, 0);
+        }
+
+        Iterator end()
+        {
+            auto self = this->GetDerived();
+
+            return Iterator(
+                self->list,
+                self->indices,
+                self->indices.size());
+        }
+
+        const Iterator begin() const
+        {
+            auto self = this->GetDerived();
+
+            return Iterator(
+                const_cast<List &>(self->list), self->indices, 0);
+        }
+
+        const Iterator end() const
+        {
+            auto self = this->GetDerived();
+
+            return Iterator(
+                const_cast<List &>(self->list),
+                self->indices,
+                self->indices.size());
+        }
+
+        size_t size() const
+        {
+            auto self = this->GetDerived();
+
+            return self->list.size();
+        }
+
+        bool empty() const
+        {
+            auto self = this->GetDerived();
+
+            return self->list.empty();
+        }
+
+    private:
+        Derived * GetDerived()
+        {
+            return static_cast<Derived *>(this);
+        }
+
+        const Derived * GetDerived() const
+        {
+            return static_cast<const Derived *>(this);
+        }
+    };
+
+
+    template<typename Base>
+    class Control: public Base, public Iterable<Control<Base>, Base>
+    {
+    public:
+        using Base::Base;
+
+        using List = decltype(Base::list);
+        using Selected = typename List::Selected;
+        using CountWillChange = typename List::CountWillChange;
+        using Count = typename List::Count;
+        using ItemControl = typename List::ItemControl;
 
         Selected selected;
         CountWillChange countWillChange;
         Count count;
 
-        Control(typename GroupBase::Upstream &upstream)
+        Control(typename Base::Upstream &upstream)
             :
-            GroupBase(upstream),
+            Base(upstream),
             selected(this->list.selected),
             countWillChange(this->list.countWillChange),
             count(this->list.count)
@@ -440,76 +628,45 @@ struct OrderedListCustom
             assert(this->list.Get().size() == this->list.count.Get());
         }
 
-    public:
         template<typename Derived>
         std::optional<size_t> Append(const Derived &item)
         {
             return this->list.Append(item);
         }
+    };
 
-        const ItemControl & operator[](size_t index) const
+    template<typename Base>
+    class Plain: public Base, public Iterable<Plain<Base>, Base>
+    {
+    public:
+        using Base::Base;
+
+        static Plain Default()
         {
-            return this->list.at(this->indices.at(index).Get());
-        }
-
-        ItemControl & operator[](size_t index)
-        {
-            return this->list.at(this->indices.at(index).Get());
-        }
-
-        const ItemControl & at(size_t index) const
-        {
-            return this->list.at(this->indices.at(index).Get());
-        }
-
-        ItemControl & at(size_t index)
-        {
-            return this->list.at(this->indices.at(index).Get());
-        }
-
-        const ItemControl & GetUnordered(size_t index) const
-        {
-            return this->list.at(index);
-        }
-
-        ItemControl & GetUnordered(size_t index)
-        {
-            return this->list.at(index);
-        }
-
-        Iterator begin()
-        {
-            auto indices_ = this->indices.Get();
-
-            return Iterator(this->list, this->indices, 0);
-        }
-
-        Iterator end()
-        {
-            assert(this->list.count.Get() == this->indices.count.Get());
-            assert(this->indices.Get().size() == this->indices.count.Get());
-            assert(this->list.Get().size() == this->list.count.Get());
-
-            return Iterator(
-                this->list,
-                this->indices,
-                this->indices.count.Get());
+            if constexpr (pex::HasDefault<Base>)
+            {
+                return {Base::Default()};
+            }
+            else
+            {
+                return {};
+            }
         }
     };
 };
 
 
-template<typename ListMaker, bool react>
+template<typename ListMaker>
 using OrderedListGroup =
     pex::Group
     <
         OrderedListFields,
         OrderedListTemplate<ListMaker>::template Template,
-        OrderedListCustom<react>
+        OrderedListCustom<ListMaker>
     >;
 
-template<typename ListMaker, bool react>
-using OrderedListControl = typename OrderedListGroup<ListMaker, react>::Control;
+template<typename ListMaker>
+using OrderedListControl = typename OrderedListGroup<ListMaker>::Control;
 
 using OrderedIndicesControl = pex::ControlSelector<IndicesListMaker>;
 

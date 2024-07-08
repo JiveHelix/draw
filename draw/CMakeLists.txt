@@ -82,7 +82,6 @@ target_sources(
     cross_shape.cpp
     draw_segments.cpp
     ellipse.cpp
-    ellipse_shape.cpp
     oddeven.cpp
     font_look.cpp
     lines_shape.cpp

@@ -22,7 +22,7 @@ EllipseShapeView::EllipseShapeView(
         new EllipseView(
             this->GetPanel(),
             "Ellipse",
-            control.ellipse,
+            control.shape,
             layoutOptions);
 
     auto look =

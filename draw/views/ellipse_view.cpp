@@ -70,5 +70,15 @@ EllipseView::EllipseView(
 }
 
 
+EllipseView::EllipseView(
+    wxWindow *parent,
+    EllipseControl control,
+    const LayoutOptions &layoutOptions)
+    :
+    EllipseView(parent, "Ellipse", control, layoutOptions)
+{
+
+}
+
 
 } // end namespace draw

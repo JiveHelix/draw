@@ -48,6 +48,7 @@ struct PolygonTemplate
     T<pex::MakeList<tau::Point2dGroup<double>, 4>> points;
 
     static constexpr auto fields = PolygonFields<PolygonTemplate>::fields;
+    static constexpr auto fieldsTypeName = "Polygon";
 };
 
 

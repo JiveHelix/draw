@@ -100,7 +100,9 @@ bool QuadGroupTemplates_::Plain::Contains(const tau::Point2d<double> &point) con
 }
 
 
-bool QuadGroupTemplates_::Plain::Contains(const tau::Point2d<double> &point, double margin) const
+bool QuadGroupTemplates_::Plain::Contains(
+    const tau::Point2d<double> &point,
+    double margin) const
 {
     return oddeven::Contains(
         this->GetPoints_(this->GetMarginScale(margin)),
