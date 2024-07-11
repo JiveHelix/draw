@@ -79,6 +79,7 @@ struct EllipseShapeTemplates: public ShapeCommon<EllipseGroup, EllipseView>
         bool HandlesRotate() const override { return true; }
         bool HandlesEditPoint() const override { return true; }
         bool HandlesEditLine() const override { return false; }
+        bool HandlesDrag() const override { return true; }
 
         void Draw(wxpex::GraphicsContext &context) override
         {

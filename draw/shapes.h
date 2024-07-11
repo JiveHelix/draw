@@ -83,6 +83,7 @@ public:
     virtual bool HandlesRotate() const { return false; }
     virtual bool HandlesEditPoint() const { return false; }
     virtual bool HandlesEditLine() const { return false; }
+    virtual bool HandlesDrag() const { return false; }
 
     virtual ssize_t GetId() const = 0;
     virtual PointsDouble GetPoints() const = 0;
@@ -136,6 +137,9 @@ struct ShapeFields
         fields::Field(&T::look, "look"),
         fields::Field(&T::node, "node"));
 };
+
+
+struct NoView {};
 
 
 template<typename ShapeGroup, typename View>
@@ -210,12 +214,21 @@ struct ShapeCommon
             return this->order;
         }
 
-        wxWindow * CreateShapeView(wxWindow *parent) const override
+        wxWindow * CreateShapeView(
+            [[maybe_unused]] wxWindow *parent) const override
         {
-            return new View(
-                parent,
-                this->shape,
-                wxpex::LayoutOptions{});
+            if constexpr (std::is_same_v<View, NoView>)
+            {
+                // Return a blank wxPanel.
+                return new wxPanel(parent, wxID_ANY);
+            }
+            else
+            {
+                return new View(
+                    parent,
+                    this->shape,
+                    wxpex::LayoutOptions{});
+            }
         }
 
         wxWindow * CreateLookView(

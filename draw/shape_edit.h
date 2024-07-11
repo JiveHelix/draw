@@ -377,6 +377,16 @@ std::unique_ptr<Drag> ProcessMouseDown(
         }
     }
 
+    if constexpr (std::is_same_v<DragShape, IgnoreMouse>)
+    {
+        return {};
+    }
+
+    if (!shape.HandlesDrag())
+    {
+        return {};
+    }
+
     cursor.Set(wxpex::Cursor::closedHand);
 
     // DragShape
@@ -512,11 +522,14 @@ protected:
                 this->Deselect(*wasSelected);
             }
 
-            // There is no selection to edit.
-            // Begin creating a new shape.
-            // DragCreate
-            this->drag_ =
-                std::make_unique<Create>(click, this->shapeList_);
+            if constexpr (!std::is_same_v<IgnoreMouse, Create>)
+            {
+                // There is no selection to edit.
+                // Begin creating a new shape.
+                // DragCreate
+                this->drag_ =
+                    std::make_unique<Create>(click, this->shapeList_);
+            }
 
             return;
         }
@@ -613,8 +626,11 @@ protected:
             }
         }
 
-        // The mouse is over a shape, but not over a line or a point.
-        this->pixelViewControl_.cursor.Set(wxpex::Cursor::openHand);
+        if (shape->HandlesDrag())
+        {
+            // The mouse is over a shape, but not over a line or a point.
+            this->pixelViewControl_.cursor.Set(wxpex::Cursor::openHand);
+        }
     }
 
     std::optional<std::pair<size_t, ItemControl>> FindSelected_(

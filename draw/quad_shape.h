@@ -48,6 +48,7 @@ struct QuadShapeTemplates: public ShapeCommon<QuadGroup, QuadView>
         bool HandlesRotate() const override { return true; }
         bool HandlesEditPoint() const override { return true; }
         bool HandlesEditLine() const override { return true; }
+        bool HandlesDrag() const override { return true; }
 
         std::string GetName() const override
         {
