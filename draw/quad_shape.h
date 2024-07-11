@@ -2,7 +2,7 @@
 
 
 #include <pex/group.h>
-#include <pex/poly_group.h>
+#include <pex/poly.h>
 #include <wxpex/modifier.h>
 
 #include "draw/quad.h"
@@ -26,11 +26,11 @@ namespace draw
 struct QuadShapeTemplates: public ShapeCommon<QuadGroup, QuadView>
 {
     template<typename Base>
-    class Impl: public ShapeImpl<Base, Impl<Base>>
+    class Derived: public ShapeDerived<Base, Derived<Base>>
     {
     public:
-        using ImplBase = ShapeImpl<Base, Impl<Base>>;
-        using ImplBase::ImplBase;
+        using Super = ShapeDerived<Base, Derived<Base>>;
+        using Super::Super;
 
         void Draw(wxpex::GraphicsContext &context) override
         {
@@ -63,23 +63,23 @@ struct QuadShapeTemplates: public ShapeCommon<QuadGroup, QuadView>
         {
             return ::draw::ProcessMouseDown
                 <
-                    DragRotateQuadPoint<Impl>,
-                    DragQuadPoint<Impl, ControlMembers>,
-                    DragQuadLine<Impl, ControlMembers>,
-                    DragShape<Impl>,
-                    Impl
+                    DragRotateQuadPoint<Derived>,
+                    DragQuadPoint<Derived, ControlMembers>,
+                    DragQuadLine<Derived, ControlMembers>,
+                    DragShape<Derived>,
+                    Derived
                 >(control, *this, click, modifier, cursor);
         }
     };
 };
 
 
-using QuadShapePolyGroup =
-    pex::poly::PolyGroup<ShapeFields, QuadShapeTemplates>;
+using QuadShapePoly =
+    pex::poly::Poly<ShapeFields, QuadShapeTemplates>;
 
-using QuadShapeValue = typename QuadShapePolyGroup::PolyValue;
-using QuadShapeModel = typename QuadShapePolyGroup::Model;
-using QuadShapeControl = typename QuadShapePolyGroup::Control;
+using QuadShapeValue = typename QuadShapePoly::PolyValue;
+using QuadShapeModel = typename QuadShapePoly::Model;
+using QuadShapeControl = typename QuadShapePoly::Control;
 
 using DragCreateQuad = DragCreateShape<CreateQuad<QuadShapeValue>>;
 using QuadBrain = draw::ShapeBrain<DragCreateQuad>;

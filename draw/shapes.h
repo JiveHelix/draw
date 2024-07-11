@@ -247,7 +247,7 @@ struct ShapeCommon
 
 // Common shape overrides.
 template<typename Base, typename Derived>
-class ShapeImpl: public Base
+class ShapeDerived: public Base
 {
 public:
     using Base::Base;

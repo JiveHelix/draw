@@ -2,7 +2,7 @@
 
 
 #include <pex/group.h>
-#include <pex/poly_group.h>
+#include <pex/poly.h>
 #include <wxpex/modifier.h>
 
 #include "draw/polygon.h"
@@ -26,11 +26,11 @@ namespace draw
 struct PolygonShapeTemplates: public ShapeCommon<PolygonGroup, PolygonView>
 {
     template<typename Base>
-    class Impl: public ShapeImpl<Base, Impl<Base>>
+    class Derived: public ShapeDerived<Base, Derived<Base>>
     {
     public:
-        using ImplBase = ShapeImpl<Base, Impl<Base>>;
-        using ImplBase::ImplBase;
+        using Super = ShapeDerived<Base, Derived<Base>>;
+        using Super::Super;
 
         bool HandlesAltClick() const override { return true; }
         bool HandlesControlClick() const override { return true; }
@@ -65,11 +65,11 @@ struct PolygonShapeTemplates: public ShapeCommon<PolygonGroup, PolygonView>
         {
             return ::draw::ProcessMouseDown
                 <
-                    DragRotatePolygonPoint<Impl>,
-                    DragPolygonPoint<Impl>,
-                    DragPolygonLine<Impl>,
-                    DragShape<Impl>,
-                    Impl
+                    DragRotatePolygonPoint<Derived>,
+                    DragPolygonPoint<Derived>,
+                    DragPolygonLine<Derived>,
+                    DragShape<Derived>,
+                    Derived
                 >(control, *this, click, modifier, cursor);
         }
 
@@ -101,12 +101,12 @@ struct PolygonShapeTemplates: public ShapeCommon<PolygonGroup, PolygonView>
 };
 
 
-using PolygonShapePolyGroup =
-    pex::poly::PolyGroup<ShapeFields, PolygonShapeTemplates>;
+using PolygonShapePoly =
+    pex::poly::Poly<ShapeFields, PolygonShapeTemplates>;
 
-using PolygonShapeValue = typename PolygonShapePolyGroup::PolyValue;
-using PolygonShapeModel = typename PolygonShapePolyGroup::Model;
-using PolygonShapeControl = typename PolygonShapePolyGroup::Control;
+using PolygonShapeValue = typename PolygonShapePoly::PolyValue;
+using PolygonShapeModel = typename PolygonShapePoly::Model;
+using PolygonShapeControl = typename PolygonShapePoly::Control;
 
 using DragCreatePolygon =
     DragCreateShape<CreatePolygon<PolygonShapeValue>>;

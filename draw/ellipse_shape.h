@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include <pex/poly_group.h>
+#include <pex/poly.h>
 #include "draw/ellipse.h"
 #include "draw/views/ellipse_view.h"
 #include "draw/look.h"
@@ -68,11 +68,11 @@ protected:
 struct EllipseShapeTemplates: public ShapeCommon<EllipseGroup, EllipseView>
 {
     template<typename Base>
-    class Impl: public ShapeImpl<Base, Impl<Base>>
+    class Derived: public ShapeDerived<Base, Derived<Base>>
     {
     public:
-        using ImplBase = ShapeImpl<Base, Impl<Base>>;
-        using ImplBase::ImplBase;
+        using Super = ShapeDerived<Base, Derived<Base>>;
+        using Super::Super;
 
         bool HandlesAltClick() const override { return false; }
         bool HandlesControlClick() const override { return false; }
@@ -115,23 +115,23 @@ struct EllipseShapeTemplates: public ShapeCommon<EllipseGroup, EllipseView>
         {
             return ::draw::ProcessMouseDown
                 <
-                    DragRotateEllipsePoint<Impl>,
-                    DragEllipsePoint<Impl>,
+                    DragRotateEllipsePoint<Derived>,
+                    DragEllipsePoint<Derived>,
                     IgnoreMouse,
-                    DragShape<Impl>,
-                    Impl
+                    DragShape<Derived>,
+                    Derived
                 >(control, *this, click, modifier, cursor);
         }
     };
 };
 
 
-using EllipseShapePolyGroup =
-    pex::poly::PolyGroup<ShapeFields, EllipseShapeTemplates>;
+using EllipseShapePoly =
+    pex::poly::Poly<ShapeFields, EllipseShapeTemplates>;
 
-using EllipseShapeValue = typename EllipseShapePolyGroup::PolyValue;
-using EllipseShapeModel = typename EllipseShapePolyGroup::Model;
-using EllipseShapeControl = typename EllipseShapePolyGroup::Control;
+using EllipseShapeValue = typename EllipseShapePoly::PolyValue;
+using EllipseShapeModel = typename EllipseShapePoly::Model;
+using EllipseShapeControl = typename EllipseShapePoly::Control;
 
 
 struct CreateEllipse
