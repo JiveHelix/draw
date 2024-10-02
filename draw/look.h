@@ -26,13 +26,14 @@ struct LookFields
 template<template<typename> typename T>
 struct LookTemplate
 {
-    using WeightRange = pex::MakeRange<int, pex::Limit<1>, pex::Limit<100>>;
+    using WeightRange =
+        pex::MakeRange<double, pex::Limit<0, 1, 10>, pex::Limit<100>>;
 
     T<bool> strokeEnable;
     T<WeightRange> strokeWeight;
-    T<wxpex::HsvGroup> strokeColor;
+    T<wxpex::HsvaGroup> strokeColor;
     T<bool> fillEnable;
-    T<wxpex::HsvGroup> fillColor;
+    T<wxpex::HsvaGroup> fillColor;
     T<bool> antialias;
 
     static constexpr auto fields = LookFields<LookTemplate>::fields;
@@ -47,10 +48,10 @@ struct Look_: public Base
     {
         return {
             true,
-            1,
-            {{0.0, 0.0, 1.0}},
+            1.0,
+            {{0.0, 0.0, 1.0, 1.0}},
             false,
-            {{0.0, 0.0, 0.5}},
+            {{0.0, 0.0, 0.5, 1.0}},
             true};
     }
 };
@@ -64,14 +65,6 @@ using LookControl = typename LookGroup::Control;
 using Look = typename LookGroup::Plain;
 
 DECLARE_EQUALITY_OPERATORS(Look)
-
-
-
-void ConfigureLook(wxpex::GraphicsContext &, const Look &);
-
-void ConfigureColors(wxpex::GraphicsContext &, const Look &);
-
-void ConfigureColors(wxpex::GraphicsContext &, const Look &, double value);
 
 
 } // end namespace draw

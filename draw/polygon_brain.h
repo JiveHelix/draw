@@ -12,34 +12,6 @@ namespace draw
 {
 
 
-template<typename Value>
-struct CreatePolygon
-{
-    std::optional<Value> operator()(
-        const Drag &drag,
-        const tau::Point2d<int> position)
-    {
-        auto size = drag.GetSize(position);
-
-        if (size.GetArea() < 1)
-        {
-            return {};
-        }
-
-        auto lines = PolygonLines(size);
-        auto polygon = Polygon(lines.GetPoints());
-        polygon.center = drag.GetDragCenter(position);
-
-        return Value{{
-            0,
-            {},
-            polygon,
-            Look::Default(),
-            NodeSettings::Default()}};
-    }
-};
-
-
 template<typename DerivedShape>
 class DragPolygonPoint: public DragEditPoint<DerivedShape>
 {

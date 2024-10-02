@@ -2,7 +2,7 @@
 
 
 #include <pex/ordered_list.h>
-#include "draw/views/list_view.h"
+#include <wxpex/list_view.h>
 #include "draw/shape_list.h"
 #include "draw/views/shape_view.h"
 
@@ -15,6 +15,8 @@ template<typename Control>
 class ShapeAdaptor
 {
 public:
+    static_assert(pex::HasOrder<Control>);
+
     ShapeAdaptor(Control &control)
         :
         control_(&control)
@@ -24,7 +26,7 @@ public:
 
     ssize_t GetId() const
     {
-        if constexpr (HasGetVirtual<Control>)
+        if constexpr (pex::HasGetVirtual<Control>)
         {
             return this->control_->GetVirtual()->GetId();
         }
@@ -36,7 +38,7 @@ public:
 
     std::string GetName() const
     {
-        if constexpr (HasGetVirtual<Control>)
+        if constexpr (pex::HasGetVirtual<Control>)
         {
             return this->control_->GetVirtual()->GetName();
         }
@@ -48,19 +50,19 @@ public:
 
     pex::OrderControl & GetOrder()
     {
-        if constexpr (HasGetVirtual<Control>)
+        if constexpr (pex::HasVirtualGetOrder<Control>)
         {
             return this->control_->GetVirtual()->GetOrder();
         }
         else
         {
-            return this->control_->GetOrder();
+            return this->control_->order;
         }
     }
 
     NodeSettingsControl & GetNode()
     {
-        if constexpr (HasGetVirtual<Control>)
+        if constexpr (pex::HasGetVirtual<Control>)
         {
             return this->control_->GetVirtual()->GetNode();
         }
@@ -72,7 +74,7 @@ public:
 
     wxWindow * CreateShapeView(wxWindow *parent) const
     {
-        if constexpr (HasGetVirtual<Control>)
+        if constexpr (pex::HasGetVirtual<Control>)
         {
             return this->control_->GetVirtual()->CreateShapeView(parent);
         }
@@ -86,7 +88,7 @@ public:
         wxWindow *parent,
         LookDisplayControl displayControl) const
     {
-        if constexpr (HasGetVirtual<Control>)
+        if constexpr (pex::HasGetVirtual<Control>)
         {
             return this->control_->GetVirtual()
                 ->CreateLookView(parent, displayControl);
@@ -102,13 +104,13 @@ private:
 };
 
 
-class ShapeListView: public ListView<OrderedShapesControl>
+class ShapeListView: public wxpex::ListView<OrderedShapesControl>
 {
 public:
     static constexpr auto observerName = "ShapeListView";
 
-    using Base = ListView<OrderedShapesControl>;
-    using ItemControl = typename Base::ItemControl;
+    using Base = wxpex::ListView<OrderedShapesControl>;
+    using ListItem = typename Base::ListItem;
     using Control = ShapeListControl;
 
     ShapeListView(
@@ -118,17 +120,17 @@ public:
         Base(
             parent,
             control.shapes,
-            control.reorder),
+            control.shapesDisplay.reorder),
         control_(control)
     {
         this->Initialize_();
     }
 
-    wxWindow * CreateView_(ItemControl &itemControl, size_t index) override
+    wxWindow * CreateView_(ListItem &listItem, size_t index) override
     {
         return new ShapeView(
             this,
-            ShapeAdaptor(itemControl),
+            ShapeAdaptor(listItem),
             this->control_.shapesDisplay[index]);
     }
 

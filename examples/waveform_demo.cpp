@@ -103,6 +103,7 @@ public:
 
     void LoadPng(const draw::GrayPng<PngPixel> &png)
     {
+        std::cout << "LoadPng" << std::endl;
         this->pngIsLoaded_ = false;
         this->pngData_ = png.GetValues().template cast<int32_t>();
         this->userControl_.pixelView.viewSettings.imageSize.Set(png.GetSize());
@@ -127,16 +128,6 @@ public:
             parent,
             this->userControl_,
             draw::WaveformControl(this->waveformModel_));
-    }
-
-    void SaveSettings() const
-    {
-        std::cout << "TODO: Persist the processing settings." << std::endl;
-    }
-
-    void LoadSettings()
-    {
-        std::cout << "TODO: Restore the processing settings." << std::endl;
     }
 
     std::string GetAppName() const

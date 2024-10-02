@@ -14,28 +14,28 @@ namespace detail
 
 
 template<typename T>
-T CreateUniqueId(std::set<T> &generator)
+T CreateUniqueId(std::set<T> &idStore)
 {
     T result = 0;
 
-    if (generator.empty())
+    if (idStore.empty())
     {
-        generator.insert(result);
+        idStore.insert(result);
         return result;
     }
 
-    auto first = generator.begin();
+    auto first = idStore.begin();
     auto second = first;
     ++second;
 
-    while (second != generator.end())
+    while (second != idStore.end())
     {
         if ((*second - *first) > 1)
         {
             // There is a gap in IDs.
             // Fill it.
             result = *first + 1;
-            generator.insert(result);
+            idStore.insert(result);
 
             return result;
         }
@@ -45,22 +45,22 @@ T CreateUniqueId(std::set<T> &generator)
     }
 
     // We got to the end of the set without finding any holes.
-    assert(first != generator.end());
+    assert(first != idStore.end());
 
     // std::set lacks a back() function.
-    assert(*first == *generator.rbegin());
+    assert(*first == *idStore.rbegin());
 
     result = *first + 1;
-    generator.insert(result);
+    idStore.insert(result);
 
     return result;
 }
 
 
 template<typename T>
-void ReleaseUniqueId(std::set<T> &generator, T id)
+void ReleaseUniqueId(std::set<T> &idStore, T id)
 {
-    if (1 != generator.erase(id))
+    if (1 != idStore.erase(id))
     {
         throw std::logic_error("Unique ID does not exist.");
     }
@@ -78,10 +78,10 @@ public:
     static_assert(std::is_integral_v<T>, "Designed for integral values");
 
 protected:
-    UniqueId(std::set<T> &generator)
+    UniqueId(std::set<T> &idStore)
         :
-        generator_(&generator),
-        id_(detail::CreateUniqueId(generator))
+        idStore_(&idStore),
+        id_(detail::CreateUniqueId(idStore))
     {
 
     }
@@ -91,7 +91,7 @@ public:
     {
         if (this->id_ >= 0)
         {
-            detail::ReleaseUniqueId(*this->generator_, this->id_);
+            detail::ReleaseUniqueId(*this->idStore_, this->id_);
         }
     }
 
@@ -100,7 +100,7 @@ public:
 
     UniqueId(UniqueId &&other)
         :
-        generator_(other.generator_),
+        idStore_(other.idStore_),
         id_(other.id_)
     {
         other.id_ = -1;
@@ -110,7 +110,7 @@ public:
     {
         if (this->id_ >= 0)
         {
-            detail::ReleaseUniqueId(*this->generator_, this->id_);
+            detail::ReleaseUniqueId(*this->idStore_, this->id_);
         }
 
         this->id_ = other.id_;
@@ -125,7 +125,7 @@ public:
     }
 
 private:
-    std::set<T> *generator_;
+    std::set<T> *idStore_;
     T id_;
 };
 

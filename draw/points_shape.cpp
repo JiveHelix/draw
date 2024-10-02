@@ -23,10 +23,10 @@ PointsShape::PointsShape(
 
 }
 
-void PointsShape::Draw(wxpex::GraphicsContext &context)
+void PointsShape::Draw(DrawContext &context)
 {
     wxpex::MaintainTransform maintainTransform(context);
-    ConfigureLook(context, this->settings_.look);
+    context.ConfigureLook(this->settings_.look);
 
     auto path = context->CreatePath();
 
@@ -51,16 +51,16 @@ ValuePointsShape::ValuePointsShape(
 
 }
 
-void ValuePointsShape::Draw(wxpex::GraphicsContext &context)
+void ValuePointsShape::Draw(DrawContext &context)
 {
     wxpex::MaintainTransform maintainTransform(context);
-    ConfigureLook(context, this->settings_.look);
+    context.ConfigureLook(this->settings_.look);
 
     for (auto &point: this->points_)
     {
         auto path = context->CreatePath();
 
-        ConfigureColors(context, this->settings_.look, point.value);
+        context.ConfigureColors(this->settings_.look, point.value);
         auto rounded = point.template Cast<int>();
         path.AddCircle(rounded.x, rounded.y, this->settings_.radius);
         path.CloseSubpath();

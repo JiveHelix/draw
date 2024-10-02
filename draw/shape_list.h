@@ -10,53 +10,51 @@ namespace draw
 {
 
 
-using ShapeListMaker = pex::MakePolyList<ShapeSupers>;
+using ShapeListMaker = pex::List<pex::MakePoly<ShapeSupers>>;
 
-static_assert(pex::IsMakePolyList<ShapeListMaker>);
-static_assert(pex::HasOrder<ShapeListMaker>);
+static_assert(pex::IsList<ShapeListMaker>);
+static_assert(pex::ListHasOrder<ShapeListMaker>);
 
 template<typename T>
 struct ShapeListFields
 {
     static constexpr auto fields = std::make_tuple(
         fields::Field(&T::shapes, "shapes"),
-        fields::Field(&T::shapesDisplay, "shapesDisplay"),
-        fields::Field(&T::reorder, "reorder"));
+        fields::Field(&T::shapesDisplay, "shapesDisplay"));
 };
 
 
-using OrderedShapesMaker = pex::OrderedListGroup<ShapeListMaker>;
+using OrderedShapes = pex::OrderedListGroup<ShapeListMaker>;
 
 
 template<template<typename> typename T>
 struct ShapeListTemplate
 {
-    T<OrderedShapesMaker> shapes;
+    T<OrderedShapes> shapes;
     T<ShapeDisplayListMaker> shapesDisplay;
-    T<pex::MakeSignal> reorder;
 
     static constexpr auto fields = ShapeListFields<ShapeListTemplate>::fields;
 };
 
 
-using OrderedShapesControl = pex::ControlSelector<OrderedShapesMaker>;
+using OrderedShapesControl = pex::ControlSelector<OrderedShapes>;
 
 
 struct ShapeListCustom
 {
-    template<typename GroupBase>
-    class Model: public GroupBase
+    template<typename Base>
+    class Model: public Base
     {
     public:
         Model()
             :
-            GroupBase(),
+            Base(),
             countEndpoint_(this, this->shapes.count, &Model::OnShapesCount_),
 
-            orderedIndicesEndpoint_(
+            indicesEndpoint_(
                 this,
                 this->shapes.indices,
-                &Model::OnIndices_)
+                &Model::OnShapesIndices_)
         {
             this->OnShapesCount_(this->shapes.count.Get());
         }
@@ -67,20 +65,23 @@ struct ShapeListCustom
             this->shapesDisplay.count.Set(value);
         }
 
-        void OnIndices_(const std::vector<size_t> &orderedIndices)
+        void OnShapesIndices_(const std::vector<size_t> &indices)
         {
-            this->shapesDisplay.indices.Set(orderedIndices);
-            this->reorder.Trigger();
+            this->shapesDisplay.indices.Set(indices);
         }
 
     private:
         using CountEndpoint = pex::Endpoint<Model, pex::model::ListCount>;
 
-        using OrderedIndicesEndpoint =
-            pex::Endpoint<Model, pex::OrderedIndicesControl>;
+        using IndicesEndpoint =
+            pex::Endpoint
+            <
+                Model,
+                decltype(OrderedShapesControl::indices)
+            >;
 
         CountEndpoint countEndpoint_;
-        OrderedIndicesEndpoint orderedIndicesEndpoint_;
+        IndicesEndpoint indicesEndpoint_;
     };
 };
 
@@ -96,6 +97,15 @@ template<typename Observer>
 using ShapesEndpoint = pex::Endpoint<Observer, ShapesControl>;
 
 
+using TestShapesDisplay = decltype(ShapeListControl::shapesDisplay);
+static_assert(std::is_same_v<TestShapesDisplay, ShapeDisplayListControl>);
+
+using TestListItem = typename TestShapesDisplay::ListItem;
+
+static_assert(std::is_same_v<TestListItem, ShapeDisplayControl>);
+
+
+static_assert(pex::ListHasVirtualGetOrder<OrderedShapes>);
 static_assert(decltype(ShapeListModel::shapes)::hasOrder);
 
 

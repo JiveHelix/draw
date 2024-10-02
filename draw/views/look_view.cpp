@@ -53,13 +53,12 @@ void StrokeControls::Initialize_(LookControl control)
     auto strokeWeight = wxpex::LabeledWidget(
         panel,
         "Stroke Weight",
-        new FieldSlider(
+        CreateFieldSlider<1>(
             panel,
-            control.strokeWeight,
-            control.strokeWeight.value));
+            control.strokeWeight));
 
     auto strokeColor =
-        new HsvPicker(
+        new HsvaPicker(
             panel,
             "Stroke Color",
             control.strokeColor);
@@ -111,7 +110,7 @@ void FillControls::Initialize_(LookControl control)
         new CheckBox(panel, "Fill Enable", control.fillEnable);
 
     auto fillColor =
-        new HsvPicker(
+        new HsvaPicker(
             panel,
             "Fill Color",
             control.fillColor);

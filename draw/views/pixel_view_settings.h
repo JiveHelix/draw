@@ -125,6 +125,8 @@ using PixelViewSettings = typename PixelViewGroup::Plain;
 using PixelViewModel = typename PixelViewGroup::Model;
 using PixelViewControl = typename PixelViewGroup::Control;
 
+using AsyncShapesControl = typename PixelViewControl::AsyncShapesControl;
+
 
 } // end namespace draw
 

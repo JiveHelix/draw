@@ -282,7 +282,7 @@ PixelViewAndWaveform::PixelViewAndWaveform(
     viewLink_(
         pixelViewControl.viewSettings,
         waveformPixelViewControl.viewSettings,
-        LinkType::horizontal),
+        LinkOptions{}.SetAll(Link::horizontal)),
 
     splitter_(new wxpex::Splitter(this))
 {

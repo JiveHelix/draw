@@ -34,7 +34,7 @@ using ShapeDisplayControl = typename ShapeDisplayGroup::Control;
 using ShapeExpandControl = decltype(ShapeDisplayControl::shapeExpand);
 
 using ShapeDisplayListMaker =
-    pex::OrderedListGroup<pex::MakeList<ShapeDisplayGroup, 0>>;
+    pex::OrderedListGroup<pex::List<ShapeDisplayGroup, 0>>;
 
 using ShapeDisplayListControl = pex::ControlSelector<ShapeDisplayListMaker>;
 

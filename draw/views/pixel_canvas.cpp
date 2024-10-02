@@ -20,12 +20,17 @@ PixelCanvas::PixelCanvas(
     :
     Scrolled(parent, wxID_ANY),
     ignoreViewPosition_(false),
-    skipUpdateViewPosition_(false),
+    skipUpdateViewPosition_(),
 
     imageSizeEndpoint_(
         this,
         controls.viewSettings.imageSize,
         &PixelCanvas::OnImageSize_),
+
+    virtualSizeEndpoint_(
+        this,
+        controls.viewSettings.virtualSize,
+        &PixelCanvas::OnVirtualSize_),
 
     viewPositionEndpoint_(
         this,
@@ -71,6 +76,11 @@ PixelCanvas::PixelCanvas(
         this);
 
     this->Bind(
+        wxEVT_LEFT_DCLICK,
+        &PixelCanvas::OnLeftDown_,
+        this);
+
+    this->Bind(
         wxEVT_LEFT_UP,
         &PixelCanvas::OnLeftUp_,
         this);
@@ -98,7 +108,7 @@ PixelCanvas::PixelCanvas(
     this->cursorEndpoint_.Connect(&PixelCanvas::OnCursor_);
 
     // Configure the scrollable area
-    this->SizeVirtualPanel_(this->scaleEndpoint_.Get());
+    this->OnVirtualSize_(this->virtualSizeEndpoint_.Get());
 
     this->Bind(wxEVT_PAINT, &PixelCanvas::OnPaint_, this);
 }
@@ -107,6 +117,36 @@ PixelCanvas::PixelCanvas(
 
 void PixelCanvas::ScrollWindow(int dx, int dy, const wxRect *rect)
 {
+    auto position = this->viewPositionEndpoint_.Get();
+
+    if (!this->skipUpdateViewPosition_)
+    {
+        // This is not an internal repositioning.
+        // Apply constraints.
+
+        auto maximumPosition = GetMaximumViewPosition(
+            this->control_.viewSettings.viewSize.Get(),
+            this->control_.viewSettings.virtualSize.Get());
+
+        if (position.x - dx < 0)
+        {
+            dx = position.x;
+        }
+        else if (position.x - dx > maximumPosition.x)
+        {
+            dx = position.x - maximumPosition.x;
+        }
+
+        if (position.y - dy < 0)
+        {
+            dy = position.y;
+        }
+        else if (position.y - dy > maximumPosition.y)
+        {
+            dy = position.y - maximumPosition.y;
+        }
+    }
+
     this->Scrolled::ScrollWindow(dx, dy, rect);
 
     if (this->skipUpdateViewPosition_)
@@ -114,12 +154,9 @@ void PixelCanvas::ScrollWindow(int dx, int dy, const wxRect *rect)
         return;
     }
 
-    this->ignoreViewPosition_ = true;
+    jive::ScopeFlag ignoreViewPosition(this->ignoreViewPosition_);
     auto delta = tau::Point2d<int>(-dx, -dy);
-    auto position = this->viewPositionEndpoint_.Get();
-
     this->viewPositionEndpoint_.Set(position + delta);
-    this->ignoreViewPosition_ = false;
 }
 
 Size PixelCanvas::GetVirtualSize() const
@@ -130,12 +167,13 @@ Size PixelCanvas::GetVirtualSize() const
 void PixelCanvas::OnImageSize_(const Size &imageSize)
 {
     this->image_ = wxImage(imageSize.width, imageSize.height, true);
-    this->SizeVirtualPanel_(this->scaleEndpoint_.Get());
 }
+
 
 void PixelCanvas::OnSize_(wxSizeEvent &event)
 {
     event.Skip();
+
     auto clientSize = wxpex::ToSize<int>(this->GetClientSize());
     auto windowSize = wxpex::ToSize<int>(this->GetSize());
     auto position = wxpex::ToPoint<int>(this->GetScreenPosition());
@@ -254,7 +292,6 @@ void PixelCanvas::OnKeyUp_(wxKeyEvent &event)
 
 void PixelCanvas::OnScale_(const Scale &scale)
 {
-    this->SizeVirtualPanel_(scale);
     this->Refresh(false);
     this->Update();
 }
@@ -280,29 +317,22 @@ void PixelCanvas::OnViewPosition_(const Point &viewPosition)
 
     // Scroll to the correct position, but do not allow ScrollWindow to
     // publish a redundant viewPosition.
-    this->skipUpdateViewPosition_ = true;
+    jive::ScopedCountFlag skipUpdate(this->skipUpdateViewPosition_);
     auto newViewStart = viewPosition / pixelsPerScrollUnit;
-
     this->Scroll(wxpex::ToWxPoint(newViewStart));
-    this->skipUpdateViewPosition_ = false;
 }
 
-void PixelCanvas::SizeVirtualPanel_(const Scale &scale)
-{
-    auto imageSize = this->imageSizeEndpoint_.Get();
-    auto virtualSize = imageSize.template Cast<double>();
 
-    virtualSize.width *= scale.horizontal;
-    virtualSize.height *= scale.vertical;
-    this->virtualSize_ = virtualSize.template Cast<int, tau::Floor>();
+void PixelCanvas::OnVirtualSize_(const Size &virtualSize)
+{
+    this->virtualSize_ = virtualSize;
+    auto viewPosition = this->viewPositionEndpoint_.Get();
 
     auto unitCount = this->virtualSize_ / PixelCanvas::pixelsPerScrollUnit;
 
-    auto viewPosition = this->viewPositionEndpoint_.Get();
-
     auto positionInUnits = viewPosition / pixelsPerScrollUnit;
 
-    this->skipUpdateViewPosition_ = true;
+    jive::ScopedCountFlag skipUpdate(this->skipUpdateViewPosition_);
 
     this->SetScrollbars(
         PixelCanvas::pixelsPerScrollUnit,
@@ -313,8 +343,6 @@ void PixelCanvas::SizeVirtualPanel_(const Scale &scale)
         positionInUnits.y);
 
     wxpex::LayoutTopLevel(this);
-
-    this->skipUpdateViewPosition_ = false;
 }
 
 
@@ -322,7 +350,11 @@ void PixelCanvas::OnPixels_(const std::shared_ptr<Pixels> &pixels)
 {
     if (!pixels)
     {
+#ifdef DEBUG_REQUIRE_PIXELS
         throw std::logic_error("pixels must not be NULL");
+#else
+        return;
+#endif
     }
 
     auto dataSize = pixels->size;

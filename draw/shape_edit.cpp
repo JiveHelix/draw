@@ -38,4 +38,34 @@ double DragAngleDifference(double first, double second)
 }
 
 
+template<typename T>
+T Modulo(T a, T b)
+{
+    if constexpr (std::is_floating_point_v<T>)
+    {
+        return std::fmod(std::fmod(a, b) + b, b);
+    }
+    else
+    {
+        return (a % b + b) % b;
+    }
+}
+
+
+double AdjustRotation(
+    double startingRotation,
+    const tau::Point2d<double> &center,
+    const tau::Point2d<double> &referencePoint,
+    const tau::Point2d<double> &endPoint)
+{
+    auto beginAngle = (referencePoint - center).GetAngle();
+    auto endAngle = (endPoint - center).GetAngle();
+
+    auto difference = endAngle - beginAngle;
+    startingRotation += difference;
+
+    return Modulo(startingRotation + 180.0, 360.0) - 180.0;
+}
+
+
 } // end namespace draw

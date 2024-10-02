@@ -25,6 +25,7 @@ target_sources(
     cross.h
     cross_shape.h
     drag.h
+    draw_context.h
     draw_ellipse.h
     draw_lines.h
     draw_segments.h
@@ -67,6 +68,7 @@ target_sources(
     views/lines_shape_view.h
     views/look_view.h
     views/node_settings_view.h
+    views/order_view.h
     views/pixel_canvas.h
     views/pixel_view.h
     views/pixel_view_settings.h
@@ -80,6 +82,7 @@ target_sources(
     views/waveform_view.h
     cross.cpp
     cross_shape.cpp
+    draw_context.cpp
     draw_segments.cpp
     ellipse.cpp
     oddeven.cpp
@@ -108,6 +111,7 @@ target_sources(
     views/lines_shape_view.cpp
     views/look_view.cpp
     views/node_settings_view.cpp
+    views/order_view.cpp
     views/pixel_canvas.cpp
     views/pixel_view.cpp
     views/pixel_view_settings.cpp

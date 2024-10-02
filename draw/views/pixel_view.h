@@ -18,9 +18,38 @@ namespace draw
 {
 
 
+struct PixelViewOptions
+{
+    bool useDualZoom;
+    bool displayControls;
+
+    PixelViewOptions()
+        :
+        useDualZoom(false),
+        displayControls(true)
+    {
+
+    }
+
+    PixelViewOptions & SetUseDualZoom(bool value)
+    {
+        this->useDualZoom = value;
+
+        return *this;
+    }
+
+    PixelViewOptions & SetDisplayControls(bool value)
+    {
+        this->displayControls = value;
+
+        return *this;
+    }
+};
+
+
 class PixelView: public wxPanel
 {
-    static constexpr int margin = 5;
+    static constexpr int margin = 3;
     static constexpr int gridSpacing = 3;
 
 public:
@@ -28,7 +57,8 @@ public:
 
     PixelView(
         wxWindow *parent,
-        PixelViewControl control);
+        PixelViewControl control,
+        PixelViewOptions options = PixelViewOptions{});
 
     wxSize DoGetBestSize() const override;
 
@@ -36,6 +66,7 @@ private:
     Size GetWindowSize_(const Size &canvasSize) const;
 
 private:
+    PixelViewOptions options_;
     wxWindow *horizontalZoom_;
     wxWindow *verticalZoom_;
     wxBoxSizer *controlsSizer_;
@@ -46,7 +77,10 @@ private:
 class PixelFrame: public wxFrame
 {
 public:
-    PixelFrame(PixelViewControl control, const std::string &title);
+    PixelFrame(
+        PixelViewControl control,
+        const std::string &title,
+        PixelViewOptions options = PixelViewOptions{});
 };
 
 

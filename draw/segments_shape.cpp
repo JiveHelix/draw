@@ -16,14 +16,14 @@ SegmentsShape::SegmentsShape(
 }
 
 
-void SegmentsShape::Draw(wxpex::GraphicsContext &context)
+void SegmentsShape::Draw(DrawContext &context)
 {
     if (this->points_.empty())
     {
         return;
     }
 
-    ConfigureLook(context, this->look_);
+    context.ConfigureLook(this->look_);
     auto path = context->CreatePath();
 
     auto point = std::begin(this->points_);

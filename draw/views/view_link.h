@@ -9,28 +9,76 @@ namespace draw
 {
 
 
-enum class LinkType: uint8_t
+enum class Link: uint8_t
 {
+    none = 0x00,
     vertical = 0x01,
     horizontal = 0x02,
-    both = vertical & horizontal
+    both = 0x03
 };
 
 
 inline
-bool IsHorizontal(LinkType linkType)
+bool IsHorizontal(Link link)
 {
-    return static_cast<uint8_t>(linkType)
-        & static_cast<uint8_t>(LinkType::horizontal);
+    return static_cast<uint8_t>(link)
+        & static_cast<uint8_t>(Link::horizontal);
 }
 
 
 inline
-bool IsVertical(LinkType linkType)
+bool IsVertical(Link link)
 {
-    return static_cast<uint8_t>(linkType)
-        & static_cast<uint8_t>(LinkType::vertical);
+    return static_cast<uint8_t>(link)
+        & static_cast<uint8_t>(Link::vertical);
 }
+
+
+struct LinkOptions
+{
+    Link scale;
+    Link position;
+    Link size;
+
+    LinkOptions()
+        :
+        scale(Link::both),
+        position(Link::both),
+        size(Link::both)
+    {
+
+    }
+
+    LinkOptions & SetAll(Link all)
+    {
+        this->scale = all;
+        this->position = all;
+        this->size = all;
+
+        return *this;
+    }
+
+    LinkOptions & SetScale(Link scale_)
+    {
+        this->scale = scale_;
+
+        return *this;
+    }
+
+    LinkOptions & SetPosition(Link position_)
+    {
+        this->position = position_;
+
+        return *this;
+    }
+
+    LinkOptions & SetSize(Link size_)
+    {
+        this->size = size_;
+
+        return *this;
+    }
+};
 
 
 class ViewLink
@@ -39,15 +87,16 @@ public:
     ViewLink(
         ViewSettingsControl first,
         ViewSettingsControl second,
-        LinkType linkType = LinkType::both)
+        LinkOptions options = LinkOptions{})
         :
         firstViewControl_(first),
         secondViewControl_(second),
+        options_(options),
         ignoreSize_(false),
         ignoreScale_(false),
         ignorePosition_(false)
     {
-        if (IsHorizontal(linkType))
+        if (IsHorizontal(options.size))
         {
             this->firstViewSizeWidth_ = IntEndpoint(
                 this,
@@ -58,7 +107,10 @@ public:
                 this,
                 second.viewSize.width,
                 &ViewLink::OnSecondViewWidth_);
+        }
 
+        if (IsHorizontal(options.scale))
+        {
             this->firstScaleHorizontal_ = FloatEndpoint(
                 this,
                 first.scale.horizontal,
@@ -68,7 +120,10 @@ public:
                 this,
                 second.scale.horizontal,
                 &ViewLink::OnSecondScaleHorizontal_);
+        }
 
+        if (IsHorizontal(options.position))
+        {
             this->firstPositionX_ = IntEndpoint(
                 this,
                 first.viewPosition.x,
@@ -80,7 +135,7 @@ public:
                 &ViewLink::OnSecondPositionX_);
         }
 
-        if (IsVertical(linkType))
+        if (IsVertical(options.size))
         {
             this->firstViewSizeHeight_ = IntEndpoint(
                 this,
@@ -91,7 +146,10 @@ public:
                 this,
                 second.viewSize.height,
                 &ViewLink::OnSecondViewHeight_);
+        }
 
+        if (IsVertical(options.scale))
+        {
             this->firstScaleVertical_ = FloatEndpoint(
                 this,
                 first.scale.vertical,
@@ -101,7 +159,10 @@ public:
                 this,
                 second.scale.vertical,
                 &ViewLink::OnSecondScaleVertical_);
+        }
 
+        if (IsVertical(options.position))
+        {
             this->firstPositionY_ = IntEndpoint(
                 this,
                 first.viewPosition.y,
@@ -116,12 +177,16 @@ public:
 
 private:
     template<typename T, typename U>
-    static void SetChanged_(T &control, U value)
+    static bool SetChanged_(T &control, U value)
     {
         if (value != control.Get())
         {
             control.Set(value);
+
+            return true;
         }
+
+        return false;
     }
 
     void OnFirstViewHeight_(int height)
@@ -181,7 +246,16 @@ private:
 
         auto ignore = jive::ScopeFlag(this->ignoreScale_);
         auto bypass = ViewSettingsBypass(this->secondViewControl_);
-        SetChanged_(this->secondScaleVertical_, scale);
+
+        if (SetChanged_(this->secondScaleVertical_, scale))
+        {
+            if (!IsVertical(this->options_.position))
+            {
+                // The vertical component of position on the linked view will
+                // not be adjusted.
+                this->secondViewControl_.recenterVertical.Trigger();
+            }
+        }
     }
 
     void OnSecondScaleVertical_(double scale)
@@ -193,7 +267,16 @@ private:
 
         auto ignore = jive::ScopeFlag(this->ignoreScale_);
         auto bypass = ViewSettingsBypass(this->firstViewControl_);
-        SetChanged_(this->firstScaleVertical_, scale);
+
+        if (SetChanged_(this->firstScaleVertical_, scale))
+        {
+            if (!IsVertical(this->options_.position))
+            {
+                // The vertical component of position on the linked view will
+                // not be adjusted.
+                this->firstViewControl_.recenterVertical.Trigger();
+            }
+        }
     }
 
     void OnFirstScaleHorizontal_(double scale)
@@ -205,7 +288,16 @@ private:
 
         auto ignore = jive::ScopeFlag(this->ignoreScale_);
         auto bypass = ViewSettingsBypass(this->secondViewControl_);
-        SetChanged_(this->secondScaleHorizontal_, scale);
+
+        if (SetChanged_(this->secondScaleHorizontal_, scale))
+        {
+            if (!IsHorizontal(this->options_.position))
+            {
+                // The horizontal component of position on the linked view will
+                // not be adjusted.
+                this->secondViewControl_.recenterHorizontal.Trigger();
+            }
+        }
     }
 
     void OnSecondScaleHorizontal_(double scale)
@@ -217,7 +309,16 @@ private:
 
         auto ignore = jive::ScopeFlag(this->ignoreScale_);
         auto bypass = ViewSettingsBypass(this->firstViewControl_);
-        SetChanged_(this->firstScaleHorizontal_, scale);
+
+        if (SetChanged_(this->firstScaleHorizontal_, scale))
+        {
+            if (!IsHorizontal(this->options_.position))
+            {
+                // The horizontal component of position on the linked view will
+                // not be adjusted.
+                this->firstViewControl_.recenterHorizontal.Trigger();
+            }
+        }
     }
 
     void OnFirstPositionY_(int position)
@@ -291,6 +392,7 @@ private:
 private:
     ViewSettingsControl firstViewControl_;
     ViewSettingsControl secondViewControl_;
+    LinkOptions options_;
     bool ignoreSize_;
     bool ignoreScale_;
     bool ignorePosition_;

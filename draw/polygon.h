@@ -36,6 +36,12 @@ struct CenteredPoints
     PointsDouble points;
 
     CenteredPoints(const PointsDouble &points_);
+
+    CenteredPoints(
+        const tau::Point2d<double> &pointsCenter,
+        const tau::Point2d<double> &transformCenter,
+        double width,
+        double height);
 };
 
 
@@ -45,7 +51,7 @@ struct PolygonTemplate
     T<CenterGroup> center;
     T<ScaleRange> scale;
     T<RotationRange> rotation;
-    T<pex::MakeList<tau::Point2dGroup<double>, 4>> points;
+    T<pex::List<tau::Point2dGroup<double>, 4>> points;
 
     static constexpr auto fields = PolygonFields<PolygonTemplate>::fields;
     static constexpr auto fieldsTypeName = "Polygon";

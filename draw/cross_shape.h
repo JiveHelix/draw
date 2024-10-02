@@ -35,7 +35,7 @@ public:
 
 
 void DrawCross(
-    wxpex::GraphicsContext &context,
+    DrawContext &context,
     const Cross &cross);
 
 
@@ -46,7 +46,7 @@ class CrossShape:
 public:
     CrossShape() = default;
     CrossShape(const Cross &cross_, const Look &look_);
-    void Draw(wxpex::GraphicsContext &context) override;
+    void Draw(DrawContext &context) override;
 };
 
 

@@ -41,6 +41,8 @@ protected:
 private:
     void OnImageSize_(const Size &imageSize);
 
+    void OnVirtualSize_(const Size &virtualSize);
+
     void OnSize_(wxSizeEvent &event);
 
     void OnMouseMotion_(wxMouseEvent &event);
@@ -62,8 +64,6 @@ private:
     void OnCursor_(wxpex::Cursor cursor);
 
     void OnViewPosition_(const Point &viewPosition);
-
-    void SizeVirtualPanel_(const Scale &scale);
 
     void OnPixels_(const std::shared_ptr<Pixels> &pixels);
 
@@ -128,7 +128,7 @@ private:
             return true;
         }
 
-        auto gc = wxpex::GraphicsContext(context);
+        auto gc = DrawContext(context);
 
         auto viewPosition =
             (this->viewPositionEndpoint_.Get() + correction)
@@ -150,7 +150,7 @@ private:
 
 private:
     bool ignoreViewPosition_;
-    bool skipUpdateViewPosition_;
+    jive::CountFlag<uint8_t> skipUpdateViewPosition_;
 
     using SizeEndpoint = pex::Endpoint<PixelCanvas, SizeControl>;
     using PositionEndpoint = pex::Endpoint<PixelCanvas, PointControl>;
@@ -159,6 +159,7 @@ private:
     static_assert(pex::IsGroupNode<PointControl>);
 
     SizeEndpoint imageSizeEndpoint_;
+    SizeEndpoint virtualSizeEndpoint_;
     PositionEndpoint viewPositionEndpoint_;
     ScaleEndpoint scaleEndpoint_;
 

@@ -25,7 +25,7 @@ struct LinesShapeTemplate
 {
     T<bool> infinite;
     T<pex::MakeRange<double, pex::Limit<0>, pex::Limit<2000>>> length;
-    T<draw::LookGroup> look;
+    T<LookGroup> look;
 
     static constexpr auto fields =
         LinesShapeFields<LinesShapeTemplate>::fields;
@@ -57,7 +57,7 @@ public:
         const LinesShapeSettings &settings,
         const Lines &lines);
 
-    void Draw(wxpex::GraphicsContext &context) override;
+    void Draw(DrawContext &context) override;
 
     LinesShapeSettings settings_;
     Lines lines_;

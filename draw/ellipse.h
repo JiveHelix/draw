@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fields/fields.h>
+#include "draw/draw_context.h"
 #include <pex/group.h>
 #include <pex/range.h>
 #include <tau/vector2d.h>
@@ -50,6 +51,7 @@ struct Ellipse: public EllipseTemplate<pex::Identity>
     bool Contains(const tau::Point2d<double> &point, double margin) const;
     PointsDouble GetPoints() const;
     void EditPoint(const tau::Point2d<double> &point, size_t index);
+    void Draw(DrawContext &context);
 };
 
 

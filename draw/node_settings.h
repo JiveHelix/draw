@@ -16,7 +16,7 @@ template<typename T>
 struct NodeSettingsFields
 {
     static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::select, "select"),
+        fields::Field(&T::toggleSelect, "toggleSelect"),
         fields::Field(&T::isSelected, "isSelected"),
         fields::Field(&T::highlightColor, "highlightColor"));
 };
@@ -26,7 +26,7 @@ struct NodeSettingsFields
 template<template<typename> typename T>
 struct NodeSettingsTemplate
 {
-    T<pex::MakeSignal> select;
+    T<pex::MakeSignal> toggleSelect;
     T<bool> isSelected;
     T<tau::HsvGroup<double>> highlightColor;
 
@@ -37,14 +37,23 @@ struct NodeSettingsTemplate
 
 struct NodeSettings: public NodeSettingsTemplate<pex::Identity>
 {
-    static NodeSettings Default()
-    {
-        static const auto darkGreen = tau::Hsv<double>{{136.0, 0.57, 0.36}};
+    static constexpr auto darkGreen = tau::Hsv<double>{{136.0, 0.57, 0.36}};
 
-        return {{
+    using Base = NodeSettingsTemplate<pex::Identity>;
+
+    NodeSettings()
+        :
+        Base{
             {},
             false,
-            darkGreen}};
+            darkGreen}
+    {
+
+    }
+
+    static NodeSettings Default()
+    {
+        return {};
     }
 };
 
@@ -63,12 +72,13 @@ using NodeSettingsGroup =
 
 using NodeSettingsModel = typename NodeSettingsGroup::Model;
 using NodeSettingsControl = typename NodeSettingsGroup::Control;
-using NodeSelectSignal = decltype(NodeSettingsControl::select);
+using NodeToggleSelectSignal = decltype(NodeSettingsControl::toggleSelect);
 
 using OptionalNodeSettings = std::optional<NodeSettingsControl>;
 
 template<typename Observer>
-using NodeSelectEndpoint = pex::Endpoint<Observer, NodeSelectSignal>;
+using NodeToggleSelectEndpoint =
+    pex::Endpoint<Observer, NodeToggleSelectSignal>;
 
 
 } // end namespace draw

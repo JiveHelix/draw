@@ -23,7 +23,7 @@ public:
         const Look &look,
         const PointsDouble &points);
 
-    void Draw(wxpex::GraphicsContext &context) override;
+    void Draw(DrawContext &context) override;
 
 private:
     Look look_;

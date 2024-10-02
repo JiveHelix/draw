@@ -2,7 +2,7 @@
 
 
 #include <wxpex/color.h>
-#include <wxpex/graphics.h>
+#include "draw/draw_context.h"
 
 
 namespace draw
@@ -15,7 +15,7 @@ void DrawEllipse(
     const Ellipse<double> &ellipse,
     const Look &look)
 {
-    auto gc = wxpex::GraphicsContext(std::forward<Device>(device));
+    auto gc = DrawContext(std::forward<Device>(device));
 
     if (look.antialias)
     {

@@ -7,7 +7,7 @@
 #include <memory>
 #include <vector>
 #include <pex/ordered_list.h>
-#include <wxpex/graphics.h>
+#include "draw/draw_context.h"
 #include <wxpex/async.h>
 #include <wxpex/modifier.h>
 #include <wxpex/cursor.h>
@@ -36,7 +36,7 @@ public:
 
     }
 
-    virtual void Draw(wxpex::GraphicsContext &) = 0;
+    virtual void Draw(DrawContext &) = 0;
 };
 
 
@@ -48,6 +48,7 @@ public:
     virtual ssize_t GetId() const = 0;
     virtual std::string GetName() const = 0;
     virtual NodeSettingsControl & GetNode() = 0;
+    virtual LookControl & GetLook() = 0;
     virtual pex::OrderControl & GetOrder() = 0;
 
     virtual wxWindow * CreateShapeView(wxWindow *parent) const = 0;
@@ -70,13 +71,13 @@ public:
 class Shape
     :
     public DrawnShape,
-    public pex::poly::PolyBase<nlohmann::json, Shape>
+    public pex::poly::PolyBase<nlohmann::json, Shape, ShapeModelUserBase>
 {
 public:
     static constexpr auto polyTypeName = "Shape";
 
     using ControlBase =
-        pex::poly::ControlBase<Shape, ShapeControlUserBase>;
+        pex::poly::ControlSuper<Shape, ShapeControlUserBase>;
 
     virtual bool HandlesAltClick() const { return false; }
     virtual bool HandlesControlClick() const { return false; }
@@ -85,6 +86,7 @@ public:
     virtual bool HandlesEditLine() const { return false; }
     virtual bool HandlesDrag() const { return false; }
 
+    virtual Look & GetLook() = 0;
     virtual ssize_t GetId() const = 0;
     virtual PointsDouble GetPoints() const = 0;
 
@@ -114,8 +116,6 @@ public:
     {
         return false;
     }
-
-    virtual std::shared_ptr<Shape> Copy() const = 0;
 };
 
 
@@ -209,13 +209,17 @@ struct ShapeCommon
             return this->node;
         }
 
+        LookControl & GetLook() override
+        {
+            return this->look;
+        }
+
         pex::OrderControl & GetOrder() override
         {
             return this->order;
         }
 
-        wxWindow * CreateShapeView(
-            [[maybe_unused]] wxWindow *parent) const override
+        wxWindow * CreateShapeView(wxWindow *parent) const override
         {
             if constexpr (std::is_same_v<View, NoView>)
             {
@@ -269,6 +273,11 @@ public:
         return this->id;
     }
 
+    Look & GetLook() override
+    {
+        return this->look;
+    }
+
     PointsDouble GetPoints() const override
     {
         return this->shape.GetPoints();
@@ -279,11 +288,6 @@ public:
         double margin) const override
     {
         return this->shape.Contains(point, margin);
-    }
-
-    std::shared_ptr<Shape> Copy() const override
-    {
-        return std::make_shared<Derived>(*this);
     }
 };
 
@@ -332,9 +336,16 @@ public:
             std::make_shared<Derived>(std::forward<Args>(args)...));
     }
 
-    void Append(const Shape &shape)
+#if 0
+    void Append(const DrawnShape &shape)
     {
         this->shapes_.push_back(shape.Copy());
+    }
+#endif
+
+    void Append(const std::shared_ptr<DrawnShape> &shape)
+    {
+        this->shapes_.push_back(shape);
     }
 
     static Shapes MakeResetter();
@@ -343,7 +354,7 @@ public:
 
 private:
     ssize_t id_;
-    std::vector<std::shared_ptr<DrawnShape>> shapes_;
+    ShapeVector shapes_;
 };
 
 

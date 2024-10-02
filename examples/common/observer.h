@@ -5,6 +5,27 @@
 #include "display_error.h"
 
 
+template<typename T>
+concept HasLoadSettings = requires(T t)
+{
+    { t.LoadSettings() };
+};
+
+
+template<typename T>
+concept HasSaveSettings = requires(T t)
+{
+    { t.SaveSettings() };
+};
+
+
+template<typename T>
+concept HasOpenFile = requires(T t)
+{
+    { t.OpenFile() };
+};
+
+
 template<typename Actor>
 class Observer
 {
@@ -15,22 +36,34 @@ public:
         :
         actor_(actor),
         endpoints_(this, control),
-        doOpenFile_([this](){this->actor_->OpenFile();})
+        doOpenFile_()
     {
-        this->endpoints_.openFile.Connect(
-            &Observer::OnOpenFile_);
+        if constexpr (HasOpenFile<Actor>)
+        {
+            this->doOpenFile_.emplace(
+                [this](){ this->actor_->OpenFile(); });
 
-        this->endpoints_.saveSettings.Connect(
-            &Observer::OnSaveSettings_);
+            this->endpoints_.openFile.Connect(
+                &Observer::OnOpenFile_);
 
-        this->endpoints_.loadSettings.Connect(
-            &Observer::OnLoadSettings_);
+            this->endpoints_.fileName.Connect(
+                &Observer::OnFileName_);
+        }
+
+        if constexpr (HasSaveSettings<Actor>)
+        {
+            this->endpoints_.saveSettings.Connect(
+                &Observer::OnSaveSettings_);
+        }
+
+        if constexpr (HasLoadSettings<Actor>)
+        {
+            this->endpoints_.loadSettings.Connect(
+                &Observer::OnLoadSettings_);
+        }
 
         this->endpoints_.about.Connect(
             &Observer::OnAbout_);
-
-        this->endpoints_.fileName.Connect(
-            &Observer::OnFileName_);
 
         this->endpoints_.errors.Connect(&Observer::OnErrors_);
     }
@@ -38,24 +71,36 @@ public:
 private:
     void OnFileName_(const std::string &)
     {
-        this->doOpenFile_();
+        if constexpr (HasOpenFile<Actor>)
+        {
+            (*this->doOpenFile_)();
+        }
     }
 
     void OnOpenFile_()
     {
         // OpenFile will open windows that add new callbacks on this signal.
         // Do the work later, outside of this callback.
-        this->doOpenFile_();
+        if constexpr (HasOpenFile<Actor>)
+        {
+            (*this->doOpenFile_)();
+        }
     }
 
     void OnSaveSettings_()
     {
-        this->actor_->SaveSettings();
+        if constexpr (HasSaveSettings<Actor>)
+        {
+            this->actor_->SaveSettings();
+        }
     }
 
     void OnLoadSettings_()
     {
-        this->actor_->LoadSettings();
+        if constexpr (HasLoadSettings<Actor>)
+        {
+            this->actor_->LoadSettings();
+        }
     }
 
     void OnAbout_()
@@ -71,5 +116,5 @@ private:
 private:
     Actor *actor_;
     UserEndpoints<Observer<Actor>> endpoints_;
-    wxpex::CallAfter doOpenFile_;
+    std::optional<wxpex::CallAfter> doOpenFile_;
 };

@@ -1,8 +1,9 @@
 #pragma once
 
 #include <optional>
-#include <wxpex/collapsible.h>
 #include <pex/endpoint.h>
+#include <wxpex/collapsible.h>
+#include <wxpex/static_box.h>
 
 #include "draw/node_settings.h"
 #include "draw/views/shape_display.h"
@@ -24,20 +25,13 @@ namespace draw
  ** `wxWindow::InheritsBackgroundColour()`.
  **/
 
-class NodeSettingsView: public wxpex::Collapsible
+class NodeSettingsView
 {
 public:
     static constexpr auto observerName = "draw::views::NodeSettingsView";
 
     NodeSettingsView(
-        wxWindow *parent,
-        const std::string &nodeName,
-        ShapeExpandControl expandControl,
-        std::optional<NodeSettingsControl> control);
-
-    NodeSettingsView(
-        wxWindow *parent,
-        const std::string &nodeName,
+        wxWindow *window,
         std::optional<NodeSettingsControl> control);
 
 private:
@@ -54,9 +48,41 @@ private:
             decltype(NodeSettingsControl::isSelected)
         >;
 
+    wxWindow *window_;
     std::optional<NodeSettingsControl> control_;
     Endpoint highlightEndpoint_;
-    std::string nodeName_;
+};
+
+
+class CollapsibleNodeSettingsView: public wxpex::Collapsible
+{
+public:
+    CollapsibleNodeSettingsView(
+        wxWindow *parent,
+        const std::string &nodeName,
+        ShapeExpandControl expandControl,
+        std::optional<NodeSettingsControl> control);
+
+    CollapsibleNodeSettingsView(
+        wxWindow *parent,
+        const std::string &nodeName,
+        std::optional<NodeSettingsControl> control);
+
+private:
+    NodeSettingsView nodeSettingsView_;
+};
+
+
+class BoxedNodeSettingsView: public wxpex::StaticBox
+{
+public:
+    BoxedNodeSettingsView(
+        wxWindow *parent,
+        const std::string &nodeName,
+        std::optional<NodeSettingsControl> control);
+
+private:
+    NodeSettingsView nodeSettingsView_;
 };
 
 

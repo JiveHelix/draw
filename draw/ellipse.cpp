@@ -92,6 +92,31 @@ void Ellipse::EditPoint(
 }
 
 
+void Ellipse::Draw(DrawContext &context)
+{
+    wxpex::MaintainTransform maintainTransform(context);
+
+    auto center = this->center;
+
+    // TODO: using arrow operator to access underlying wxGraphicsContext is
+    // confusing.
+    auto transform = context->GetTransform();
+    transform.Translate(center.x, center.y);
+
+    context->SetTransform(transform);
+    context->Rotate(tau::ToRadians(this->rotation));
+    double ellipseMajor = this->scale * this->major;
+    double ellipseMinor = this->scale * this->minor;
+
+    // wx draws the ellipse contained within this rectangle.
+    context->DrawEllipse(
+        -ellipseMajor / 2.0,
+        -ellipseMinor / 2.0,
+        ellipseMajor,
+        ellipseMinor);
+}
+
+
 } // end namespace draw
 
 

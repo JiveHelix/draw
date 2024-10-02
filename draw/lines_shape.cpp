@@ -25,7 +25,7 @@ LinesShape::LinesShape(
 }
 
 
-void LinesShape::Draw(wxpex::GraphicsContext &context)
+void LinesShape::Draw(DrawContext &context)
 {
     if (this->lines_.empty())
     {
@@ -33,7 +33,7 @@ void LinesShape::Draw(wxpex::GraphicsContext &context)
     }
 
     wxpex::MaintainTransform maintainTransform(context);
-    ConfigureLook(context, this->settings_.look);
+    context.ConfigureLook(this->settings_.look);
     auto path = context->CreatePath();
 
     if (this->settings_.infinite)

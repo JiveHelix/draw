@@ -7,7 +7,7 @@ namespace draw
 
 
 void DrawCross(
-    wxpex::GraphicsContext &context,
+    DrawContext &context,
     const Cross &cross)
 {
     auto transform = context->GetTransform();
@@ -41,10 +41,10 @@ CrossShape::CrossShape(const Cross &cross_, const Look &look_)
 
 }
 
-void CrossShape::Draw(wxpex::GraphicsContext &context)
+void CrossShape::Draw(DrawContext &context)
 {
     wxpex::MaintainTransform maintainTransform(context);
-    ConfigureLook(context, this->look);
+    context.ConfigureLook(this->look);
     DrawCross(context, this->cross);
 }
 

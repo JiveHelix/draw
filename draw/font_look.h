@@ -4,6 +4,7 @@
 #include <fields/fields.h>
 #include <pex/group.h>
 #include <wxpex/color_picker.h>
+#include "draw/draw_context.h"
 
 
 namespace draw
@@ -61,7 +62,7 @@ using FontLookControl = typename FontLookGroup::Control;
 
 
 void ConfigureFontLook(
-    wxpex::GraphicsContext &context,
+    DrawContext &context,
     const FontLook &fontLook);
 
 

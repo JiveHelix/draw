@@ -8,6 +8,7 @@
 #include <draw/views/pixel_view.h>
 #include <draw/png.h>
 #include "user.h"
+#include "about_window.h"
 #include "display_error.h"
 
 
@@ -15,6 +16,12 @@ using Pixel = uint32_t;
 using PngPixel = uint8_t;
 static constexpr size_t valueCount = 256;
 
+
+template<typename T>
+concept HasLoadPng = requires(T t)
+{
+    { t.LoadPng(std::declval<draw::GrayPng<PngPixel>>()) };
+};
 
 
 template<typename Derived>
@@ -73,44 +80,47 @@ public:
 
     void OpenFile()
     {
-        auto fileName = this->user_.fileName.Get();
-
-        if (!jive::path::IsFile(fileName))
+        if constexpr (HasLoadPng<Derived>)
         {
-            auto [directory, file] = jive::path::Split(fileName);
+            auto fileName = this->user_.fileName.Get();
 
-            wxpex::FileDialogOptions options{};
-            options.message = "Choose a PNG file";
-            options.wildcard = "*.png";
-
-            wxFileDialog openFile(
-                nullptr,
-                wxString(options.message),
-                wxString(directory),
-                wxString(file),
-                wxString(options.wildcard),
-                options.style);
-
-            if (openFile.ShowModal() == wxID_CANCEL)
+            if (!jive::path::IsFile(fileName))
             {
+                auto [directory, file] = jive::path::Split(fileName);
+
+                wxpex::FileDialogOptions options{};
+                options.message = "Choose a PNG file";
+                options.wildcard = "*.png";
+
+                wxFileDialog openFile(
+                    nullptr,
+                    wxString(options.message),
+                    wxString(directory),
+                    wxString(file),
+                    wxString(options.wildcard),
+                    options.style);
+
+                if (openFile.ShowModal() == wxID_CANCEL)
+                {
+                    return;
+                }
+
+                this->user_.fileName.Set(openFile.GetPath());
+
                 return;
             }
 
-            this->user_.fileName.Set(openFile.GetPath());
+            // Open PNG file, and read data into Eigen matrix.
+            // Display pixel view.
+            draw::GrayPng<PngPixel> png(this->user_.fileName.Get());
 
-            return;
+            this->GetDerived()->LoadPng(png);
+
+            this->user_.pixelView.viewSettings.imageSize.Set(png.GetSize());
+            this->user_.pixelView.viewSettings.FitZoom();
+
+            this->GetDerived()->Display();
         }
-
-        // Open PNG file, and read data into Eigen matrix.
-        // Display pixel view.
-        draw::GrayPng<PngPixel> png(this->user_.fileName.Get());
-
-        this->GetDerived()->LoadPng(png);
-
-        this->user_.pixelView.viewSettings.imageSize.Set(png.GetSize());
-        this->user_.pixelView.viewSettings.FitZoom();
-
-        this->GetDerived()->Display();
     }
 
     void Shutdown()

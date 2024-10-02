@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include <wxpex/graphics.h>
+#include "draw/draw_context.h"
 #include "draw/oddeven.h"
 
 
@@ -10,7 +10,7 @@ namespace draw
 
 
 void DrawSegments(
-    wxpex::GraphicsContext &context,
+    DrawContext &context,
     const PointsDouble &points);
 
 

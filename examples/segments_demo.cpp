@@ -1,3 +1,4 @@
+#include <cmath>
 #include <iostream>
 #include <mutex>
 #include <condition_variable>
@@ -7,8 +8,10 @@
 #include <tau/angles.h>
 #include <wxpex/app.h>
 #include <wxpex/border_sizer.h>
-#include <wxpex/collapsible.h>
-#include <wxpex/scrolled.h>
+#include <wxpex/list_view.h>
+#include <wxpex/check_box.h>
+#include <wxpex/button.h>
+
 
 #include <draw/pixels.h>
 #include <draw/segments_shape.h>
@@ -23,6 +26,58 @@
 #include "common/brain.h"
 
 
+using FrequencyRange =
+    pex::MakeRange<double, pex::Limit<0, 1, 32>, pex::Limit<32>>;
+
+constexpr size_t initialFunctionCount = 4;
+
+
+template<typename T>
+struct SettingsFields
+{
+    static constexpr auto fields = std::make_tuple(
+        fields::Field(&T::functionCount, "functionCount"),
+        fields::Field(&T::pointCount, "pointCount"),
+        fields::Field(&T::startFrequency, "startFrequency"),
+        fields::Field(&T::endFrequency, "endFrequency"),
+        fields::Field(&T::amplitude, "amplitude"),
+        fields::Field(&T::isLogarithmic, "isLogarithmic"),
+        fields::Field(&T::resetPhase, "resetPhase"),
+        fields::Field(&T::resetLook, "resetLook"));
+};
+
+
+template<template<typename> typename T>
+struct SettingsTemplate
+{
+    T<pex::MakeRange<size_t, pex::Limit<2>, pex::Limit<32>>> functionCount;
+    T<pex::MakeRange<size_t, pex::Limit<2>, pex::Limit<2048>>> pointCount;
+    T<FrequencyRange> startFrequency;
+    T<FrequencyRange> endFrequency;
+    T<pex::MakeRange<double, pex::Limit<0>, pex::Limit<1000>>> amplitude;
+    T<bool> isLogarithmic;
+    T<pex::MakeSignal> resetPhase;
+    T<pex::MakeSignal> resetLook;
+
+    static constexpr auto fields = SettingsFields<SettingsTemplate>::fields;
+};
+
+
+struct Settings: public SettingsTemplate<pex::Identity>
+{
+    static Settings Default()
+    {
+        return {{initialFunctionCount, 256, 1.0, 4.0, 200.0, true, {}, {}}};
+    }
+};
+
+using SettingsGroup =
+    pex::Group<SettingsFields, SettingsTemplate, pex::PlainT<Settings>>;
+
+using SettingsModel = typename SettingsGroup::Model;
+using SettingsControl = typename SettingsGroup::Control;
+
+
 template<typename T>
 struct TrigFields
 {
@@ -30,7 +85,6 @@ struct TrigFields
         fields::Field(&T::amplitude, "amplitude"),
         fields::Field(&T::frequency, "frequency"),
         fields::Field(&T::phase, "phase"),
-        fields::Field(&T::points, "points"),
         fields::Field(&T::look, "look"));
 };
 
@@ -39,9 +93,8 @@ template<template<typename> typename T>
 struct TrigTemplate
 {
     T<pex::MakeRange<double, pex::Limit<0>, pex::Limit<1000>>> amplitude;
-    T<pex::MakeRange<double, pex::Limit<-10>, pex::Limit<10>>> frequency;
+    T<FrequencyRange> frequency;
     T<pex::MakeRange<double, pex::Limit<-180>, pex::Limit<180>>> phase;
-    T<pex::MakeRange<size_t, pex::Limit<2>, pex::Limit<1920>>> points;
     T<draw::LookGroup> look;
 };
 
@@ -50,7 +103,7 @@ struct TrigSettings: public TrigTemplate<pex::Identity>
 {
     static TrigSettings Default()
     {
-        return {{400.0, 1.0, 0.0, 100, draw::Look::Default()}};
+        return {{400.0, 1.0, 0.0, draw::Look::Default()}};
     }
 };
 
@@ -66,34 +119,399 @@ template<typename T>
 struct DemoFields
 {
     static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::sine, "sine"),
-        fields::Field(&T::cosine, "cosine"));
+        fields::Field(&T::settings, "settings"),
+        fields::Field(&T::functions, "functions"));
 };
 
 
 template<template<typename> typename T>
 struct DemoTemplate
 {
-    T<TrigGroup> sine;
-    T<TrigGroup> cosine;
+    T<SettingsGroup> settings;
+    T<pex::List<TrigGroup, initialFunctionCount>> functions;
 };
 
 
-using DemoGroup = pex::Group<DemoFields, DemoTemplate>;
+using FunctionCountControl = decltype(SettingsControl::functionCount);
+using FrequencyControl = decltype(SettingsControl::startFrequency);
+using AmplitudeControl = decltype(SettingsControl::amplitude);
+using BooleanControl = decltype(SettingsControl::isLogarithmic);
+using SignalControl = pex::control::Signal<>;
+
+
+struct DemoCustom
+{
+    template<typename Base>
+    class Model: public Base
+    {
+    public:
+        Model()
+            :
+            Base{},
+            ignoreFunctionEndpoints_{},
+
+            functionCountEndpoint_(
+                this,
+                this->settings.functionCount,
+                &Model::OnFunctionCount_),
+
+            startFrequencyEndpoint_(
+                this,
+                this->settings.startFrequency,
+                &Model::OnStartingFrequency_),
+
+            endFrequencyEndpoint_(
+                this,
+                this->settings.endFrequency,
+                &Model::OnEndingFrequency_),
+
+            amplitudeEndpoint_(
+                this,
+                this->settings.amplitude,
+                &Model::OnAmplitude_),
+
+            isLogarithmicEndpoint_(
+                this,
+                this->settings.isLogarithmic,
+                &Model::OnIsLogarithmic_),
+
+            resetPhaseEndpoint_(
+                this,
+                this->settings.resetPhase,
+                &Model::OnResetPhase_),
+
+            resetLookEndpoint_(
+                this,
+                this->settings.resetLook,
+                &Model::OnResetLook_),
+
+            functionFrequencyEndpoints_{}
+        {
+            this->CreateFunctions_();
+            this->OnResetLook_();
+        }
+
+        static double GetFundamental(double frequency)
+        {
+            auto positiveFrequency = std::abs(frequency);
+
+            // The FrequencyRange should not allow an input of zero.
+            assert(positiveFrequency > 0.0);
+
+            double octave = std::floor(std::log2(positiveFrequency));
+
+            return positiveFrequency / std::exp2(octave);
+        }
+
+        static double GetHue(double frequency)
+        {
+            // Rounding-errors can disagree with mathematical theory.
+            // It shouldn't be possible to obtain a result less than 1.0, yet
+            // it is possible.
+            double fundamental = std::max(1.0, GetFundamental(frequency));
+            return 360.0 * (fundamental - 1.0);
+        }
+
+    private:
+        void CreateLinearFunctions_()
+        {
+            auto theseSettings = this->settings.Get();
+
+            double frequencyRange =
+                theseSettings.endFrequency - theseSettings.startFrequency;
+
+            double frequencyStep =
+                frequencyRange / (theseSettings.functionCount - 1);
+
+            double nextFrequency = theseSettings.startFrequency;
+
+            jive::ScopeFlag ignore(this->ignoreFunctionEndpoints_);
+
+            for (size_t i = 0; i < theseSettings.functionCount; ++i)
+            {
+                auto &functionModel = this->functions[i];
+                functionModel.amplitude.Set(theseSettings.amplitude);
+                functionModel.frequency.Set(nextFrequency);
+                nextFrequency += frequencyStep;
+                functionModel.phase.Set(0);
+            }
+        }
+
+        void CreateLogarithmicFunctions_()
+        {
+            auto theseSettings = this->settings.Get();
+
+            assert(theseSettings.functionCount > 1);
+
+            double frequencyRange =
+                theseSettings.endFrequency / theseSettings.startFrequency;
+
+            double stepFactor = std::pow(
+                frequencyRange,
+                1.0 / static_cast<double>(theseSettings.functionCount - 1));
+
+            double nextFrequency = theseSettings.startFrequency;
+
+            jive::ScopeFlag ignore(this->ignoreFunctionEndpoints_);
+
+            auto defer = pex::MakeDefer(this->functions);
+
+            for (size_t i = 0; i < theseSettings.functionCount; ++i)
+            {
+                auto &functionModel = defer[i];
+                functionModel.amplitude.Set(theseSettings.amplitude);
+                functionModel.frequency.Set(nextFrequency);
+                nextFrequency *= stepFactor;
+                functionModel.phase.Set(0);
+            }
+        }
+
+        void CreateFunctions_()
+        {
+            using Period = std::chrono::duration<double, std::micro>;
+            using Clock = std::chrono::steady_clock;
+            using TimePoint = std::chrono::time_point<Clock, Period>;
+
+            TimePoint start = Clock::now();
+
+            if (this->settings.isLogarithmic.Get())
+            {
+                this->CreateLogarithmicFunctions_();
+            }
+            else
+            {
+                this->CreateLinearFunctions_();
+            }
+
+            TimePoint end = Clock::now();
+
+            std::cout << "Created functions: "
+                << (end - start).count() << " us\n";
+        }
+
+        void OnFunctionFrequency_(double frequency, size_t index)
+        {
+            if (this->ignoreFunctionEndpoints_)
+            {
+                return;
+            }
+
+            this->functions[index].look.strokeColor.hue.Set(GetHue(frequency));
+        }
+
+        void OnFunctionCount_(size_t functionCount)
+        {
+            bool countIncreased = functionCount > this->functions.count.Get();
+
+            this->functionFrequencyEndpoints_.clear();
+            this->functions.count.Set(functionCount);
+
+            this->CreateFunctions_();
+
+            if (countIncreased)
+            {
+                this->OnResetLook_();
+            }
+
+            for (size_t i = 0; i < functionCount; ++i)
+            {
+                this->functionFrequencyEndpoints_.emplace_back(
+                    this,
+                    this->functions[i].frequency,
+                    &Model::OnFunctionFrequency_,
+                    i);
+            }
+        }
+
+        void OnStartingFrequency_(double)
+        {
+            this->CreateFunctions_();
+            this->OnResetLook_();
+        }
+
+        void OnEndingFrequency_(double)
+        {
+            this->CreateFunctions_();
+            this->OnResetLook_();
+        }
+
+        void OnAmplitude_(double)
+        {
+            this->CreateFunctions_();
+        }
+
+        void OnIsLogarithmic_(bool)
+        {
+            this->CreateFunctions_();
+            this->OnResetLook_();
+        }
+
+        void OnResetPhase_()
+        {
+            auto count = this->functions.count.Get();
+
+            for (size_t i = 0; i < count; ++i)
+            {
+                this->functions[i].phase.Set(0.0);
+            }
+        }
+
+        void OnResetLook_()
+        {
+            auto count = this->functions.count.Get();
+
+            for (size_t i = 0; i < count; ++i)
+            {
+                auto &functionModel = this->functions[i];
+                auto &look = functionModel.look;
+
+                auto thisLook = draw::Look::Default();
+                thisLook.strokeColor.saturation = 1.0;
+
+                thisLook.strokeColor.hue =
+                    GetHue(functionModel.frequency.Get());
+
+                look.Set(thisLook);
+            }
+        }
+
+        using FunctionCountEndpoint =
+            pex::Endpoint<Model, FunctionCountControl>;
+
+        using FrequencyEndpoint =
+            pex::Endpoint<Model, FrequencyControl>;
+
+        using AmplitudeEndpoint =
+            pex::Endpoint<Model, AmplitudeControl>;
+
+        using BooleanEndpoint =
+            pex::Endpoint<Model, BooleanControl>;
+
+        using SignalEndpoint =
+            pex::Endpoint<Model, SignalControl>;
+
+        using FunctionFrequencyEndpoint =
+            pex::BoundEndpoint
+            <
+                FrequencyControl,
+                decltype(&Model::OnFunctionFrequency_)
+            >;
+
+        bool ignoreFunctionEndpoints_;
+        FunctionCountEndpoint functionCountEndpoint_;
+        FrequencyEndpoint startFrequencyEndpoint_;
+        FrequencyEndpoint endFrequencyEndpoint_;
+        AmplitudeEndpoint amplitudeEndpoint_;
+        BooleanEndpoint isLogarithmicEndpoint_;
+        SignalEndpoint resetPhaseEndpoint_;
+        SignalEndpoint resetLookEndpoint_;
+
+        std::vector<FunctionFrequencyEndpoint> functionFrequencyEndpoints_;
+    };
+};
+
+
+using DemoGroup = pex::Group<DemoFields, DemoTemplate, DemoCustom>;
 using DemoModel = typename DemoGroup::Model;
 using DemoControl = typename DemoGroup::Control;
 
+using FunctionsControl = decltype(DemoControl::functions);
 
-class TrigSettingsView: public wxpex::Collapsible
+
+class SettingsView: public wxPanel
 {
 public:
-    using LayoutOptions = wxpex::LayoutOptions;
+    SettingsView(wxWindow *parent, SettingsControl control)
+        :
+        wxPanel(parent, wxID_ANY)
+    {
+        auto functionCount = wxpex::LabeledWidget(
+            this,
+            "functions",
+            new wxpex::FieldSlider(
+                this,
+                control.functionCount,
+                control.functionCount.value));
 
-    TrigSettingsView(
+        auto pointCount = wxpex::LabeledWidget(
+            this,
+            "points",
+            new wxpex::FieldSlider(
+                this,
+                control.pointCount,
+                control.pointCount.value));
+
+        auto startFrequency = wxpex::LabeledWidget(
+            this,
+            "start frequency",
+            new wxpex::FieldSlider(
+                this,
+                control.startFrequency,
+                control.startFrequency.value));
+
+        auto endFrequency = wxpex::LabeledWidget(
+            this,
+            "end frequency",
+            new wxpex::FieldSlider(
+                this,
+                control.endFrequency,
+                control.endFrequency.value));
+
+        auto amplitude = wxpex::LabeledWidget(
+            this,
+            "amplitude",
+            new wxpex::FieldSlider(
+                this,
+                control.amplitude,
+                control.amplitude.value));
+
+        auto isLogarithmic = wxpex::LabeledWidget(
+            this,
+            "logarithmic",
+            new wxpex::CheckBox(
+                this,
+                "",
+                control.isLogarithmic));
+
+        auto resetPhase = new wxpex::Button(
+            this,
+            "reset phase",
+            control.resetPhase);
+
+        auto resetLook = new wxpex::Button(
+            this,
+            "reset look",
+            control.resetLook);
+
+        auto sizer = wxpex::LayoutLabeled(
+            wxpex::LayoutOptions{},
+            functionCount,
+            pointCount,
+            startFrequency,
+            endFrequency,
+            amplitude,
+            isLogarithmic);
+
+        auto topSizer = wxpex::LayoutItems(
+            wxpex::verticalItems,
+            sizer.release(),
+            wxpex::LayoutItems(
+                wxpex::horizontalItems,
+                resetPhase,
+                resetLook).release());
+
+        this->SetSizerAndFit(topSizer.release());
+    }
+};
+
+
+class FunctionView: public wxpex::Collapsible
+{
+public:
+    FunctionView(
         wxWindow *parent,
         const std::string &name,
-        TrigControl control,
-        const LayoutOptions &layoutOptions)
+        TrigControl control)
         :
         wxpex::Collapsible(parent, name)
     {
@@ -104,7 +522,7 @@ public:
         auto amplitude = wxpex::LabeledWidget(
             panel,
             "amplitude",
-            new wxpex::ValueSlider(
+            new wxpex::FieldSlider(
                 panel,
                 control.amplitude,
                 control.amplitude.value));
@@ -112,7 +530,7 @@ public:
         auto frequency = wxpex::LabeledWidget(
             panel,
             "frequency",
-            new wxpex::ValueSlider(
+            new wxpex::FieldSlider(
                 panel,
                 control.frequency,
                 control.frequency.value));
@@ -120,32 +538,23 @@ public:
         auto phase = wxpex::LabeledWidget(
             panel,
             "phase",
-            new wxpex::ValueSlider(
+            new wxpex::FieldSlider(
                 panel,
                 control.phase,
                 control.phase.value));
-
-        auto points = wxpex::LabeledWidget(
-            panel,
-            "points",
-            new wxpex::ValueSlider(
-                panel,
-                control.points,
-                control.points.value));
 
         auto look =
             new draw::LookView(
                 panel,
                 "Look",
                 control.look,
-                layoutOptions);
+                wxpex::LayoutOptions{});
 
         auto labeledSizer = wxpex::LayoutLabeled(
-            layoutOptions,
+            wxpex::LayoutOptions{},
             amplitude,
             frequency,
-            phase,
-            points);
+            phase);
 
         auto sizer = wxpex::LayoutItems(
             wxpex::ItemOptions(wxpex::verticalItems).SetProportion(1),
@@ -157,42 +566,55 @@ public:
 };
 
 
-class DemoControls: public wxpex::Scrolled
+class FunctionListView: public wxpex::ListView<FunctionsControl>
+{
+public:
+    using Base = wxpex::ListView<FunctionsControl>;
+
+    FunctionListView(wxWindow *parent, FunctionsControl control)
+        :
+        Base(parent, control)
+    {
+        this->Initialize_();
+    }
+
+    wxWindow * CreateView_(ListItem &listItem, size_t index) override
+    {
+        return new FunctionView(
+            this,
+            fmt::format("Function {}", index),
+            listItem);
+    }
+};
+
+
+class DemoControls: public wxPanel
 {
 public:
     DemoControls(
         wxWindow *parent,
         DemoControl control)
         :
-        wxpex::Scrolled(parent)
+        wxPanel(parent, wxID_ANY)
     {
         wxpex::LayoutOptions layoutOptions{};
         layoutOptions.labelFlags = wxALIGN_RIGHT;
 
-        auto sineView =
-            new TrigSettingsView(
-                this,
-                "Sine",
-                control.sine,
-                layoutOptions);
+        auto settingsView = new SettingsView(
+            this,
+            control.settings);
 
-        auto cosineView =
-            new TrigSettingsView(
-                this,
-                "Cosine",
-                control.cosine,
-                layoutOptions);
-
-        sineView->Expand();
-        cosineView->Expand();
+        auto functionList = new FunctionListView(
+            this,
+            control.functions);
 
         auto sizer = wxpex::LayoutItems(
-            wxpex::ItemOptions(wxpex::verticalItems).SetProportion(1),
-            sineView,
-            cosineView);
+            wxpex::verticalItems,
+            settingsView,
+            functionList);
 
-        auto topSizer = wxpex::BorderSizer(std::move(sizer), 5);
-        this->ConfigureTopSizer(wxpex::verticalScrolled, std::move(topSizer));
+        auto topSizer = wxpex::BorderSizer(std::move(sizer), 2);
+        this->SetSizerAndFit(topSizer.release());
     }
 };
 
@@ -202,36 +624,40 @@ class DemoBrain: public Brain<DemoBrain>
 public:
     DemoBrain()
         :
-        sineId_(),
-        cosineId_(),
+        shapesId_(),
         observer_(this, UserControl(this->user_)),
         demoModel_(),
         demoControl_(this->demoModel_),
 
-        sineEndpoint_(
+        imageSizeEndpoint_(
             this,
-            this->demoControl_.sine,
-            &DemoBrain::OnSine_),
+            this->userControl_.pixelView.viewSettings.imageSize,
+            &DemoBrain::OnImageSize_),
 
-        cosineEndpoint_(
+        countWillChangeEndpoint_(
             this,
-            this->demoControl_.cosine,
-            &DemoBrain::OnCosine_),
+            this->demoModel_.functions.countWillChange,
+            &DemoBrain::OnCountWillChange_),
 
-        pixelViewEndpoint_(
+        countEndpoint_(
             this,
-            this->userControl_.pixelView)
+            this->demoModel_.functions.count,
+            &DemoBrain::OnCount_),
+
+        pointCountEndpoint_(
+            this,
+            this->demoModel_.settings.pointCount,
+            &DemoBrain::OnPointCount_),
+
+        functionEndpoints_(),
+
+        listChangedConnection_(
+            this,
+            this->demoModel_.functions,
+            &DemoBrain::OnFunctionList_)
+
     {
-        this->demoControl_.sine.look.strokeEnable.Set(true);
-        this->demoControl_.cosine.look.strokeEnable.Set(true);
-
-        MakeTrigPoints_<Sin>(
-            this->sinePoints_,
-            this->demoControl_.sine.Get());
-
-        MakeTrigPoints_<Cos>(
-            this->cosinePoints_,
-            this->demoControl_.cosine.Get());
+        this->OnCount_(this->demoModel_.functions.count.Get());
     }
 
     std::string GetAppName() const
@@ -247,16 +673,6 @@ public:
         return new DemoControls(parent, this->demoControl_);
     }
 
-    void SaveSettings() const
-    {
-        std::cout << "TODO: Persist the processing settings." << std::endl;
-    }
-
-    void LoadSettings()
-    {
-        std::cout << "TODO: Restore the processing settings." << std::endl;
-    }
-
     void ShowAbout()
     {
         wxAboutBox(MakeAboutDialogInfo("Segments Demo"));
@@ -264,30 +680,36 @@ public:
 
     void Display()
     {
-        auto sineShapes = draw::Shapes(this->sineId_.Get());
+        std::cout << "Display..." << std::endl;
 
-        sineShapes.EmplaceBack<draw::SegmentsShape>(
-            this->demoModel_.sine.look.Get(),
-            this->sinePoints_);
+        using Period = std::chrono::duration<double, std::micro>;
+        using Clock = std::chrono::steady_clock;
+        using TimePoint = std::chrono::time_point<Clock, Period>;
 
-        auto cosineShapes = draw::Shapes(this->cosineId_.Get());
+        TimePoint start = Clock::now();
 
-        cosineShapes.EmplaceBack<draw::SegmentsShape>(
-            this->demoModel_.cosine.look.Get(),
-            this->cosinePoints_);
+        auto shapes = draw::Shapes(this->shapesId_.Get());
 
-        this->userControl_.pixelView.asyncShapes.Set(sineShapes);
-        this->userControl_.pixelView.asyncShapes.Set(cosineShapes);
+        size_t i = 0;
+
+        for (auto &function: this->demoControl_.functions)
+        {
+            shapes.EmplaceBack<draw::SegmentsShape>(
+                function.look.Get(),
+                this->functionPoints_.at(i++));
+        }
+
+        this->userControl_.pixelView.asyncShapes.Set(shapes);
+
+        TimePoint end = Clock::now();
+
+        std::cout << "Created shapes: "
+            << (end - start).count() << " us\n";
     }
 
     void Shutdown()
     {
         Brain<DemoBrain>::Shutdown();
-    }
-
-    void LoadPng(const draw::GrayPng<PngPixel> &)
-    {
-
     }
 
 private:
@@ -312,11 +734,17 @@ private:
     template<typename Function>
     static void MakeTrigPoints_(
         draw::PointsDouble &points,
-        const TrigSettings &settings)
+        size_t pointCount,
+        const TrigSettings &settings,
+        const draw::Size &imageSize)
     {
         auto tauRadians = tau::Angles<double>::tau;
 
-        RowVector x = RowVector::LinSpaced(static_cast<ssize_t>(settings.points), 0, tauRadians);
+        RowVector x =
+            RowVector::LinSpaced(
+                static_cast<ssize_t>(pointCount),
+                0,
+                tauRadians);
 
         RowVector sine =
             settings.amplitude
@@ -324,8 +752,8 @@ private:
                 settings.frequency * x.array()
                 + tau::ToRadians(settings.phase));
 
-        double drawSpacing = 1920.0
-            / static_cast<double>(settings.points - 1);
+        double drawSpacing = static_cast<double>(imageSize.width)
+            / static_cast<double>(pointCount - 1);
 
         double zeroLine = 1080.0 / 2.;
 
@@ -337,29 +765,101 @@ private:
         }
     }
 
-    void OnSine_(const TrigSettings &trigSettings)
+    void OnFunction_(const TrigSettings &trigSettings, size_t index)
     {
-        MakeTrigPoints_<Sin>(this->sinePoints_, trigSettings);
+        MakeTrigPoints_<Sin>(
+            this->functionPoints_.at(index),
+            this->demoModel_.settings.pointCount.Get(),
+            trigSettings,
+            this->userControl_.pixelView.viewSettings.imageSize.Get());
+    }
+
+    void OnFunctionList_()
+    {
+        std::cout << "OnFunctionList_ Display" << std::endl;
         this->Display();
     }
 
-    void OnCosine_(const TrigSettings &trigSettings)
+    void CreateFunctionEndpoints_(size_t functionCount)
     {
-        MakeTrigPoints_<Cos>(this->cosinePoints_, trigSettings);
+        for (size_t i = 0; i < functionCount; ++i)
+        {
+            this->functionEndpoints_.emplace_back(
+                this,
+                this->demoModel_.functions[i],
+                &DemoBrain::OnFunction_,
+                i);
+        }
+    }
+
+    void OnImageSize_(const draw::Size &)
+    {
+        this->ComputeFunctions_();
+        this->Display();
+    }
+
+    void ComputeFunctions_()
+    {
+        size_t index = 0;
+
+        for (auto &function: this->demoControl_.functions)
+        {
+            std::cout << "ComputeFunctions " << index << std::endl;
+            this->OnFunction_(function.Get(), index++);
+        }
+    }
+
+    void OnCountWillChange_()
+    {
+        this->functionEndpoints_.clear();
+    }
+
+    void OnCount_(size_t count)
+    {
+        std::cout << "OnCount_ " << count << std::endl;
+        this->functionPoints_.resize(count);
+        this->CreateFunctionEndpoints_(count);
+    }
+
+    void OnPointCount_(size_t)
+    {
+        this->ComputeFunctions_();
         this->Display();
     }
 
 private:
-    draw::ShapesId sineId_;
-    draw::ShapesId cosineId_;
+    draw::ShapesId shapesId_;
     Observer<DemoBrain> observer_;
     DemoModel demoModel_;
     DemoControl demoControl_;
-    pex::Endpoint<DemoBrain, TrigControl> sineEndpoint_;
-    pex::Endpoint<DemoBrain, TrigControl> cosineEndpoint_;
-    pex::EndpointGroup<DemoBrain, draw::PixelViewControl> pixelViewEndpoint_;
-    draw::PointsDouble sinePoints_;
-    draw::PointsDouble cosinePoints_;
+
+    using ImageSizeEndpoint = pex::Endpoint<DemoBrain, draw::SizeControl>;
+
+    using CountWillChangeEndpoint =
+        pex::Endpoint<DemoBrain, pex::control::Signal<>>;
+
+    using CountEndpoint =
+        pex::Endpoint<DemoBrain, pex::control::ListCount>;
+
+    ImageSizeEndpoint imageSizeEndpoint_;
+    CountWillChangeEndpoint countWillChangeEndpoint_;
+    CountEndpoint countEndpoint_;
+
+    using PointCountEndpoint =
+        pex::Endpoint<DemoBrain, decltype(SettingsControl::pointCount)>;
+
+    PointCountEndpoint pointCountEndpoint_;
+
+    using FunctionEndpoint =
+        pex::BoundEndpoint<TrigControl, decltype(&DemoBrain::OnFunction_)>;
+
+    std::vector<FunctionEndpoint> functionEndpoints_;
+    std::vector<draw::PointsDouble> functionPoints_;
+
+    using ListChangedConnection =
+        pex::detail::ListConnect<DemoBrain, decltype(DemoModel::functions)>;
+
+    ListChangedConnection listChangedConnection_;
 };
 
 

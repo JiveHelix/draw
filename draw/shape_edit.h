@@ -1,11 +1,12 @@
 #pragma once
 
+
 #include <pex/endpoint.h>
 #include <pex/list_observer.h>
+#include "draw/selection_brain.h"
 #include "draw/oddeven.h"
 #include "draw/drag.h"
 #include "draw/views/pixel_view_settings.h"
-#include "draw/node_settings.h"
 #include "draw/shapes.h"
 #include "draw/shape_list.h"
 #include "draw/polygon_lines.h"
@@ -126,29 +127,6 @@ protected:
 };
 
 
-template<typename List>
-auto GetVirtual(List &list, size_t unordered)
-{
-    auto &shapeControl = list.GetUnordered(unordered);
-    return shapeControl.GetVirtual();
-}
-
-
-template<typename List>
-auto GetValueBase(List &list, size_t unordered)
-{
-    auto &shapeControl = list.GetUnordered(unordered);
-    return shapeControl.Get().GetValueBase();
-}
-
-
-template<typename List>
-NodeSettingsControl & GetNode(List &list, size_t unordered)
-{
-    return GetVirtual(list, unordered)->GetNode();
-}
-
-
 template<typename CreateShape>
 class DragCreateShape: public Drag
 {
@@ -195,6 +173,7 @@ protected:
 
         if (newIndex)
         {
+            this->shapeList_.MoveToTop(*newIndex);
             this->Select_(*newIndex);
         }
     }
@@ -205,11 +184,12 @@ protected:
 
         if (wasSelected)
         {
-            GetNode(this->shapeList_, *wasSelected).isSelected.Set(false);
+            ::draw::GetNode(this->shapeList_, *wasSelected)
+                .isSelected.Set(false);
         }
 
         this->shapeList_.selected.Set(unordered);
-        GetNode(this->shapeList_, unordered).isSelected.Set(true);
+        ::draw::GetNode(this->shapeList_, unordered).isSelected.Set(true);
     }
 
 protected:
@@ -298,6 +278,7 @@ protected:
 
 
 struct IgnoreMouse {};
+struct DoNotCreate {};
 
 /*
  * DragShape is required. RotatePoint, DragPoint, and DragLine can be bypassed
@@ -381,44 +362,50 @@ std::unique_ptr<Drag> ProcessMouseDown(
     {
         return {};
     }
-
-    if (!shape.HandlesDrag())
+    else
     {
-        return {};
+        if (!shape.HandlesDrag())
+        {
+            return {};
+        }
+
+        cursor.Set(wxpex::Cursor::closedHand);
+
+        // DragShape
+        return std::make_unique<DragShape>(
+            click,
+            shape.shape.center,
+            shapeControl,
+            shape);
     }
-
-    cursor.Set(wxpex::Cursor::closedHand);
-
-    // DragShape
-    return std::make_unique<DragShape>(
-        click,
-        shape.shape.center,
-        shapeControl,
-        shape);
 }
 
 
+using ListItem = typename ShapesControl::ListItem;
+
+
+struct FoundShape
+{
+    size_t listIndex;
+    size_t unordered;
+    ListItem shape;
+};
+
+
 template<typename Create>
-class ShapeBrain
+class ShapeBrain: public SelectionBrain<ShapesControl>
 {
 public:
     static constexpr auto observerName = "ShapeBrain";
 
-    using ListObserver = pex::ListObserver<ShapeBrain, ShapesControl>;
-
-    using ItemControl = typename ShapesControl::ItemControl;
+    using ListItem = typename ShapesControl::ListItem;
 
     ShapeBrain(
-        ShapesControl shapeList,
+        const std::vector<ShapesControl> &shapeLists,
         PixelViewControl pixelViewControl)
         :
-        shapeList_(shapeList),
-
-        listObserver_(
-            this,
-            shapeList,
-            &ShapeBrain::OnCountWillChange_,
-            &ShapeBrain::OnCount_),
+        SelectionBrain(shapeLists),
+        isEnabled_(true),
 
         pixelViewControl_(pixelViewControl),
 
@@ -437,31 +424,73 @@ public:
             pixelViewControl.modifier,
             &ShapeBrain::OnModifier_),
 
-        drag_(),
 
-        indicesEndpoint_(
-            this,
-            this->shapeList_.indices,
-            &ShapeBrain::OnIndices_),
-
-        selectConnections_()
+        drag_()
     {
-        this->OnCount_(this->shapeList_.count.Get());
+    }
+
+    ShapeBrain(
+        ShapesControl shapeList,
+        PixelViewControl pixelViewControl)
+        :
+        ShapeBrain(std::vector<ShapesControl>({shapeList}), pixelViewControl)
+    {
+
     }
 
     ~ShapeBrain()
     {
-        this->ClearSelectConnections_();
+
+    }
+
+    void SetIsEnabled(bool isEnabled)
+    {
+        // Do not leave drag state set when toggling the enable switch.
+        this->drag_.reset();
+        this->isEnabled_ = isEnabled;
+        this->DeselectAll();
+    }
+
+    std::optional<FoundShape> GetShapeSelection() const
+    {
+        for (size_t i = 0; i < this->lists_.size(); ++i)
+        {
+            const auto &shapeList = this->lists_[i];
+
+            if (shapeList.selected.Get())
+            {
+                auto unordered = *shapeList.selected.Get();
+
+                return FoundShape
+                    {
+                        i,
+                        unordered,
+                        GetUnordered(shapeList, unordered)
+                    };
+            }
+        }
+
+        return {};
     }
 
     void OnModifier_(const wxpex::Modifier &)
     {
+        if (!this->isEnabled_)
+        {
+            return;
+        }
+
         this->UpdateCursor_();
     }
 
 
     void OnLogicalPosition_(const tau::Point2d<int> &position)
     {
+        if (!this->isEnabled_)
+        {
+            return;
+        }
+
         this->UpdateCursor_();
 
         if (this->drag_)
@@ -478,6 +507,11 @@ public:
 protected:
     void OnMouseDown_(bool isDown)
     {
+        if (!this->isEnabled_)
+        {
+            return;
+        }
+
         if (!isDown)
         {
             // Mouse has been released.
@@ -488,15 +522,15 @@ protected:
         }
 
         auto click = this->pixelViewControl_.logicalPosition.Get();
-        auto wasSelected = this->shapeList_.selected.Get();
+        auto wasSelected = this->GetShapeSelection();
 
-        auto found = this->FindSelected_(click.template Cast<double>());
+        auto found = this->FindClicked_(click.template Cast<double>());
 
         if (!found)
         {
             if (wasSelected)
             {
-                auto selected = this->shapeList_.GetUnordered(*wasSelected);
+                auto selected = wasSelected->shape;
                 auto shape = selected.Get();
 
                 if (shape.GetValueBase()->HandlesControlClick())
@@ -522,23 +556,23 @@ protected:
                 this->Deselect(*wasSelected);
             }
 
-            if constexpr (!std::is_same_v<IgnoreMouse, Create>)
+            if constexpr (!std::is_same_v<DoNotCreate, Create>)
             {
                 // There is no selection to edit.
                 // Begin creating a new shape.
                 // DragCreate
                 this->drag_ =
-                    std::make_unique<Create>(click, this->shapeList_);
+                    std::make_unique<Create>(click, this->lists_.at(0));
             }
 
             return;
         }
 
         // The user clicked on a shape.
-        this->Select(found->first);
+        this->ToggleSelect(found->unordered, found->listIndex);
 
-        this->drag_ = found->second.Get().GetValueBase()->ProcessMouseDown(
-            found->second.GetVirtual()->Copy(),
+        this->drag_ = found->shape.Get().GetValueBase()->ProcessMouseDown(
+            found->shape.GetVirtual()->Copy(),
             click,
             this->pixelViewControl_.modifier.Get(),
             this->pixelViewControl_.cursor);
@@ -553,19 +587,19 @@ protected:
 
         auto modifier = this->pixelViewControl_.modifier.Get();
         auto click = this->pixelViewControl_.logicalPosition.Get();
-        auto found = this->FindSelected_(click.template Cast<double>());
+        auto found = this->FindClicked_(click.template Cast<double>());
 
         if (!found)
         {
             // The cursor is not contained by any of the shapes.
-            if (
-                modifier.IsControl()
-                && this->shapeList_.selected.Get())
+            auto shapeSelection = this->GetShapeSelection();
+
+            if (modifier.IsControl() && shapeSelection)
             {
                 auto shape =
                     GetValueBase(
-                        this->shapeList_,
-                        *this->shapeList_.selected.Get());
+                        this->lists_.at(shapeSelection->listIndex),
+                        shapeSelection->unordered);
 
                 if (shape->HandlesControlClick())
                 {
@@ -584,7 +618,7 @@ protected:
         }
 
         // There is a shape under the cursor.
-        auto value = found->second.Get();
+        auto value = found->shape.Get();
         auto shape = value.GetValueBase();
         auto points = shape->GetPoints();
         auto foundPoint = FindPoint(click, points);
@@ -633,22 +667,29 @@ protected:
         }
     }
 
-    std::optional<std::pair<size_t, ItemControl>> FindSelected_(
+    std::optional<FoundShape> FindClicked_(
         const tau::Point2d<int> &position)
     {
-        auto count = this->shapeList_.count.Get();
+        auto listCount = this->lists_.size();
 
-        while (count-- > 0)
+        for (size_t listIndex = 0; listIndex < listCount; ++listIndex)
         {
-            auto &shapeControl = this->shapeList_[count];
-            auto value = shapeControl.Get();
-            auto shape = value.GetValueBase();
+            auto &shapeList = this->lists_[listIndex];
+            auto count = shapeList.count.Get();
 
-            if (shape->Contains(position, 10.0))
+            for (size_t index = 0; index < count; ++index)
             {
-                return std::make_pair(
-                    this->shapeList_.indices.at(count).Get(),
-                    shapeControl);
+                auto &shapeControl = shapeList[index];
+                auto value = shapeControl.Get();
+                auto shape = value.GetValueBase();
+
+                if (shape->Contains(position, 10.0))
+                {
+                    return FoundShape{
+                        listIndex,
+                        shapeList.indices.at(index).Get(),
+                        shapeControl};
+                }
             }
         }
 
@@ -656,76 +697,28 @@ protected:
     }
 
 private:
-    void ClearSelectConnections_()
+    void Deselect(const FoundShape &foundShape)
     {
-        for (auto &connection: this->selectConnections_)
+        auto &shapeList = this->lists_.at(foundShape.listIndex);
+        shapeList.selected.Set({});
+        ::draw::GetNode(shapeList, foundShape.unordered).isSelected.Set(false);
+    }
+
+    void DeselectAll()
+    {
+        for (auto &shapeList: this->lists_)
         {
-            connection.Disconnect(this);
-        }
+            auto selectedIndex = shapeList.selected.Get();
 
-        this->selectConnections_.clear();
-    }
-
-    void OnCountWillChange_()
-    {
-        this->ClearSelectConnections_();
-    }
-
-    void OnIndices_(const std::vector<size_t> &indices)
-    {
-        // No change in size is expected.
-        assert(indices.size() == this->selectConnections_.size());
-
-        this->ClearSelectConnections_();
-        this->OnCount_(indices.size());
-    }
-
-    void OnCount_(size_t count_)
-    {
-        this->selectConnections_.reserve(count_);
-        auto indices = this->shapeList_.indices.Get();
-
-        for (size_t i = 0; i < count_; ++i)
-        {
-            auto unordered = indices.at(i);
-
-            this->selectConnections_.emplace_back(
-                this,
-                GetNode(this->shapeList_, unordered).select,
-                std::bind(
-                    &ShapeBrain::OnSelect_,
-                    unordered,
-                    std::placeholders::_1));
+            if (selectedIndex)
+            {
+                ::draw::GetNode(shapeList, *selectedIndex)
+                    .isSelected.Set(false);
+            }
         }
     }
 
-    static void OnSelect_(size_t unordered, void *context)
-    {
-        auto self = static_cast<ShapeBrain *>(context);
-        self->Select(unordered);
-    }
-
-    void Select(size_t unordered)
-    {
-        auto wasSelected = this->shapeList_.selected.Get();
-
-        if (wasSelected && (*wasSelected != unordered))
-        {
-            GetNode(this->shapeList_, *wasSelected).isSelected.Set(false);
-        }
-
-        this->shapeList_.selected.Set(unordered);
-        GetNode(this->shapeList_, unordered).isSelected.Set(true);
-    }
-
-    void Deselect(size_t unordered)
-    {
-        this->shapeList_.selected.Set({});
-        GetNode(this->shapeList_, unordered).isSelected.Set(false);
-    }
-
-    ShapesControl shapeList_;
-    ListObserver listObserver_;
+    bool isEnabled_;
 
     PixelViewControl pixelViewControl_;
 
@@ -737,27 +730,15 @@ private:
     pex::Endpoint<ShapeBrain, decltype(PixelViewControl::modifier)>
         modifierEndpoint_;
 
-    using OrderedIndicesEndpoint =
-        pex::Endpoint<ShapeBrain, pex::OrderedIndicesControl>;
-
     std::unique_ptr<Drag> drag_;
-    OrderedIndicesEndpoint indicesEndpoint_;
-    std::vector<NodeSelectSignal> selectConnections_;
 };
 
 
-template<typename T>
-T Modulo(T a, T b)
-{
-    if constexpr (std::is_floating_point_v<T>)
-    {
-        return std::fmod(std::fmod(a, b) + b, b);
-    }
-    else
-    {
-        return (a % b + b) % b;
-    }
-}
+double AdjustRotation(
+    double startingRotation,
+    const tau::Point2d<double> &center,
+    const tau::Point2d<double> &referencePoint,
+    const tau::Point2d<double> &endPoint);
 
 
 template<typename DerivedShape>
@@ -766,18 +747,12 @@ void RotatePoint(
     const tau::Point2d<double> &referencePoint,
     const tau::Point2d<double> &endPoint)
 {
-    auto & center = derivedShape.shape.center;
-    auto beginAngle = (referencePoint - center).GetAngle();
-    auto endAngle = (endPoint - center).GetAngle();
-
-    auto difference = endAngle - beginAngle;
-    derivedShape.shape.rotation += difference;
-
-    derivedShape.shape.rotation =
-        Modulo(derivedShape.shape.rotation + 180.0, 360.0) - 180.0;
+    derivedShape.shape.rotation = AdjustRotation(
+        derivedShape.shape.rotation,
+        derivedShape.shape.center,
+        referencePoint,
+        endPoint);
 }
-
-
 
 
 } // end namespace draw

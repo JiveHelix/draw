@@ -25,7 +25,7 @@ template<template<typename> typename T>
 struct PointsShapeTemplate
 {
     T<pex::MakeRange<double, pex::Limit<0>, pex::Limit<20>>> radius;
-    T<draw::LookGroup> look;
+    T<LookGroup> look;
 
     static constexpr auto fields =
         PointsShapeFields<PointsShapeTemplate>::fields;
@@ -52,7 +52,7 @@ public:
         const PointsShapeSettings &settings,
         const PointsDouble &points);
 
-    void Draw(wxpex::GraphicsContext &context) override;
+    void Draw(DrawContext &context) override;
 
     PointsShapeSettings settings_;
     PointsDouble points_;
@@ -81,7 +81,7 @@ public:
         const PointsShapeSettings &settings,
         const ValuePoints &points);
 
-    void Draw(wxpex::GraphicsContext &context) override;
+    void Draw(DrawContext &context) override;
 
     PointsShapeSettings settings_;
     ValuePoints points_;

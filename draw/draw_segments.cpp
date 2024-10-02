@@ -6,7 +6,7 @@ namespace draw
 
 
 void DrawSegments(
-    wxpex::GraphicsContext &context,
+    DrawContext &context,
     const PointsDouble &points)
 {
     auto path = context->CreatePath();

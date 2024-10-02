@@ -83,6 +83,33 @@ CenteredPoints::CenteredPoints(const PointsDouble &points_)
 }
 
 
+CenteredPoints::CenteredPoints(
+    const tau::Point2d<double> &pointsCenter,
+    const tau::Point2d<double> &transformCenter,
+    double width,
+    double height)
+    :
+    center(transformCenter),
+    points()
+{
+    auto halfWidth = width / 2.0;
+    auto halfHeight = height / 2.0;
+
+    this->points.emplace_back(-halfWidth, -halfHeight);
+    this->points.emplace_back(halfWidth, -halfHeight);
+    this->points.emplace_back(halfWidth, halfHeight);
+    this->points.emplace_back(-halfWidth, halfHeight);
+
+    auto offset = transformCenter - pointsCenter;
+
+    for (auto &point: this->points)
+    {
+        point -= offset;
+    }
+}
+
+
+
 Polygon::Polygon(const CenteredPoints &centeredPoints)
 {
     this->center = centeredPoints.center;

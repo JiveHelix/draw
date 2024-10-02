@@ -1,115 +1,75 @@
-#define USE_OBSERVER_NAME
-// #define ENABLE_PEX_LOG
 
 
-#include <iostream>
-#include <mutex>
-#include <condition_variable>
-#include <thread>
-#include <chrono>
-
-#include <fmt/core.h>
-#include <pex/list.h>
-#include <wxpex/app.h>
-#include <wxpex/check_box.h>
-#include <wxpex/border_sizer.h>
-
-#include <draw/pixels.h>
-#include <draw/polygon_shape.h>
-#include <draw/quad_shape.h>
-#include <draw/ellipse_shape.h>
-#include <draw/views/pixel_view_settings.h>
-#include <draw/views/pixel_view.h>
-#include <draw/polygon_brain.h>
-#include <draw/shapes.h>
-#include <draw/shape_list.h>
-#include <draw/views/shape_list_view.h>
-
-#include "common/observer.h"
-#include "common/about_window.h"
-#include "common/brain.h"
+#include "common/shape_demo_brain.h"
+#include <draw/hue_generator.h>
 
 
-class DemoBrain: public Brain<DemoBrain>
+class DemoBrain: public ShapeDemoBrain<DemoBrain>
 {
 public:
     DemoBrain()
         :
-        shapesId_(),
-        observer_(this, UserControl(this->user_)),
-        demoModel_(),
-        demoControl_(this->demoModel_),
-
-        shapesEndpoint_(
-            this,
-            this->demoControl_.shapes,
-            &DemoBrain::OnShapes_),
+        ShapeDemoBrain<DemoBrain>(),
+        hueGenerator_(),
 
         polygonBrain_(
             this->demoControl_.shapes,
-            this->userControl_.pixelView)
+            this->userControl_.pixelView),
+
+        countEndpoint_(
+            this,
+            this->demoControl_.shapes.count,
+            &DemoBrain::OnShapeAdded_)
     {
-        this->demoControl_.shapes.Append(draw::QuadShapeValue::Default());
-        this->demoControl_.shapes.Append(draw::EllipseShapeValue::Default());
+        this->demoControl_.shapes.Append(
+            draw::ShapeValue::Default<draw::QuadShape>());
+
+        this->demoControl_.shapes.Append(
+            draw::ShapeValue::Default<draw::EllipseShape>());
     }
 
-    wxWindow * CreateControls(wxWindow *parent)
-    {
-        this->userControl_.pixelView.viewSettings.imageSize.Set(
-            draw::Size(1920, 1080));
-
-        return new draw::ShapeListView(parent, this->demoControl_);
-    }
-
-    void SaveSettings() const
-    {
-        std::cout << "TODO: Persist the settings." << std::endl;
-    }
-
-    void LoadSettings()
-    {
-        std::cout << "TODO: Restore the settings." << std::endl;
-    }
 
     std::string GetAppName() const
     {
         return "Polygon Demo";
     }
 
-    void Display()
+    // Assign a random color to each shape as it is created.
+    void OnShapeAdded_(size_t count)
     {
-        auto shapes = draw::Shapes(this->shapesId_.Get());
-
-        for (auto &shapeControl: this->demoControl_.shapes)
+        if (count == 0)
         {
-            const auto &shapeValue = shapeControl.Get();
-            shapes.Append(*shapeValue.GetValueBase());
+            // List is empty.
+            return;
         }
 
-        this->userControl_.pixelView.asyncShapes.Set(shapes);
-    }
+        auto &shapeControl = this->demoControl_.shapes.at(count - 1);
 
-    void LoadPng(const draw::GrayPng<PngPixel> &)
-    {
+        auto &lookControl = shapeControl.GetVirtual()->GetLook();
 
+        auto defer = pex::MakeDefer(lookControl);
+
+        auto hue = this->hueGenerator_.MakeHue();
+
+        defer.strokeEnable.Set(true);
+        defer.strokeColor.hue.Set(hue);
+        defer.strokeColor.saturation.Set(1.0);
+        defer.strokeColor.value.Set(1.0);
+        defer.strokeColor.alpha.Set(1.0);
+
+        defer.fillEnable.Set(true);
+        defer.fillColor.hue.Set(hue);
+        defer.fillColor.saturation.Set(0.75);
+        defer.fillColor.value.Set(0.50);
+        defer.fillColor.alpha.Set(1.0);
     }
 
 private:
-    void OnShapes_(const typename draw::ShapesControl::Type &)
-    {
-        this->Display();
-    }
-
-private:
-    draw::ShapesId shapesId_;
-    Observer<DemoBrain> observer_;
-    draw::ShapeListModel demoModel_;
-    draw::ShapeListControl demoControl_;
-
-    using ShapesEndpoint = draw::ShapesEndpoint<DemoBrain>;
-    ShapesEndpoint shapesEndpoint_;
-
+    HueGenerator hueGenerator_;
     draw::PolygonBrain polygonBrain_;
+
+    using CountEndpoint = pex::Endpoint<DemoBrain, pex::control::ListCount>;
+    CountEndpoint countEndpoint_;
 };
 
 

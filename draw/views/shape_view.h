@@ -2,8 +2,10 @@
 
 
 #include <wxpex/button.h>
+#include <wxpex/collapsible.h>
 #include "draw/views/node_settings_view.h"
 #include "draw/views/shape_display.h"
+#include "draw/views/order_view.h"
 
 
 
@@ -11,10 +13,8 @@ namespace draw
 {
 
 
-
-
 template<typename Control>
-class ShapeView: public NodeSettingsView
+class ShapeView: public CollapsibleNodeSettingsView
 {
 public:
     using LayoutOptions = wxpex::LayoutOptions;
@@ -24,7 +24,7 @@ public:
         Control control,
         ShapeDisplayControl displayControl)
         :
-        NodeSettingsView(
+        CollapsibleNodeSettingsView(
             parent,
             control.GetName(),
             displayControl.shapeExpand,
@@ -36,22 +36,14 @@ public:
             this->GetPanel(),
             displayControl.lookExpand);
 
-        auto order = control.GetOrder();
-
-        auto down =
-            new wxpex::Button(this->GetPanel(), "Down", order.moveDown);
-
-        auto up =
-            new wxpex::Button(this->GetPanel(), "Up", order.moveUp);
-
-        auto upDownSizer = wxpex::LayoutItems(wxpex::horizontalItems, down, up);
+        auto orderView = new OrderView(this->GetPanel(), control.GetOrder());
 
         this->ConfigureTopSizer(
             wxpex::LayoutItems(
                 wxpex::verticalItems,
                 shape,
                 look,
-                upDownSizer.release()));
+                orderView));
     }
 };
 

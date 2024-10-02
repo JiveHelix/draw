@@ -81,25 +81,10 @@ struct EllipseShapeTemplates: public ShapeCommon<EllipseGroup, EllipseView>
         bool HandlesEditLine() const override { return false; }
         bool HandlesDrag() const override { return true; }
 
-        void Draw(wxpex::GraphicsContext &context) override
+        void Draw(DrawContext &context) override
         {
-            wxpex::MaintainTransform maintainTransform(context);
-            ConfigureLook(context, this->look);
-
-            auto center = this->shape.center;
-            auto transform = context->GetTransform();
-            transform.Translate(center.x, center.y);
-            context->SetTransform(transform);
-            context->Rotate(tau::ToRadians(this->shape.rotation));
-            double ellipseMajor = this->shape.scale * this->shape.major;
-            double ellipseMinor = this->shape.scale * this->shape.minor;
-
-            // wx draws the ellipse contained within this rectangle.
-            context->DrawEllipse(
-                -ellipseMajor / 2.0,
-                -ellipseMinor / 2.0,
-                ellipseMajor,
-                ellipseMinor);
+            context.ConfigureLook(this->look);
+            this->shape.Draw(context);
         }
 
         std::string GetName() const override
@@ -129,14 +114,14 @@ struct EllipseShapeTemplates: public ShapeCommon<EllipseGroup, EllipseView>
 using EllipseShapePoly =
     pex::poly::Poly<ShapeFields, EllipseShapeTemplates>;
 
-using EllipseShapeValue = typename EllipseShapePoly::PolyValue;
+using EllipseShape = typename EllipseShapePoly::Derived;
 using EllipseShapeModel = typename EllipseShapePoly::Model;
 using EllipseShapeControl = typename EllipseShapePoly::Control;
 
 
 struct CreateEllipse
 {
-    std::optional<EllipseShapeValue> operator()(
+    std::optional<ShapeValue> operator()(
         const Drag &drag,
         const tau::Point2d<int> position)
     {
@@ -154,12 +139,12 @@ struct CreateEllipse
         ellipse.rotation = 0.0;
         ellipse.scale = 1.0;
 
-        return EllipseShapeValue{{
+        return ShapeValue::Create<EllipseShape>(
             0,
-            {},
+            pex::Order{},
             ellipse,
             Look::Default(),
-            NodeSettings::Default()}};
+            NodeSettings::Default());
     }
 };
 

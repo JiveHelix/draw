@@ -6,7 +6,7 @@ namespace draw
 
 
 void ConfigureFontLook(
-    wxpex::GraphicsContext &context,
+    DrawContext &context,
     const FontLook &fontLook)
 {
     wxColour color;

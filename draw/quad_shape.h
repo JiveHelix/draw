@@ -32,14 +32,14 @@ struct QuadShapeTemplates: public ShapeCommon<QuadGroup, QuadView>
         using Super = ShapeDerived<Base, Derived<Base>>;
         using Super::Super;
 
-        void Draw(wxpex::GraphicsContext &context) override
+        void Draw(DrawContext &context) override
         {
             if (this->shape.size.GetArea() < 0.5)
             {
                 return;
             }
 
-            ConfigureLook(context, this->look);
+            context.ConfigureLook(this->look);
             DrawSegments(context, this->shape.GetPoints());
         }
 
@@ -77,11 +77,39 @@ struct QuadShapeTemplates: public ShapeCommon<QuadGroup, QuadView>
 using QuadShapePoly =
     pex::poly::Poly<ShapeFields, QuadShapeTemplates>;
 
-using QuadShapeValue = typename QuadShapePoly::PolyValue;
+using QuadShape = typename QuadShapePoly::Derived;
 using QuadShapeModel = typename QuadShapePoly::Model;
 using QuadShapeControl = typename QuadShapePoly::Control;
 
-using DragCreateQuad = DragCreateShape<CreateQuad<QuadShapeValue>>;
+
+struct CreateQuad
+{
+    std::optional<ShapeValue> operator()(
+        const Drag &drag,
+        const tau::Point2d<int> position)
+    {
+        auto size = drag.GetSize(position);
+
+        if (size.GetArea() < 1)
+        {
+            return {};
+        }
+
+        auto quad = Quad::Default();
+        quad.center = drag.GetDragCenter(position);
+        quad.size = drag.GetSize(position);
+
+        return ShapeValue::Create<QuadShape>(
+            0,
+            pex::Order{},
+            quad,
+            Look::Default(),
+            NodeSettings::Default());
+    }
+};
+
+
+using DragCreateQuad = DragCreateShape<CreateQuad>;
 using QuadBrain = draw::ShapeBrain<DragCreateQuad>;
 
 

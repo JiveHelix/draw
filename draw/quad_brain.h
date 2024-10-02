@@ -36,29 +36,6 @@ struct QuadBounds
 };
 
 
-template<typename Value>
-struct CreateQuad
-{
-    std::optional<Value> operator()(
-        const Drag &drag,
-        const tau::Point2d<int> position)
-    {
-        auto size = drag.GetSize(position);
-
-        if (size.GetArea() < 1)
-        {
-            return {};
-        }
-
-        auto quad = Quad::Default();
-        quad.center = drag.GetDragCenter(position);
-        quad.size = drag.GetSize(position);
-
-        return Value{{0, {}, quad, Look::Default(), NodeSettings::Default()}};
-    }
-};
-
-
 template<typename DerivedShape, typename QuadControlMembers>
 class DragQuadPoint: public DragEditPoint<DerivedShape>
 {

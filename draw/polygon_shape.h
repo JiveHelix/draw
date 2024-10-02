@@ -39,7 +39,7 @@ struct PolygonShapeTemplates: public ShapeCommon<PolygonGroup, PolygonView>
         bool HandlesEditLine() const override { return true; }
         bool HandlesDrag() const override { return true; }
 
-        void Draw(wxpex::GraphicsContext &context) override
+        void Draw(DrawContext &context) override
         {
             auto points = this->shape.GetPoints();
 
@@ -48,7 +48,7 @@ struct PolygonShapeTemplates: public ShapeCommon<PolygonGroup, PolygonView>
                 return;
             }
 
-            ConfigureLook(context, this->look);
+            context.ConfigureLook(this->look);
             DrawSegments(context, points);
         }
 
@@ -104,19 +104,42 @@ struct PolygonShapeTemplates: public ShapeCommon<PolygonGroup, PolygonView>
 using PolygonShapePoly =
     pex::poly::Poly<ShapeFields, PolygonShapeTemplates>;
 
-using PolygonShapeValue = typename PolygonShapePoly::PolyValue;
+using PolygonShape = typename PolygonShapePoly::Derived;
 using PolygonShapeModel = typename PolygonShapePoly::Model;
 using PolygonShapeControl = typename PolygonShapePoly::Control;
 
-using DragCreatePolygon =
-    DragCreateShape<CreatePolygon<PolygonShapeValue>>;
+
+struct CreatePolygon
+{
+    std::optional<ShapeValue> operator()(
+        const Drag &drag,
+        const tau::Point2d<int> position)
+    {
+        auto size = drag.GetSize(position);
+
+        if (size.GetArea() < 1)
+        {
+            return {};
+        }
+
+        auto lines = PolygonLines(size);
+        auto polygon = Polygon(lines.GetPoints());
+        polygon.center = drag.GetDragCenter(position);
+
+        return ShapeValue::Create<PolygonShape>(
+            0,
+            pex::Order{},
+            polygon,
+            Look::Default(),
+            NodeSettings::Default());
+    }
+};
+
+
+using DragCreatePolygon = DragCreateShape<CreatePolygon>;
+using DragReplacePolygon = DragReplaceShape<CreatePolygon>;
 
 using PolygonBrain = draw::ShapeBrain<DragCreatePolygon>;
-
-
-using DragReplacePolygon =
-    DragReplaceShape<CreatePolygon<PolygonShapeValue>>;
-
 
 
 } // end namespace draw

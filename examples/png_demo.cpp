@@ -75,16 +75,6 @@ public:
             this->GetUserControls());
     }
 
-    void SaveSettings() const
-    {
-        std::cout << "TODO: Persist the processing settings." << std::endl;
-    }
-
-    void LoadSettings()
-    {
-        std::cout << "TODO: Restore the processing settings." << std::endl;
-    }
-
     void ShowAbout()
     {
         wxAboutBox(MakeAboutDialogInfo("PNG Demo"));

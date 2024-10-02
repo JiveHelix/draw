@@ -17,29 +17,12 @@ inline constexpr auto borderStyle = wxBORDER_SIMPLE;
 
 
 NodeSettingsView::NodeSettingsView(
-    wxWindow *parent,
-    const std::string &nodeName,
-    ShapeExpandControl expandControl,
+    wxWindow *window,
     std::optional<NodeSettingsControl> control)
     :
-    wxpex::Collapsible(parent, nodeName, expandControl, borderStyle),
+    window_(window),
     control_(control),
-    highlightEndpoint_(),
-    nodeName_(nodeName)
-{
-    this->InitializeHighlight_();
-}
-
-
-NodeSettingsView::NodeSettingsView(
-    wxWindow *parent,
-    const std::string &nodeName,
-    std::optional<NodeSettingsControl> control)
-    :
-    wxpex::Collapsible(parent, nodeName, borderStyle),
-    control_(control),
-    highlightEndpoint_(),
-    nodeName_(nodeName)
+    highlightEndpoint_()
 {
     this->InitializeHighlight_();
 }
@@ -49,7 +32,15 @@ void NodeSettingsView::InitializeHighlight_()
 {
     if (this->control_)
     {
-        this->Bind(wxEVT_LEFT_DOWN, &NodeSettingsView::OnLeftDown_, this);
+        this->window_->Bind(
+            wxEVT_LEFT_DOWN,
+            &NodeSettingsView::OnLeftDown_,
+            this);
+
+        this->window_->Bind(
+            wxEVT_LEFT_DCLICK,
+            &NodeSettingsView::OnLeftDown_,
+            this);
 
         this->highlightEndpoint_ =
             Endpoint(
@@ -64,7 +55,8 @@ void NodeSettingsView::OnLeftDown_(wxMouseEvent &event)
 {
     event.Skip();
     assert(this->control_);
-    this->control_->select.Trigger();
+
+    this->control_->toggleSelect.Trigger();
 }
 
 
@@ -74,15 +66,52 @@ void NodeSettingsView::OnHighlight_(bool isHighlighted)
 
     if (isHighlighted)
     {
-        this->SetBackgroundColour(
+        this->window_->SetBackgroundColour(
             wxpex::ToWxColour(this->control_->highlightColor.Get()));
     }
     else
     {
-        this->SetBackgroundColour(wxColour());
+        this->window_->SetBackgroundColour(wxColour());
     }
 
-    this->Refresh();
+    this->window_->Refresh();
+}
+
+
+CollapsibleNodeSettingsView::CollapsibleNodeSettingsView(
+    wxWindow *parent,
+    const std::string &nodeName,
+    ShapeExpandControl expandControl,
+    std::optional<NodeSettingsControl> control)
+    :
+    wxpex::Collapsible(parent, nodeName, expandControl, borderStyle),
+    nodeSettingsView_(this, control)
+{
+
+}
+
+
+CollapsibleNodeSettingsView::CollapsibleNodeSettingsView(
+    wxWindow *parent,
+    const std::string &nodeName,
+    std::optional<NodeSettingsControl> control)
+    :
+    wxpex::Collapsible(parent, nodeName, borderStyle),
+    nodeSettingsView_(this, control)
+{
+
+}
+
+
+BoxedNodeSettingsView::BoxedNodeSettingsView(
+    wxWindow *parent,
+    const std::string &nodeName,
+    std::optional<NodeSettingsControl> control)
+    :
+    wxpex::StaticBox(parent, nodeName),
+    nodeSettingsView_(this, control)
+{
+
 }
 
 
