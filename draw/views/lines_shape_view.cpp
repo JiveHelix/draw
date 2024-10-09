@@ -41,7 +41,7 @@ LinesShapeView::LinesShapeView(
         length.Layout(wxHORIZONTAL).release(),
         look);
 
-    this->ConfigureTopSizer(std::move(sizer));
+    this->ConfigureSizer(std::move(sizer));
 }
 
 

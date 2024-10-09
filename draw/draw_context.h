@@ -21,6 +21,9 @@ public:
 
     }
 
+    DrawContext(const DrawContext &) = delete;
+    DrawContext & operator=(const DrawContext &) = delete;
+
     void ConfigureLook(const Look &look);
 
     void ConfigureColors(const Look &);

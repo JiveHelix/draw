@@ -57,7 +57,7 @@ public:
         auto shapeListView =
             new draw::ShapeListView(scrolled, this->demoControl_);
 
-        scrolled->ConfigureTopSizer(
+        scrolled->ConfigureSizer(
             wxpex::verticalScrolled,
             wxpex::BorderSizer(shapeListView, 1));
 

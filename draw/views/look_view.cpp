@@ -73,7 +73,7 @@ void StrokeControls::Initialize_(LookControl control)
         strokeColor,
         antialias);
 
-    this->ConfigureTopSizer(std::move(sizer));
+    this->ConfigureSizer(std::move(sizer));
 }
 
 
@@ -120,7 +120,7 @@ void FillControls::Initialize_(LookControl control)
         fillEnable,
         fillColor);
 
-    this->ConfigureTopSizer(std::move(sizer));
+    this->ConfigureSizer(std::move(sizer));
 }
 
 
@@ -147,7 +147,7 @@ LookView::LookView(
         strokeControls,
         fillControls);
 
-    this->ConfigureTopSizer(std::move(sizer));
+    this->ConfigureSizer(std::move(sizer));
 }
 
 
@@ -188,7 +188,7 @@ LookView::LookView(
         strokeControls,
         fillControls);
 
-    this->ConfigureTopSizer(std::move(sizer));
+    this->ConfigureSizer(std::move(sizer));
 }
 
 
@@ -221,7 +221,7 @@ StrokeView::StrokeView(
         wxpex::verticalItems,
         strokeControls);
 
-    this->ConfigureTopSizer(std::move(sizer));
+    this->ConfigureSizer(std::move(sizer));
 }
 
 
@@ -255,7 +255,7 @@ StrokeView::StrokeView(
         wxpex::verticalItems,
         strokeControls);
 
-    this->ConfigureTopSizer(std::move(sizer));
+    this->ConfigureSizer(std::move(sizer));
 }
 
 

@@ -38,7 +38,7 @@ public:
 
         auto orderView = new OrderView(this->GetPanel(), control.GetOrder());
 
-        this->ConfigureTopSizer(
+        this->ConfigureSizer(
             wxpex::LayoutItems(
                 wxpex::verticalItems,
                 shape,

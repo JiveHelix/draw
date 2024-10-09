@@ -34,7 +34,7 @@ void DrawContext::ConfigureColors(const Look &look)
     }
     else
     {
-        this->context_->SetPen(this->context_->CreatePen(*wxTRANSPARENT_PEN));
+        this->context_->SetPen(wxNullPen);
     }
 
     if (look.fillEnable)
@@ -46,7 +46,7 @@ void DrawContext::ConfigureColors(const Look &look)
     }
     else
     {
-        this->context_->SetBrush(this->context_->CreateBrush(*wxTRANSPARENT_BRUSH));
+        this->context_->SetBrush(wxNullBrush);
     }
 }
 

@@ -557,11 +557,11 @@ public:
             phase);
 
         auto sizer = wxpex::LayoutItems(
-            wxpex::ItemOptions(wxpex::verticalItems).SetProportion(1),
+            wxpex::ItemOptions(wxpex::verticalItems).Proportion(1),
             labeledSizer.release(),
             look);
 
-        this->ConfigureTopSizer(std::move(sizer));
+        this->ConfigureSizer(std::move(sizer));
     }
 };
 

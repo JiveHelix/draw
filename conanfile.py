@@ -44,4 +44,4 @@ class DrawConan(ConanFile):
         self.requires("fields/[~1.3]")
         self.requires("pex/[>=0.9.4 <0.10]")
         self.requires("tau/[~1.10]")
-        self.requires("wxpex/[>=0.9.6 <0.10]")
+        self.requires("wxpex/[>=0.9.9 <0.10]")

@@ -72,7 +72,7 @@ WaveformColorView::WaveformColorView(
         highlight,
         sliderSizer.release());
 
-    this->ConfigureTopSizer(std::move(sizer));
+    this->ConfigureSizer(std::move(sizer));
 }
 
 
@@ -132,7 +132,7 @@ WaveformSettingsView::WaveformSettingsView(
         sliderSizer.release(),
         color);
 
-    this->ConfigureTopSizer(std::move(sizer));
+    this->ConfigureSizer(std::move(sizer));
 }
 
 
