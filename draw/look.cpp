@@ -5,5 +5,5 @@ template struct pex::Group
     <
         draw::LookFields,
         draw::LookTemplate,
-        pex::PlainU<draw::Look_>
+        pex::PlainT<draw::Look>
     >;

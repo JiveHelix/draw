@@ -23,7 +23,11 @@ CrossShapeView::CrossShapeView(
             layoutOptions);
 
     auto look =
-        new StrokeView(this->GetPanel(), "Stroke", control.look, layoutOptions);
+        new StrokeOnlyView(
+            this->GetPanel(),
+            "Stroke",
+            control.look.stroke,
+            layoutOptions);
 
     auto sizer = wxpex::LayoutItems(
         wxpex::verticalItems,

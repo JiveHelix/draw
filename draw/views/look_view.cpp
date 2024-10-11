@@ -18,9 +18,9 @@ namespace draw
 {
 
 
-StrokeControls::StrokeControls(
+StrokeView::StrokeView(
     wxWindow *parent,
-    LookControl control,
+    StrokeControl control,
     const wxpex::LayoutOptions &layoutOptions)
     :
     wxpex::Collapsible(parent, "Stroke", borderStyle)
@@ -29,9 +29,9 @@ StrokeControls::StrokeControls(
 }
 
 
-StrokeControls::StrokeControls(
+StrokeView::StrokeView(
     wxWindow *parent,
-    LookControl control,
+    StrokeControl control,
     wxpex::Collapsible::StateControl expandControl,
     const wxpex::LayoutOptions &layoutOptions)
     :
@@ -41,45 +41,54 @@ StrokeControls::StrokeControls(
 }
 
 
-void StrokeControls::Initialize_(LookControl control)
+void StrokeView::Initialize_(StrokeControl control)
 {
     using namespace wxpex;
 
     auto panel = this->GetPanel();
 
-    auto strokeEnable =
-        new CheckBox(panel, "Stroke Enable", control.strokeEnable);
+    auto enable =
+        new CheckBox(panel, "Enable", control.enable);
 
-    auto strokeWeight = wxpex::LabeledWidget(
+    auto weight = wxpex::LabeledWidget(
         panel,
-        "Stroke Weight",
+        "Weight",
         CreateFieldSlider<1>(
             panel,
-            control.strokeWeight));
+            control.weight));
 
-    auto strokeColor =
+    auto color =
         new HsvaPicker(
             panel,
-            "Stroke Color",
-            control.strokeColor);
+            "Color",
+            control.color);
+
+    auto penStyle = wxpex::CreateGraphicsControl(panel, control.penStyle);
+    auto penCap = wxpex::CreateGraphicsControl(panel, control.penCap);
+    auto penJoin = wxpex::CreateGraphicsControl(panel, control.penJoin);
 
     auto antialias =
         new CheckBox(panel, "Anti-alias", control.antialias);
 
     auto sizer = wxpex::LayoutItems(
         wxpex::verticalItems,
-        strokeEnable,
-        strokeWeight.Layout(wxHORIZONTAL).release(),
-        strokeColor,
+        enable,
+        weight.Layout(wxHORIZONTAL).release(),
+        color,
+        wxpex::LayoutLabeled(
+            wxpex::LayoutOptions{},
+            penStyle,
+            penCap,
+            penJoin).release(),
         antialias);
 
     this->ConfigureSizer(std::move(sizer));
 }
 
 
-FillControls::FillControls(
+FillView::FillView(
     wxWindow *parent,
-    LookControl control,
+    FillControl control,
     const wxpex::LayoutOptions &layoutOptions)
     :
     wxpex::Collapsible(parent, "Fill", borderStyle)
@@ -88,9 +97,9 @@ FillControls::FillControls(
 }
 
 
-FillControls::FillControls(
+FillView::FillView(
     wxWindow *parent,
-    LookControl control,
+    FillControl control,
     wxpex::Collapsible::StateControl expandControl,
     const wxpex::LayoutOptions &layoutOptions)
     :
@@ -100,25 +109,28 @@ FillControls::FillControls(
 }
 
 
-void FillControls::Initialize_(LookControl control)
+void FillView::Initialize_(FillControl control)
 {
     using namespace wxpex;
 
     auto panel = this->GetPanel();
 
     auto fillEnable =
-        new CheckBox(panel, "Fill Enable", control.fillEnable);
+        new CheckBox(panel, "Fill Enable", control.enable);
 
     auto fillColor =
         new HsvaPicker(
             panel,
             "Fill Color",
-            control.fillColor);
+            control.color);
+
+    auto brushStyle = wxpex::CreateGraphicsControl(panel, control.brushStyle);
 
     auto sizer = wxpex::LayoutItems(
         wxpex::verticalItems,
         fillEnable,
-        fillColor);
+        fillColor,
+        brushStyle.Layout(wxHORIZONTAL).release());
 
     this->ConfigureSizer(std::move(sizer));
 }
@@ -132,14 +144,14 @@ LookView::LookView(
     :
     wxpex::Collapsible(parent, name, borderStyle)
 {
-    auto strokeControls = new StrokeControls(
+    auto strokeControls = new StrokeView(
         this->GetPanel(),
-        control,
+        control.stroke,
         layoutOptions);
 
-    auto fillControls = new FillControls(
+    auto fillControls = new FillView(
         this->GetPanel(),
-        control,
+        control.fill,
         layoutOptions);
 
     auto sizer = wxpex::LayoutItems(
@@ -171,15 +183,15 @@ LookView::LookView(
     :
     wxpex::Collapsible(parent, name, displayControl.lookExpand, borderStyle)
 {
-    auto strokeControls = new StrokeControls(
+    auto strokeControls = new StrokeView(
         this->GetPanel(),
-        control,
+        control.stroke,
         displayControl.strokeExpand,
         layoutOptions);
 
-    auto fillControls = new FillControls(
+    auto fillControls = new FillView(
         this->GetPanel(),
-        control,
+        control.fill,
         displayControl.fillExpand,
         layoutOptions);
 
@@ -204,15 +216,15 @@ LookView::LookView(
 }
 
 
-StrokeView::StrokeView(
+StrokeOnlyView::StrokeOnlyView(
     wxWindow *parent,
     const std::string &name,
-    LookControl control,
+    StrokeControl control,
     const LayoutOptions &layoutOptions)
     :
     wxpex::Collapsible(parent, name, borderStyle)
 {
-    auto strokeControls = new StrokeControls(
+    auto strokeControls = new StrokeView(
         this->GetPanel(),
         control,
         layoutOptions);
@@ -225,27 +237,27 @@ StrokeView::StrokeView(
 }
 
 
-StrokeView::StrokeView(
+StrokeOnlyView::StrokeOnlyView(
     wxWindow *parent,
-    LookControl control,
+    StrokeControl control,
     const LayoutOptions &layoutOptions)
     :
-    StrokeView(parent, "Stroke", control, layoutOptions)
+    StrokeOnlyView(parent, "Stroke", control, layoutOptions)
 {
 
 }
 
 
-StrokeView::StrokeView(
+StrokeOnlyView::StrokeOnlyView(
     wxWindow *parent,
     const std::string &name,
-    LookControl control,
+    StrokeControl control,
     LookDisplayControl displayControl,
     const LayoutOptions &layoutOptions)
     :
     wxpex::Collapsible(parent, name, displayControl.lookExpand, borderStyle)
 {
-    auto strokeControls = new StrokeControls(
+    auto strokeControls = new StrokeView(
         this->GetPanel(),
         control,
         displayControl.strokeExpand,
@@ -259,13 +271,13 @@ StrokeView::StrokeView(
 }
 
 
-StrokeView::StrokeView(
+StrokeOnlyView::StrokeOnlyView(
     wxWindow *parent,
-    LookControl control,
+    StrokeControl control,
     LookDisplayControl displayControl,
     const LayoutOptions &layoutOptions)
     :
-    StrokeView(parent, "Stroke", control, displayControl, layoutOptions)
+    StrokeOnlyView(parent, "Stroke", control, displayControl, layoutOptions)
 {
 
 }

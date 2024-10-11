@@ -296,7 +296,7 @@ struct DemoCustom
                 return;
             }
 
-            this->functions[index].look.strokeColor.hue.Set(GetHue(frequency));
+            this->functions[index].look.stroke.color.hue.Set(GetHue(frequency));
         }
 
         void OnFunctionCount_(size_t functionCount)
@@ -366,9 +366,9 @@ struct DemoCustom
                 auto &look = functionModel.look;
 
                 auto thisLook = draw::Look::Default();
-                thisLook.strokeColor.saturation = 1.0;
+                thisLook.stroke.color.saturation = 1.0;
 
-                thisLook.strokeColor.hue =
+                thisLook.stroke.color.hue =
                     GetHue(functionModel.frequency.Get());
 
                 look.Set(thisLook);

@@ -64,11 +64,11 @@ void WaveformPixels::OnViewSize_(const Size &viewSize)
     auto oddLinesSettings = LinesShapeSettings::Default();
 
     // Draw even lines heavy
-    evenLinesSettings.look.strokeWeight = 1;
-    evenLinesSettings.look.strokeColor.value = 0.8;
+    evenLinesSettings.look.stroke.weight = 1;
+    evenLinesSettings.look.stroke.color.value = 0.8;
 
-    oddLinesSettings.look.strokeWeight = 1;
-    oddLinesSettings.look.strokeColor.value = 0.5;
+    oddLinesSettings.look.stroke.weight = 1;
+    oddLinesSettings.look.stroke.color.value = 0.5;
 
     LinesShape::Lines oddLines;
     LinesShape::Lines evenLines;

@@ -26,7 +26,6 @@ target_sources(
     cross_shape.h
     drag.h
     draw_context.h
-    draw_ellipse.h
     draw_lines.h
     draw_segments.h
     ellipse.h

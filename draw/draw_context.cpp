@@ -8,41 +8,30 @@ namespace draw
 void DrawContext::ConfigureLook(const Look &look)
 {
     this->look_ = look;
-
-    if (look.antialias)
-    {
-        this->context_->SetAntialiasMode(wxANTIALIAS_DEFAULT);
-    }
-    else
-    {
-        this->context_->SetAntialiasMode(wxANTIALIAS_NONE);
-    }
-
+    this->SetAntialias(look.stroke.antialias);
     this->ConfigureColors(look);
 }
 
 
 void DrawContext::ConfigureColors(const Look &look)
 {
-    if (look.strokeEnable)
+    if (look.stroke.enable)
     {
         this->context_->SetPen(
-            this->context_->CreatePen(
-                wxGraphicsPenInfo(
-                    wxpex::ToWxColour(look.strokeColor),
-                    look.strokeWeight)));
+            this->context_->CreatePen(look.stroke.GetPenInfo()));
     }
     else
     {
         this->context_->SetPen(wxNullPen);
     }
 
-    if (look.fillEnable)
+    if (look.fill.enable)
     {
         this->context_->SetBrush(
             this->context_->CreateBrush(
                 wxBrush(
-                    wxpex::ToWxColour(look.fillColor))));
+                    wxpex::ToWxColour(look.fill.color),
+                    wxBrushStyle(look.fill.brushStyle))));
     }
     else
     {
@@ -53,31 +42,29 @@ void DrawContext::ConfigureColors(const Look &look)
 
 void DrawContext::ConfigureColors(const Look &look, double value)
 {
-    if (look.strokeEnable)
+    if (look.stroke.enable)
     {
-        auto strokeColor = look.strokeColor;
-        strokeColor.value = value;
+        auto stroke = look.stroke;
+        stroke.color.value = value;
 
         this->context_->SetPen(
-            this->context_->CreatePen(
-                wxGraphicsPenInfo(
-                    wxpex::ToWxColour(strokeColor),
-                    look.strokeWeight)));
+            this->context_->CreatePen(stroke.GetPenInfo()));
     }
     else
     {
         this->context_->SetPen(this->context_->CreatePen(*wxTRANSPARENT_PEN));
     }
 
-    if (look.fillEnable)
+    if (look.fill.enable)
     {
-        auto fillColor = look.fillColor;
+        auto fillColor = look.fill.color;
         fillColor.value = value;
 
         this->context_->SetBrush(
             this->context_->CreateBrush(
                 wxBrush(
-                    wxpex::ToWxColour(fillColor))));
+                    wxpex::ToWxColour(fillColor),
+                    wxBrushStyle(look.fill.brushStyle))));
     }
     else
     {

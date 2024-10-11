@@ -51,17 +51,17 @@ public:
 
         auto hue = this->hueGenerator_.MakeHue();
 
-        defer.strokeEnable.Set(true);
-        defer.strokeColor.hue.Set(hue);
-        defer.strokeColor.saturation.Set(1.0);
-        defer.strokeColor.value.Set(1.0);
-        defer.strokeColor.alpha.Set(1.0);
+        defer.stroke.enable.Set(true);
+        defer.stroke.color.hue.Set(hue);
+        defer.stroke.color.saturation.Set(1.0);
+        defer.stroke.color.value.Set(1.0);
+        defer.stroke.color.alpha.Set(1.0);
 
-        defer.fillEnable.Set(true);
-        defer.fillColor.hue.Set(hue);
-        defer.fillColor.saturation.Set(0.75);
-        defer.fillColor.value.Set(0.50);
-        defer.fillColor.alpha.Set(1.0);
+        defer.fill.enable.Set(true);
+        defer.fill.color.hue.Set(hue);
+        defer.fill.color.saturation.Set(0.75);
+        defer.fill.color.value.Set(0.50);
+        defer.fill.color.alpha.Set(1.0);
     }
 
 private:
