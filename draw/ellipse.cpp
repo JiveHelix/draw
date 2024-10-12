@@ -5,14 +5,16 @@ namespace draw
 {
 
 
-Ellipse Ellipse::Default()
-{
-    return {{
+Ellipse::Ellipse()
+    :
+    EllipseTemplate<pex::Identity>{
         {{400.0, 400.0}},
         200.0,
         300.0,
         45.0,
-        1.0}};
+        1.0}
+{
+
 }
 
 

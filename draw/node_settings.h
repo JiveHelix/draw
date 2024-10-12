@@ -50,11 +50,6 @@ struct NodeSettings: public NodeSettingsTemplate<pex::Identity>
     {
 
     }
-
-    static NodeSettings Default()
-    {
-        return {};
-    }
 };
 
 

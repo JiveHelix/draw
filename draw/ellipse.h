@@ -46,7 +46,7 @@ struct EllipseTemplate
 
 struct Ellipse: public EllipseTemplate<pex::Identity>
 {
-    static Ellipse Default();
+    Ellipse();
     bool Contains(const tau::Point2d<double> &point) const;
     bool Contains(const tau::Point2d<double> &point, double margin) const;
     PointsDouble GetPoints() const;

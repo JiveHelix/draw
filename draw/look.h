@@ -61,11 +61,6 @@ struct Stroke: public StrokeTemplate<pex::Identity>
 
     }
 
-    static Stroke Default()
-    {
-        return {};
-    }
-
     wxGraphicsPenInfo GetPenInfo() const
     {
         return wxGraphicsPenInfo(
@@ -120,11 +115,6 @@ struct Fill: public FillTemplate<pex::Identity>
     {
 
     }
-
-    static Fill Default()
-    {
-        return {};
-    }
 };
 
 
@@ -167,11 +157,6 @@ struct Look: public LookTemplate<pex::Identity>
             Fill{}}
     {
 
-    }
-
-    static Look Default()
-    {
-        return {};
     }
 };
 

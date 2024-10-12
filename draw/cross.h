@@ -51,11 +51,6 @@ struct Cross_: public Base
     {
 
     }
-
-    static Cross_ Default()
-    {
-        return {};
-    }
 };
 
 

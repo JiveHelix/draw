@@ -5,12 +5,14 @@ namespace draw
 {
 
 
-LinesShapeSettings LinesShapeSettings::Default()
-{
-    return {{
+LinesShapeSettings::LinesShapeSettings()
+    :
+    LinesShapeTemplate<pex::Identity>{
         true,
         1000.0,
-        Look::Default()}};
+        {}}
+{
+
 }
 
 

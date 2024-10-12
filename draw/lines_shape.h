@@ -36,7 +36,7 @@ struct LinesShapeTemplate
 
 struct LinesShapeSettings: public LinesShapeTemplate<pex::Identity>
 {
-    static LinesShapeSettings Default();
+    LinesShapeSettings();
 };
 
 

@@ -71,9 +71,9 @@ struct ViewGroupTemplates_
         static constexpr int defaultWidth = 1920;
         static constexpr int defaultHeight = 1080;
 
-        static Plain Default()
-        {
-            return Plain{
+        Plain()
+            :
+            GroupBase{
                 Point{0, 0},
                 Size{defaultWidth, defaultHeight},
                 Size{defaultWidth, defaultHeight},
@@ -88,7 +88,9 @@ struct ViewGroupTemplates_
                 {},
                 {},
                 {},
-                false};
+                false}
+        {
+
         }
 
         // Compute the coordinates of an unscaled point using current zoom.

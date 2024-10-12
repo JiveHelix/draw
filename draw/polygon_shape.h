@@ -130,8 +130,8 @@ struct CreatePolygon
             0,
             pex::Order{},
             polygon,
-            Look::Default(),
-            NodeSettings::Default());
+            Look{},
+            NodeSettings{});
     }
 };
 

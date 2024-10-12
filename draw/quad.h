@@ -83,16 +83,18 @@ struct QuadGroupTemplates_
 {
     struct Plain: public QuadTemplate<pex::Identity>
     {
-        static Plain Default()
-        {
-            return {{
+        Plain()
+            :
+            QuadTemplate<pex::Identity>{
                 {{960, 540}},
                 {{300, 200}},
                 1.0,
-                0.0,
-                {0, 0},
-                {0, 0},
-                {}}};
+                {},
+                {},
+                {},
+                {}}
+        {
+
         }
 
         using Affine = Eigen::Matrix<double, 3, 3>;
@@ -129,7 +131,7 @@ struct QuadGroupTemplates_
     private:
         void OnReset_()
         {
-            this->Set(Plain::Default());
+            this->Set(Plain{});
         }
 
     private:

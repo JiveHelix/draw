@@ -65,9 +65,19 @@ struct SettingsTemplate
 
 struct Settings: public SettingsTemplate<pex::Identity>
 {
-    static Settings Default()
+    Settings()
+        :
+        SettingsTemplate<pex::Identity>{
+            initialFunctionCount,
+            256,
+            1.0,
+            4.0,
+            200.0,
+            true,
+            {},
+            {}}
     {
-        return {{initialFunctionCount, 256, 1.0, 4.0, 200.0, true, {}, {}}};
+
     }
 };
 
@@ -101,9 +111,15 @@ struct TrigTemplate
 
 struct TrigSettings: public TrigTemplate<pex::Identity>
 {
-    static TrigSettings Default()
+    TrigSettings()
+        :
+        TrigTemplate<pex::Identity>{
+            400.0,
+            1.0,
+            0.0,
+            {}}
     {
-        return {{400.0, 1.0, 0.0, draw::Look::Default()}};
+
     }
 };
 
@@ -365,7 +381,7 @@ struct DemoCustom
                 auto &functionModel = this->functions[i];
                 auto &look = functionModel.look;
 
-                auto thisLook = draw::Look::Default();
+                auto thisLook = draw::Look{};
                 thisLook.stroke.color.saturation = 1.0;
 
                 thisLook.stroke.color.hue =

@@ -5,11 +5,13 @@ namespace draw
 {
 
 
-PointsShapeSettings PointsShapeSettings::Default()
-{
-    return {{
+PointsShapeSettings::PointsShapeSettings()
+    :
+    PointsShapeTemplate<pex::Identity>{
         2.0,
-        Look::Default()}};
+        {}}
+{
+
 }
 
 

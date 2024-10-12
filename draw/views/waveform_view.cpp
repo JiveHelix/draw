@@ -60,8 +60,8 @@ void WaveformPixels::OnViewSize_(const Size &viewSize)
 
     auto linesVector = this->GetLines();
 
-    auto evenLinesSettings = LinesShapeSettings::Default();
-    auto oddLinesSettings = LinesShapeSettings::Default();
+    auto evenLinesSettings = LinesShapeSettings{};
+    auto oddLinesSettings = LinesShapeSettings{};
 
     // Draw even lines heavy
     evenLinesSettings.look.stroke.weight = 1;

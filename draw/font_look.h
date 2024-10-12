@@ -39,13 +39,15 @@ struct FontLookTemplate
 
 struct FontLook: public FontLookTemplate<pex::Identity>
 {
-    static FontLook Default()
-    {
-        return {{
+    FontLook()
+        :
+        FontLookTemplate<pex::Identity>{
             true,
             18.0,
             {{0.0, 0.0, 1.0}},
-            true}};
+            true}
+    {
+
     }
 };
 

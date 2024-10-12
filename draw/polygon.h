@@ -75,11 +75,6 @@ struct Polygon: public PolygonTemplate<pex::Identity>
 
     }
 
-    static Polygon Default()
-    {
-        return {};
-    }
-
     Polygon(const CenteredPoints &centeredPoints);
     Polygon(const PointsDouble &points_);
     PointsDouble GetPoints() const;

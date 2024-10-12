@@ -95,7 +95,7 @@ struct CreateQuad
             return {};
         }
 
-        auto quad = Quad::Default();
+        auto quad = Quad{};
         quad.center = drag.GetDragCenter(position);
         quad.size = drag.GetSize(position);
 
@@ -103,8 +103,8 @@ struct CreateQuad
             0,
             pex::Order{},
             quad,
-            Look::Default(),
-            NodeSettings::Default());
+            Look{},
+            NodeSettings{});
     }
 };
 

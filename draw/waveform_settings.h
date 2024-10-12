@@ -59,13 +59,15 @@ struct WaveformColor: public WaveformColorTemplate<pex::Identity>
     static constexpr auto defaultHue = 138.0; // green
     static constexpr auto defaultHighlightHue = 292.0; // purple
 
-    static WaveformColor Default()
-    {
-        return {{
-            BrightnessRanges::Settings::Default(),
+    WaveformColor()
+        :
+        WaveformColorTemplate<pex::Identity>{
+            BrightnessRanges::Settings{},
             defaultCount,
             {{defaultHue, 1.0, 1.0}},
-            {{defaultHighlightHue, 1.0, 1.0}}}};
+            {{defaultHighlightHue, 1.0, 1.0}}}
+    {
+
     }
 };
 
@@ -120,15 +122,17 @@ struct WaveformSettings: public WaveformTemplate<pex::Identity>
     static constexpr size_t defaultColumnCount = 400;
     static constexpr double defaultVerticalZoom = 1.0;
 
-    static WaveformSettings Default()
-    {
-        return {{
+    WaveformSettings()
+        :
+        WaveformTemplate<pex::Identity>{
             true,
             defaultMaximumValue,
             defaultLevelCount,
             defaultColumnCount,
             defaultVerticalZoom,
-            WaveformColor::Default()}};
+            WaveformColor{}}
+    {
+
     }
 };
 

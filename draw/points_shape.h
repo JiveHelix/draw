@@ -38,7 +38,7 @@ struct PointsShapeSettings
     :
     public PointsShapeTemplate<pex::Identity>
 {
-    static PointsShapeSettings Default();
+    PointsShapeSettings();
 };
 
 

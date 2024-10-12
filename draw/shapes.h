@@ -258,16 +258,6 @@ public:
     using PlainShape = decltype(Base::shape);
     static constexpr auto fieldsTypeName = PlainShape::fieldsTypeName;
 
-    static Derived Default()
-    {
-        return {{
-            0,
-            {},
-            PlainShape::Default(),
-            Look::Default(),
-            NodeSettings::Default()}};
-    }
-
     ssize_t GetId() const override
     {
         return this->id;

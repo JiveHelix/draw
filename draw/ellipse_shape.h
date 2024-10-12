@@ -143,8 +143,8 @@ struct CreateEllipse
             0,
             pex::Order{},
             ellipse,
-            Look::Default(),
-            NodeSettings::Default());
+            Look{},
+            NodeSettings{});
     }
 };
 
