@@ -647,7 +647,7 @@ public:
 
         imageSizeEndpoint_(
             this,
-            this->userControl_.pixelView.viewSettings.imageSize,
+            this->userControl_.pixelView.canvas.viewSettings.imageSize,
             &DemoBrain::OnImageSize_),
 
         countWillChangeEndpoint_(
@@ -683,7 +683,7 @@ public:
 
     wxWindow * CreateControls(wxWindow *parent)
     {
-        this->userControl_.pixelView.viewSettings.imageSize.Set(
+        this->userControl_.pixelView.canvas.viewSettings.imageSize.Set(
             draw::Size(1920, 1080));
 
         return new DemoControls(parent, this->demoControl_);
@@ -787,7 +787,7 @@ private:
             this->functionPoints_.at(index),
             this->demoModel_.settings.pointCount.Get(),
             trigSettings,
-            this->userControl_.pixelView.viewSettings.imageSize.Get());
+            this->userControl_.pixelView.canvas.viewSettings.imageSize.Get());
     }
 
     void OnFunctionList_()

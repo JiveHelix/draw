@@ -32,12 +32,12 @@ WaveformPixels::WaveformPixels(
 
     viewSize_(
         this,
-        pixelViewControl.viewSettings.viewSize,
+        pixelViewControl.canvas.viewSettings.viewSize,
         &WaveformPixels::OnViewSize_),
 
     imageSize_(
         this,
-        mainViewControl.viewSettings.imageSize,
+        mainViewControl.canvas.viewSettings.imageSize,
         &WaveformPixels::OnImageSize_)
 {
     auto canvas = new PixelCanvas(this, pixelViewControl);
@@ -51,7 +51,7 @@ WaveformPixels::WaveformPixels(
 void WaveformPixels::OnViewSize_(const Size &viewSize)
 {
     // Let the generated waveform height match the height of the view.
-    this->pixelViewControl_.viewSettings.imageSize.height.Set(viewSize.height);
+    this->pixelViewControl_.canvas.viewSettings.imageSize.height.Set(viewSize.height);
 
     if (viewSize.height < 20)
     {
@@ -133,14 +133,15 @@ void WaveformPixels::OnImageSize_(const Size &imageSize)
 {
     // Let the generated waveform width match the width of the original
     // image.
-    this->pixelViewControl_.viewSettings.imageSize.width.Set(imageSize.width);
+    this->pixelViewControl_.canvas.viewSettings.imageSize.width.Set(
+        imageSize.width);
 }
 
 
 Eigen::Vector<wxCoord, Eigen::Dynamic> WaveformPixels::GetLines() const
 {
     auto imageHeight =
-        this->pixelViewControl_.viewSettings.imageSize.height.Get();
+        this->pixelViewControl_.canvas.viewSettings.imageSize.height.Get();
 
     float scale = static_cast<float>(
         this->waveformControl_.verticalScale.Get());
@@ -280,8 +281,8 @@ PixelViewAndWaveform::PixelViewAndWaveform(
     wxPanel(parent, wxID_ANY),
 
     viewLink_(
-        pixelViewControl.viewSettings,
-        waveformPixelViewControl.viewSettings,
+        pixelViewControl.canvas.viewSettings,
+        waveformPixelViewControl.canvas.viewSettings,
         LinkOptions{}.SetAll(Link::horizontal)),
 
     splitter_(new wxpex::Splitter(this))

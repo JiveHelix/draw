@@ -137,11 +137,11 @@ WaveformGenerator::WaveformGenerator(
 
     imageSizeEndpoint_(
         this,
-        pixelViewControl.viewSettings.imageSize,
+        pixelViewControl.canvas.viewSettings.imageSize,
         &WaveformGenerator::OnImageSize_),
 
     waveformSettings_(this->waveformControl_.Get()),
-    imageSize_(this->pixelViewControl_.viewSettings.imageSize),
+    imageSize_(this->pixelViewControl_.canvas.viewSettings.imageSize),
 
     isRunning_(true),
     inputs_(),
@@ -305,7 +305,7 @@ WaveformGenerator::WaveformGenerator(
 
     imageSizeEndpoint_(
         this,
-        this->pixelViewControl_.viewSettings.imageSize,
+        this->pixelViewControl_.canvas.viewSettings.imageSize,
         &WaveformGenerator::OnImageSize_),
 
     waveformSettings_(other.waveformSettings_),

@@ -1,18 +1,8 @@
 #pragma once
 
-#include <mutex>
-#include <jive/path.h>
-#include <pex/value.h>
-#include <pex/endpoint.h>
 
-#include <wxpex/ignores.h>
+#include "draw/views/canvas.h"
 
-WXSHIM_PUSH_IGNORES
-#include <wx/scrolwin.h>
-WXSHIM_POP_IGNORES
-
-#include "draw/view.h"
-#include "draw/scale.h"
 #include "draw/pixels.h"
 #include "draw/views/pixel_view_settings.h"
 
@@ -21,49 +11,17 @@ namespace draw
 {
 
 
-using Scrolled = wxScrolled<wxPanel>;
-
-class PixelCanvas: public Scrolled
+class PixelCanvas: public Canvas
 {
 public:
     static constexpr auto observerName = "PixelCanvas";
-    static constexpr int pixelsPerScrollUnit = 10;
 
     PixelCanvas(
         wxWindow *parent,
-        PixelViewControl controls);
-
-    Size GetVirtualSize() const;
-
-protected:
-    void ScrollWindow(int dx, int dy, const wxRect *rect) override;
+        PixelViewControl control);
 
 private:
     void OnImageSize_(const Size &imageSize);
-
-    void OnVirtualSize_(const Size &virtualSize);
-
-    void OnSize_(wxSizeEvent &event);
-
-    void OnMouseMotion_(wxMouseEvent &event);
-
-    void OnLeftDown_(wxMouseEvent &event);
-
-    void OnLeftUp_(wxMouseEvent &event);
-
-    void OnRightDown_(wxMouseEvent &event);
-
-    void OnRightUp_(wxMouseEvent &event);
-
-    void OnKeyDown_(wxKeyEvent &event);
-
-    void OnKeyUp_(wxKeyEvent &event);
-
-    void OnScale_(const Scale &scale);
-
-    void OnCursor_(wxpex::Cursor cursor);
-
-    void OnViewPosition_(const Point &viewPosition);
 
     void OnPixels_(const std::shared_ptr<Pixels> &pixels);
 
@@ -72,8 +30,6 @@ private:
     bool HasShapes_() const;
 
     void OnPaint_(wxPaintEvent &);
-
-    tau::Point2d<int> CorrectCenterPixel_(draw::View<int> &view) const;
 
     template<typename Context>
     bool Draw_(Context &&context)
@@ -149,38 +105,11 @@ private:
     }
 
 private:
-    bool ignoreViewPosition_;
-    jive::CountFlag<uint8_t> skipUpdateViewPosition_;
-
     using SizeEndpoint = pex::Endpoint<PixelCanvas, SizeControl>;
-    using PositionEndpoint = pex::Endpoint<PixelCanvas, PointControl>;
-    using ScaleEndpoint = pex::Endpoint<PixelCanvas, ScaleControl>;
-
-    static_assert(pex::IsGroupNode<PointControl>);
-
     SizeEndpoint imageSizeEndpoint_;
-    SizeEndpoint virtualSizeEndpoint_;
-    PositionEndpoint viewPositionEndpoint_;
-    ScaleEndpoint scaleEndpoint_;
 
-    using CursorEndpoint =
-        typename pex::Endpoint
-        <
-            PixelCanvas,
-            decltype(PixelViewControl::cursor)
-        >;
-
-    CursorEndpoint cursorEndpoint_;
-
-    using ImageCenterControl = typename tau::Point2dGroup<double>::Control;
-    ImageCenterControl imageCenter_;
-
-    PixelViewControl control_;
     wxImage image_;
 
-    Size virtualSize_;
-
-    wxBitmap bitmap_;
     pex::Endpoint<PixelCanvas, PixelsControl> pixelsEndpoint_;
     std::shared_ptr<Pixels> pixelData_;
 

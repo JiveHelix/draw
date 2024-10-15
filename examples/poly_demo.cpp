@@ -14,7 +14,7 @@ public:
 
         polygonBrain_(
             this->demoControl_.shapes,
-            this->userControl_.pixelView),
+            this->userControl_.pixelView.canvas),
 
         countEndpoint_(
             this,

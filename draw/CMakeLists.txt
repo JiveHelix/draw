@@ -59,6 +59,11 @@ target_sources(
     detail/png_image.h
     detail/poly_shape_id.h
     views/affine_view.h
+    views/bitmap_canvas.h
+    views/bitmap_view.h
+    views/canvas.h
+    views/canvas_settings.h
+    views/canvas_view.h
     views/cross_shape_view.h
     views/cross_view.h
     views/ellipse_shape_view.h
@@ -102,6 +107,9 @@ target_sources(
     waveform_settings.cpp
     detail/png_image.cpp
     detail/poly_shape_id.cpp
+    views/bitmap_canvas.cpp
+    views/bitmap_view.cpp
+    views/canvas_settings.cpp
     views/cross_shape_view.cpp
     views/cross_view.cpp
     views/ellipse_shape_view.cpp

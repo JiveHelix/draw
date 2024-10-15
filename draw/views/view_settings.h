@@ -221,7 +221,19 @@ struct ViewGroupTemplates_
             }
 
             jive::ScopeFlag ignoreZoom(this->ignoreZoom_);
+
             auto deferScale = pex::MakeDefer(this->scale);
+
+            if (fit.horizontal < this->scale.horizontal.GetMinimum())
+            {
+                this->scale.horizontal.SetMinimum(fit.horizontal);
+            }
+
+            if (fit.vertical < this->scale.vertical.GetMinimum())
+            {
+                this->scale.vertical.SetMinimum(fit.vertical);
+            }
+
             deferScale.Set(fit);
 
             // Reset the imageCenterPixel_ before the zoom scale is notified.

@@ -24,7 +24,7 @@ public:
         ShapeDemoBrain<DemoBrain>(),
         quadBrain_(
             this->demoControl_.shapes,
-            this->userControl_.pixelView)
+            this->userControl_.pixelView.canvas)
     {
         this->demoControl_.shapes.Append(
             draw::ShapeValue::Default<draw::QuadShape>());

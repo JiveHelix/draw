@@ -6,7 +6,7 @@
 #include "draw/selection_brain.h"
 #include "draw/oddeven.h"
 #include "draw/drag.h"
-#include "draw/views/pixel_view_settings.h"
+#include "draw/views/canvas_settings.h"
 #include "draw/shapes.h"
 #include "draw/shape_list.h"
 #include "draw/polygon_lines.h"
@@ -402,26 +402,26 @@ public:
 
     ShapeBrain(
         const std::vector<ShapesControl> &shapeLists,
-        PixelViewControl pixelViewControl)
+        CanvasControl canvasControl)
         :
         SelectionBrain(shapeLists),
         isEnabled_(true),
 
-        pixelViewControl_(pixelViewControl),
+        canvasControl_(canvasControl),
 
         mouseDownEndpoint_(
             this,
-            pixelViewControl.mouseDown,
+            canvasControl.mouseDown,
             &ShapeBrain::OnMouseDown_),
 
         logicalPositionEndpoint_(
             this,
-            pixelViewControl.logicalPosition,
+            canvasControl.logicalPosition,
             &ShapeBrain::OnLogicalPosition_),
 
         modifierEndpoint_(
             this,
-            pixelViewControl.modifier,
+            canvasControl.modifier,
             &ShapeBrain::OnModifier_),
 
 
@@ -431,9 +431,9 @@ public:
 
     ShapeBrain(
         ShapesControl shapeList,
-        PixelViewControl pixelViewControl)
+        CanvasControl canvasControl)
         :
-        ShapeBrain(std::vector<ShapesControl>({shapeList}), pixelViewControl)
+        ShapeBrain(std::vector<ShapesControl>({shapeList}), canvasControl)
     {
 
     }
@@ -521,7 +521,7 @@ protected:
             return;
         }
 
-        auto click = this->pixelViewControl_.logicalPosition.Get();
+        auto click = this->canvasControl_.logicalPosition.Get();
         auto wasSelected = this->GetShapeSelection();
 
         auto found = this->FindClicked_(click.template Cast<double>());
@@ -535,7 +535,7 @@ protected:
 
                 if (shape.GetValueBase()->HandlesControlClick())
                 {
-                    if (this->pixelViewControl_.modifier.Get().IsControl())
+                    if (this->canvasControl_.modifier.Get().IsControl())
                     {
                         // There was a selected shape.
                         // Keep it selected and handle a control modifier.
@@ -574,8 +574,8 @@ protected:
         this->drag_ = found->shape.Get().GetValueBase()->ProcessMouseDown(
             found->shape.GetVirtual()->Copy(),
             click,
-            this->pixelViewControl_.modifier.Get(),
-            this->pixelViewControl_.cursor);
+            this->canvasControl_.modifier.Get(),
+            this->canvasControl_.cursor);
     }
 
     void UpdateCursor_()
@@ -585,8 +585,8 @@ protected:
             return;
         }
 
-        auto modifier = this->pixelViewControl_.modifier.Get();
-        auto click = this->pixelViewControl_.logicalPosition.Get();
+        auto modifier = this->canvasControl_.modifier.Get();
+        auto click = this->canvasControl_.logicalPosition.Get();
         auto found = this->FindClicked_(click.template Cast<double>());
 
         if (!found)
@@ -603,15 +603,15 @@ protected:
 
                 if (shape->HandlesControlClick())
                 {
-                    this->pixelViewControl_.cursor.Set(wxpex::Cursor::pencil);
+                    this->canvasControl_.cursor.Set(wxpex::Cursor::pencil);
 
                     return;
                 }
             }
 
-            if (this->pixelViewControl_.cursor.Get() != wxpex::Cursor::arrow)
+            if (this->canvasControl_.cursor.Get() != wxpex::Cursor::arrow)
             {
-                this->pixelViewControl_.cursor.Set(wxpex::Cursor::arrow);
+                this->canvasControl_.cursor.Set(wxpex::Cursor::arrow);
             }
 
             return;
@@ -629,19 +629,19 @@ protected:
             if (modifier.IsControl() && shape->HandlesRotate())
             {
                 // TODO: Create a rotate cursor
-                this->pixelViewControl_.cursor.Set(wxpex::Cursor::pointRight);
+                this->canvasControl_.cursor.Set(wxpex::Cursor::pointRight);
             }
             else if (modifier.IsAlt() && shape->HandlesAltClick())
             {
-                this->pixelViewControl_.cursor.Set(wxpex::Cursor::bullseye);
+                this->canvasControl_.cursor.Set(wxpex::Cursor::bullseye);
             }
             else if (shape->HandlesEditPoint())
             {
-                this->pixelViewControl_.cursor.Set(wxpex::Cursor::cross);
+                this->canvasControl_.cursor.Set(wxpex::Cursor::cross);
             }
             else
             {
-                this->pixelViewControl_.cursor.Set(wxpex::Cursor::openHand);
+                this->canvasControl_.cursor.Set(wxpex::Cursor::openHand);
             }
 
             return;
@@ -655,7 +655,7 @@ protected:
             if (lineIndex)
             {
                 // Hovering over a line, change cursor
-                this->pixelViewControl_.cursor.Set(wxpex::Cursor::sizing);
+                this->canvasControl_.cursor.Set(wxpex::Cursor::sizing);
                 return;
             }
         }
@@ -663,7 +663,7 @@ protected:
         if (shape->HandlesDrag())
         {
             // The mouse is over a shape, but not over a line or a point.
-            this->pixelViewControl_.cursor.Set(wxpex::Cursor::openHand);
+            this->canvasControl_.cursor.Set(wxpex::Cursor::openHand);
         }
     }
 
@@ -720,14 +720,14 @@ private:
 
     bool isEnabled_;
 
-    PixelViewControl pixelViewControl_;
+    CanvasControl canvasControl_;
 
-    pex::Endpoint<ShapeBrain, decltype(PixelViewControl::mouseDown)>
+    pex::Endpoint<ShapeBrain, decltype(CanvasControl::mouseDown)>
         mouseDownEndpoint_;
 
     pex::Endpoint<ShapeBrain, PointControl> logicalPositionEndpoint_;
 
-    pex::Endpoint<ShapeBrain, decltype(PixelViewControl::modifier)>
+    pex::Endpoint<ShapeBrain, decltype(CanvasControl::modifier)>
         modifierEndpoint_;
 
     std::unique_ptr<Drag> drag_;

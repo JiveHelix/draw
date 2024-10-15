@@ -1,87 +1,28 @@
 #pragma once
 
 
-#include <mutex>
-#include <pex/value.h>
-
-#include <wxpex/ignores.h>
-
-WXSHIM_PUSH_IGNORES
-#include <wx/scrolwin.h>
-WXSHIM_POP_IGNORES
-
-#include "draw/views/pixel_canvas.h"
 #include "draw/views/pixel_view_settings.h"
+#include "draw/views/canvas_view.h"
+#include "draw/views/pixel_canvas.h"
 
 
 namespace draw
 {
 
 
-struct PixelViewOptions
+class PixelView: public CanvasView<PixelCanvas>
 {
-    bool useDualZoom;
-    bool displayControls;
-
-    PixelViewOptions()
-        :
-        useDualZoom(false),
-        displayControls(true)
-    {
-
-    }
-
-    PixelViewOptions & SetUseDualZoom(bool value)
-    {
-        this->useDualZoom = value;
-
-        return *this;
-    }
-
-    PixelViewOptions & SetDisplayControls(bool value)
-    {
-        this->displayControls = value;
-
-        return *this;
-    }
-};
-
-
-class PixelView: public wxPanel
-{
-    static constexpr int margin = 3;
-    static constexpr int gridSpacing = 3;
-
 public:
     static constexpr auto observerName = "PixelView";
 
     PixelView(
         wxWindow *parent,
         PixelViewControl control,
-        PixelViewOptions options = PixelViewOptions{});
-
-    wxSize DoGetBestSize() const override;
-
-private:
-    Size GetWindowSize_(const Size &canvasSize) const;
-
-private:
-    PixelViewOptions options_;
-    wxWindow *horizontalZoom_;
-    wxWindow *verticalZoom_;
-    wxBoxSizer *controlsSizer_;
-    PixelCanvas *canvas_;
+        CanvasViewOptions options = CanvasViewOptions{});
 };
 
 
-class PixelFrame: public wxFrame
-{
-public:
-    PixelFrame(
-        PixelViewControl control,
-        const std::string &title,
-        PixelViewOptions options = PixelViewOptions{});
-};
+using PixelFrame = CanvasFrame<PixelView, PixelViewControl>;
 
 
 } // end namespace draw

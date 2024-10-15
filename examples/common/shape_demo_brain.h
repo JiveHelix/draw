@@ -49,7 +49,7 @@ public:
 
     wxWindow * CreateControls(wxWindow *parent)
     {
-        this->userControl_.pixelView.viewSettings.imageSize.Set(
+        this->userControl_.pixelView.canvas.viewSettings.imageSize.Set(
             draw::Size(1920, 1080));
 
         auto scrolled = new wxpex::Scrolled(parent);

@@ -75,7 +75,7 @@ public:
 
         viewSettingsEndpoint_(
             this,
-            this->waveformPixelControl_.viewSettings,
+            this->waveformPixelControl_.canvas.viewSettings,
             &DemoBrain::OnViewSettings_),
 
         waveformSettingsEndpoint_(
@@ -91,9 +91,8 @@ public:
             0,
             static_cast<int32_t>(valueCount - 1))
     {
-        // this->user_.pixelView.viewSettings.scale.Set({.5, .5});
-        this->waveformPixelModel_.viewSettings.linkZoom.Set(false);
-        this->waveformPixelModel_.viewSettings.scale.vertical.Set(1.0);
+        this->waveformPixelModel_.canvas.viewSettings.linkZoom.Set(false);
+        this->waveformPixelModel_.canvas.viewSettings.scale.vertical.Set(1.0);
     }
 
     ~DemoBrain()
@@ -106,7 +105,10 @@ public:
         std::cout << "LoadPng" << std::endl;
         this->pngIsLoaded_ = false;
         this->pngData_ = png.GetValues().template cast<int32_t>();
-        this->userControl_.pixelView.viewSettings.imageSize.Set(png.GetSize());
+
+        this->userControl_.pixelView.canvas.viewSettings.imageSize.Set(
+            png.GetSize());
+
         this->waveformModel_.maximumValue.Set(valueCount - 1);
         this->waveformModel_.levelCount.SetMaximum(valueCount);
 
@@ -143,7 +145,8 @@ public:
     std::shared_ptr<draw::Pixels>
     MakePixels() const
     {
-        auto size = this->userControl_.pixelView.viewSettings.imageSize.Get();
+        auto size =
+            this->userControl_.pixelView.canvas.viewSettings.imageSize.Get();
 
         auto result = draw::Pixels::CreateShared(size);
 

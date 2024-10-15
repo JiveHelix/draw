@@ -116,8 +116,10 @@ public:
 
             this->GetDerived()->LoadPng(png);
 
-            this->user_.pixelView.viewSettings.imageSize.Set(png.GetSize());
-            this->user_.pixelView.viewSettings.FitZoom();
+            this->user_.pixelView.canvas.viewSettings.imageSize.Set(
+                png.GetSize());
+
+            this->user_.pixelView.canvas.viewSettings.FitZoom();
 
             this->GetDerived()->Display();
         }
