@@ -1,4 +1,5 @@
 #include "draw/segments_shape.h"
+#include "draw/draw_spline.h"
 
 
 namespace draw

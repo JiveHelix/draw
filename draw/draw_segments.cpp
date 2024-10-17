@@ -5,19 +5,23 @@ namespace draw
 {
 
 
+void AddSegmentsToPoint(
+    wxGraphicsPath &path,
+    const PointsDouble &points)
+{
+    for (const auto &point: points)
+    {
+        path.AddLineToPoint(point.x, point.y);
+    }
+}
+
+
 void DrawSegments(
     DrawContext &context,
     const PointsDouble &points)
 {
     auto path = context->CreatePath();
-    auto point = std::begin(points);
-    path.MoveToPoint(point->x, point->y);
-
-    while (++point != std::end(points))
-    {
-        path.AddLineToPoint(point->x, point->y);
-    }
-
+    AddSegmentsToPoint(path, points);
     path.CloseSubpath();
     context->DrawPath(path);
 }

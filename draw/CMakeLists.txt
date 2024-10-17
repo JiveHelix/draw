@@ -28,6 +28,7 @@ target_sources(
     draw_context.h
     draw_lines.h
     draw_segments.h
+    draw_spline.h
     ellipse.h
     ellipse_shape.h
     error.h
@@ -88,6 +89,7 @@ target_sources(
     cross_shape.cpp
     draw_context.cpp
     draw_segments.cpp
+    draw_spline.cpp
     ellipse.cpp
     oddeven.cpp
     font_look.cpp

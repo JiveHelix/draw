@@ -284,11 +284,11 @@ struct DemoCustom
 
         void CreateFunctions_()
         {
-            using Period = std::chrono::duration<double, std::micro>;
-            using Clock = std::chrono::steady_clock;
-            using TimePoint = std::chrono::time_point<Clock, Period>;
+            // using Period = std::chrono::duration<double, std::micro>;
+            // using Clock = std::chrono::steady_clock;
+            // using TimePoint = std::chrono::time_point<Clock, Period>;
 
-            TimePoint start = Clock::now();
+            // TimePoint start = Clock::now();
 
             if (this->settings.isLogarithmic.Get())
             {
@@ -299,10 +299,10 @@ struct DemoCustom
                 this->CreateLinearFunctions_();
             }
 
-            TimePoint end = Clock::now();
+            // TimePoint end = Clock::now();
 
-            std::cout << "Created functions: "
-                << (end - start).count() << " us\n";
+            // std::cout << "Created functions: "
+            //    << (end - start).count() << " us\n";
         }
 
         void OnFunctionFrequency_(double frequency, size_t index)
@@ -696,13 +696,13 @@ public:
 
     void Display()
     {
-        std::cout << "Display..." << std::endl;
+        // std::cout << "Display..." << std::endl;
 
-        using Period = std::chrono::duration<double, std::micro>;
-        using Clock = std::chrono::steady_clock;
-        using TimePoint = std::chrono::time_point<Clock, Period>;
+        // using Period = std::chrono::duration<double, std::micro>;
+        // using Clock = std::chrono::steady_clock;
+        // using TimePoint = std::chrono::time_point<Clock, Period>;
 
-        TimePoint start = Clock::now();
+        // TimePoint start = Clock::now();
 
         auto shapes = draw::Shapes(this->shapesId_.Get());
 
@@ -717,10 +717,10 @@ public:
 
         this->userControl_.pixelView.asyncShapes.Set(shapes);
 
-        TimePoint end = Clock::now();
+        // TimePoint end = Clock::now();
 
-        std::cout << "Created shapes: "
-            << (end - start).count() << " us\n";
+        // std::cout << "Created shapes: "
+        //    << (end - start).count() << " us\n";
     }
 
     void Shutdown()
@@ -792,7 +792,7 @@ private:
 
     void OnFunctionList_()
     {
-        std::cout << "OnFunctionList_ Display" << std::endl;
+        // std::cout << "OnFunctionList_ Display" << std::endl;
         this->Display();
     }
 
@@ -820,7 +820,7 @@ private:
 
         for (auto &function: this->demoControl_.functions)
         {
-            std::cout << "ComputeFunctions " << index << std::endl;
+            // std::cout << "ComputeFunctions " << index << std::endl;
             this->OnFunction_(function.Get(), index++);
         }
     }
@@ -832,7 +832,7 @@ private:
 
     void OnCount_(size_t count)
     {
-        std::cout << "OnCount_ " << count << std::endl;
+        // std::cout << "OnCount_ " << count << std::endl;
         this->functionPoints_.resize(count);
         this->CreateFunctionEndpoints_(count);
     }
