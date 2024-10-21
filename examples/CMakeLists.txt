@@ -17,6 +17,15 @@ target_link_libraries(
     project_options
     common)
 
+add_executable(regular_polygon_demo regular_polygon_demo.cpp)
+
+target_link_libraries(
+    regular_polygon_demo
+    PRIVATE
+    project_warnings
+    project_options
+    common)
+
 
 add_executable(poly_demo poly_demo.cpp)
 

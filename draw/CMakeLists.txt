@@ -42,6 +42,8 @@ target_sources(
     point.h
     points_shape.h
     polygon.h
+    regular_polygon.h
+    regular_polygon_shape.h
     polygon_brain.h
     polygon_lines.h
     polygon_shape.h
@@ -80,6 +82,7 @@ target_sources(
     views/points_shape_view.h
     views/point_view.h
     views/polygon_view.h
+    views/regular_polygon_view.h
     views/quad_view.h
     views/size_view.h
     views/view_settings.h
@@ -97,6 +100,7 @@ target_sources(
     look.cpp
     points_shape.cpp
     polygon.cpp
+    regular_polygon.cpp
     polygon_lines.cpp
     png.cpp
     quad.cpp
@@ -126,6 +130,7 @@ target_sources(
     views/pixel_view_settings.cpp
     views/points_shape_view.cpp
     views/polygon_view.cpp
+    views/regular_polygon_view.cpp
     views/quad_view.cpp
     views/view_settings.cpp
     views/waveform_settings_view.cpp

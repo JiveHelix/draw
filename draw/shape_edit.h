@@ -24,6 +24,22 @@ std::optional<PointsIterator> FindPoint(
 double DragAngleDifference(double first, double second);
 
 
+// TODO: Document what Modulo does.
+template<typename T>
+T Modulo(T a, T b)
+{
+    if constexpr (std::is_floating_point_v<T>)
+    {
+        return std::fmod(std::fmod(a, b) + b, b);
+    }
+    else
+    {
+        return (a % b + b) % b;
+    }
+}
+
+
+
 template<typename DerivedShape>
 class DragShape: public Drag
 {

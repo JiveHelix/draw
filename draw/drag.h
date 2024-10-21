@@ -38,6 +38,9 @@ public:
 
     virtual void ReportLogicalPosition(const tau::Point2d<int> &position) = 0;
 
+    // Get the position of the dragged element.
+    // The start_ is usually near the dragged element.
+    // THe offset_ the position of the dragged shape feature.
     tau::Point2d<double> GetPosition(const tau::Point2d<int> &end) const
     {
         tau::Point2d<int> delta = end - this->start_;
@@ -72,6 +75,16 @@ public:
     void SetOffset(const tau::Point2d<double> &offset)
     {
         this->offset_ = offset;
+    }
+
+    tau::Point2d<double> GetStart() const
+    {
+        return this->start_;
+    }
+
+    tau::Point2d<double> GetOffset() const
+    {
+        return this->offset_;
     }
 
 protected:
