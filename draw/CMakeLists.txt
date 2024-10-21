@@ -22,6 +22,8 @@ target_link_libraries(
 target_sources(
     draw
     PRIVATE
+    color_map.h
+    color_map_settings.h
     cross.h
     cross_shape.h
     drag.h
@@ -35,6 +37,7 @@ target_sources(
     font_look.h
     lines_shape.h
     look.h
+    mono_image.h
     oddeven.h
     pixels.h
     planar.h
@@ -67,6 +70,7 @@ target_sources(
     views/canvas.h
     views/canvas_settings.h
     views/canvas_view.h
+    views/color_map_settings_view.h
     views/cross_shape_view.h
     views/cross_view.h
     views/ellipse_shape_view.h
@@ -88,6 +92,8 @@ target_sources(
     views/view_settings.h
     views/waveform_settings_view.h
     views/waveform_view.h
+    color_map.cpp
+    color_map_settings.cpp
     cross.cpp
     cross_shape.cpp
     draw_context.cpp
