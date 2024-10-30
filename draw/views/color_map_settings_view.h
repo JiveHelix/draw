@@ -49,6 +49,11 @@ public:
                 control.range.high,
                 control.range.high.value));
 
+        auto maximum = wxpex::LabeledWidget(
+            panel,
+            "Maximum",
+            new wxpex::Field(panel, control.maximum));
+
         auto turboOn = wxpex::LabeledWidget(
             panel,
             "Turbo",
@@ -58,6 +63,7 @@ public:
             layoutOptions,
             levelLow,
             levelHigh,
+            maximum,
             turboOn);
 
         this->ConfigureSizer(std::move(sizer));

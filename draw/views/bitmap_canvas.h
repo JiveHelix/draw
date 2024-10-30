@@ -1,7 +1,6 @@
 #pragma once
 
 
-#include "draw/pixels.h"
 #include "draw/views/canvas.h"
 #include "draw/views/canvas_settings.h"
 
@@ -19,7 +18,9 @@ public:
         wxWindow *parent,
         CanvasControl control);
 
-    wxBitmap * GetBitmap();
+    wxBitmap & GetBitmap();
+    const wxBitmap & GetBitmap() const;
+    void SetBitmap(const wxBitmap &bitmap);
 
 private:
     void OnImageSize_(const Size &imageSize);

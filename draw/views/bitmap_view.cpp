@@ -16,9 +16,21 @@ BitmapView::BitmapView(
 }
 
 
-wxBitmap * BitmapView::GetBitmap()
+wxBitmap & BitmapView::GetBitmap()
 {
     return this->GetCanvas()->GetBitmap();
+}
+
+
+const wxBitmap & BitmapView::GetBitmap() const
+{
+    return this->GetCanvas()->GetBitmap();
+}
+
+
+void BitmapView::SetBitmap(const wxBitmap &bitmap)
+{
+    return this->GetCanvas()->SetBitmap(bitmap);
 }
 
 

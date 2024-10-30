@@ -26,7 +26,7 @@ BitmapCanvas::BitmapCanvas(
         control.viewSettings.imageSize,
         &BitmapCanvas::OnImageSize_),
 
-    bitmap_()
+    bitmap_(16, 16)
 {
     this->OnImageSize_(control.viewSettings.imageSize.Get());
 
@@ -34,15 +34,35 @@ BitmapCanvas::BitmapCanvas(
 }
 
 
-wxBitmap * BitmapCanvas::GetBitmap()
+wxBitmap & BitmapCanvas::GetBitmap()
 {
-    return &this->bitmap_;
+    return this->bitmap_;
+}
+
+
+const wxBitmap & BitmapCanvas::GetBitmap() const
+{
+    return this->bitmap_;
+}
+
+
+void BitmapCanvas::SetBitmap(const wxBitmap &bitmap)
+{
+    this->bitmap_ = bitmap;
 }
 
 
 void BitmapCanvas::OnImageSize_(const Size &imageSize)
 {
-    this->bitmap_ = wxBitmap(imageSize.width, imageSize.height);
+    if (imageSize.width == 0 || imageSize.height == 0)
+    {
+        return;
+    }
+
+    if (wxpex::ToSize<int>(this->bitmap_.GetSize()) != imageSize)
+    {
+        this->bitmap_ = wxBitmap(imageSize.width, imageSize.height);
+    }
 }
 
 

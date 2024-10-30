@@ -41,10 +41,6 @@ protected:
         auto position = this->GetPosition(end);
         auto newRadius = adjusted.shape.center.Distance(position);
 
-        auto startingRadius = adjusted.shape.center.Distance(this->GetOffset());
-        auto shapeRadius = adjusted.shape.GetRadius();
-        assert(std::abs(startingRadius - shapeRadius) < 1e-6);
-
         auto oldVector =
             tau::Vector2d<double>(
                 adjusted.shape.center,
@@ -136,15 +132,6 @@ protected:
         auto adjusted = this->startingShape_;
         auto position = this->GetPosition(end);
 
-        // The reference point of a line in this case is defined to be the
-        // line's midpoint.
-        auto startingRadius =
-            adjusted.shape.center.Distance(this->GetOffset());
-
-        auto shapeRadius = adjusted.shape.GetMidpointRadius();
-
-        assert(std::abs(startingRadius - shapeRadius) < 1e-6);
-
         auto radius = adjusted.shape.center.Distance(position);
 
         auto oldVector =
@@ -160,6 +147,8 @@ protected:
         auto newShape = adjusted.shape.Rotate_deg(
             oldVector.GetAngle_deg(newVector));
 
+        // The reference point of a line in this case is defined to be the
+        // line's midpoint.
         newShape.SetMidpointRadius(radius);
         adjusted.shape = newShape;
 

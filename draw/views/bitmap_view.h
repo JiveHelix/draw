@@ -20,7 +20,9 @@ public:
         CanvasControl control,
         CanvasViewOptions options = CanvasViewOptions{});
 
-    wxBitmap * GetBitmap();
+    wxBitmap & GetBitmap();
+    const wxBitmap & GetBitmap() const;
+    void SetBitmap(const wxBitmap &bitmap);
 };
 
 

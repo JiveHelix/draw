@@ -262,6 +262,11 @@ struct ViewGroupTemplates_
 
         void RecenterView(const Size &viewSize_)
         {
+            if (this->ignoreViewPosition_)
+            {
+                return;
+            }
+
             auto viewPosition_ = this->GetCenteredViewPosition_(viewSize_);
 
             // We need to notify observers of the change to view position
@@ -278,6 +283,11 @@ struct ViewGroupTemplates_
 
         void RecenterHorizontalView()
         {
+            if (this->ignoreViewPosition_)
+            {
+                return;
+            }
+
             auto viewPosition_ =
                 this->GetCenteredViewPosition_(this->viewSize.Get());
 
@@ -288,6 +298,11 @@ struct ViewGroupTemplates_
 
         void RecenterVerticalView()
         {
+            if (this->ignoreViewPosition_)
+            {
+                return;
+            }
+
             auto viewPosition_ =
                 this->GetCenteredViewPosition_(this->viewSize.Get());
 

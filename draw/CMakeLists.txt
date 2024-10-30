@@ -22,6 +22,7 @@ target_link_libraries(
 target_sources(
     draw
     PRIVATE
+    bitmap.h
     color_map.h
     color_map_settings.h
     cross.h
@@ -92,6 +93,7 @@ target_sources(
     views/view_settings.h
     views/waveform_settings_view.h
     views/waveform_view.h
+    bitmap.cpp
     color_map.cpp
     color_map_settings.cpp
     cross.cpp

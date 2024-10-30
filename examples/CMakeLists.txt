@@ -27,6 +27,16 @@ target_link_libraries(
     common)
 
 
+add_executable(bitmap_demo bitmap_demo.cpp)
+
+target_link_libraries(
+    bitmap_demo
+    PRIVATE
+    project_warnings
+    project_options
+    common)
+
+
 add_executable(poly_demo poly_demo.cpp)
 
 target_link_libraries(

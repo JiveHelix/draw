@@ -164,6 +164,11 @@ public:
         return canvas_;
     }
 
+    const DerivedCanvas * GetCanvas() const
+    {
+        return canvas_;
+    }
+
 protected:
     Size GetWindowSize_(const Size &canvasSize) const
     {

@@ -201,9 +201,11 @@ protected:
         auto windowSize = wxpex::ToSize<int>(this->GetSize());
         auto position = wxpex::ToPoint<int>(this->GetScreenPosition());
 
-        this->control_.viewSettings.viewSize.Set(clientSize);
-        this->control_.viewSettings.windowSize.Set(windowSize);
-        this->control_.viewSettings.screenPosition.Set(position);
+        auto viewSettings = pex::MakeDefer(this->control_.viewSettings);
+
+        viewSettings.viewSize.Set(clientSize);
+        viewSettings.windowSize.Set(windowSize);
+        viewSettings.screenPosition.Set(position);
     }
 
     void OnMouseMotion_(wxMouseEvent &event)
