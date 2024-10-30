@@ -41,6 +41,17 @@ PixelCanvas::PixelCanvas(
 
 void PixelCanvas::OnImageSize_(const Size &imageSize)
 {
+    auto currentImageSize =
+        wxpex::ToSize<draw::SizeType>(this->image_.GetSize());
+
+    if (currentImageSize == imageSize)
+    {
+        // TODO: Fix pex sending repeated notifications for values that
+        // haven't changed.
+        // I suspect it is in the destructor of pex::DeferGroup.
+        return;
+    }
+
     this->image_ = wxImage(imageSize.width, imageSize.height, true);
 }
 
