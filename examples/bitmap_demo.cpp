@@ -288,7 +288,7 @@ private:
     {
         assert(this->demoPixelViews_);
 
-        return *this->demoPixelViews_->GetBitmapView()->GetBitmap();
+        return this->demoPixelViews_->GetBitmapView()->GetBitmap();
     }
 
     void DrawPolygon_()
