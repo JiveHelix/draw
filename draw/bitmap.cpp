@@ -35,4 +35,21 @@ MonoImage<int32_t> GetMonoImage(const wxBitmap &bitmap, int32_t maximumValue)
 }
 
 
+wxBitmap GetBitmap(const tau::RgbPixels<uint8_t> &pixels)
+{
+    wxImage image;
+
+    // wxImage is meant to manipulate the underlying data, so it expects non
+    // const data.
+    // We are only using it to move data into wxBitmap.
+    image.SetData(
+        const_cast<uint8_t *>(pixels.data.data()),
+        pixels.size.width,
+        pixels.size.height,
+        true);
+
+    return wxBitmap(image, 32);
+}
+
+
 } // end namespace draw

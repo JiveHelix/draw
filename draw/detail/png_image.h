@@ -104,7 +104,8 @@ public:
     void WriteRgb(
         const std::string &fileName,
         const PlanarRgb<Pixel> &planarRgb,
-        png_uint_32 pngFormat)
+        png_uint_32 pngFormat,
+        bool convert)
     {
         this->image_.format = pngFormat;
         this->SetWidth(planarRgb.GetColumnCount());
@@ -116,7 +117,7 @@ public:
         int pngResult = png_image_write_to_file(
             &this->image_,
             fileName.c_str(),
-            0,
+            int(convert),
             interleaved.data(),
             0,
             nullptr);
@@ -128,7 +129,8 @@ public:
     void WriteRgb(
         const std::string &fileName,
         const tau::RgbPixels<Pixel> &rgbPixels,
-        png_uint_32 pngFormat)
+        png_uint_32 pngFormat,
+        bool convert)
     {
         this->image_.format = pngFormat;
         this->SetWidth(rgbPixels.size.width);
@@ -137,7 +139,7 @@ public:
         int pngResult = png_image_write_to_file(
             &this->image_,
             fileName.c_str(),
-            0,
+            int(convert),
             rgbPixels.data.data(),
             0,
             nullptr);

@@ -32,7 +32,8 @@ void WritePng(
 
 void WritePng48(
     const std::string &fileName,
-    const PlanarRgb<uint16_t> &planarRgb);
+    const PlanarRgb<uint16_t> &planarRgb,
+    bool convert);
 
 
 void WritePngGray8(
@@ -83,7 +84,7 @@ public:
     {
         if (high)
         {
-            WritePng48(fileName, this->rgb_->template Cast<uint16_t>());
+            WritePng48(fileName, this->rgb_->template Cast<uint16_t>(), false);
         }
         else
         {

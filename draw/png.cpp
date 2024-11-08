@@ -50,7 +50,7 @@ void WritePng(
     const std::string &fileName,
     const PlanarRgb<uint8_t> &planarRgb)
 {
-    detail::PngImage{}.WriteRgb(fileName, planarRgb, PNG_FORMAT_RGB);
+    detail::PngImage{}.WriteRgb(fileName, planarRgb, PNG_FORMAT_RGB, false);
 }
 
 
@@ -58,15 +58,20 @@ void WritePng(
     const std::string &fileName,
     const tau::RgbPixels<uint8_t> &rgbPixels)
 {
-    detail::PngImage{}.WriteRgb(fileName, rgbPixels, PNG_FORMAT_RGB);
+    detail::PngImage{}.WriteRgb(fileName, rgbPixels, PNG_FORMAT_RGB, false);
 }
 
 
 void WritePng48(
     const std::string &fileName,
-    const PlanarRgb<uint16_t> &planarRgb)
+    const PlanarRgb<uint16_t> &planarRgb,
+    bool convert)
 {
-    detail::PngImage{}.WriteRgb(fileName, planarRgb, PNG_FORMAT_LINEAR_RGB);
+    detail::PngImage{}.WriteRgb(
+        fileName,
+        planarRgb,
+        PNG_FORMAT_LINEAR_RGB,
+        convert);
 }
 
 
