@@ -105,7 +105,7 @@ public:
                     return;
                 }
 
-                this->user_.fileName.Set(openFile.GetPath());
+                this->user_.fileName.Set(openFile.GetPath().utf8_string());
 
                 return;
             }
