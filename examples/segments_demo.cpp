@@ -237,7 +237,8 @@ struct DemoCustom
                 theseSettings.endFrequency - theseSettings.startFrequency;
 
             double frequencyStep =
-                frequencyRange / (theseSettings.functionCount - 1);
+                frequencyRange
+                / static_cast<double>(theseSettings.functionCount - 1);
 
             double nextFrequency = theseSettings.startFrequency;
 
@@ -613,9 +614,6 @@ public:
         :
         wxPanel(parent, wxID_ANY)
     {
-        wxpex::LayoutOptions layoutOptions{};
-        layoutOptions.labelFlags = wxALIGN_RIGHT;
-
         auto settingsView = new SettingsView(
             this,
             control.settings);
@@ -777,7 +775,9 @@ private:
 
         for (ssize_t i = 0; i < x.size(); ++i)
         {
-            points.emplace_back(i * drawSpacing, zeroLine - sine(i));
+            points.emplace_back(
+                static_cast<double>(i) * drawSpacing,
+                zeroLine - sine(i));
         }
     }
 

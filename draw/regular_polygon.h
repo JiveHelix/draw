@@ -56,7 +56,7 @@ struct RegularPolygon: public RegularPolygonTemplate<pex::Identity>
     RegularPolygon()
         :
         RegularPolygonTemplate<pex::Identity>{
-            {{0.0, 0.0}},
+            tau::Point2d<double>(0.0, 0.0),
             100.0,
             3,
             0.0}

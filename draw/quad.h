@@ -83,11 +83,14 @@ struct QuadGroupTemplates_
 {
     struct Plain: public QuadTemplate<pex::Identity>
     {
+        using Point = typename CenterGroup::Plain;
+        using Size = typename SizeGroup::Plain;
+
         Plain()
             :
             QuadTemplate<pex::Identity>{
-                {{960, 540}},
-                {{300, 200}},
+                Point(960, 540),
+                Size(300, 200),
                 1.0,
                 {},
                 {},

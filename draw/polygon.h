@@ -60,17 +60,19 @@ struct PolygonTemplate
 
 struct Polygon: public PolygonTemplate<pex::Identity>
 {
+    using Point = tau::Point2d<double>;
+
     Polygon()
         :
         PolygonTemplate<pex::Identity>{
-            {{0.0, 0.0}},
+            Point(0.0, 0.0),
             1.0,
             0.0,
             PointsDouble{
-                {-100.0, -100.0},
-                {100.0, -100.0},
-                {100.0, 100.0},
-                {-100.0, 100.0}}}
+                Point(-100.0, -100.0),
+                Point(100.0, -100.0),
+                Point(100.0, 100.0),
+                Point(-100.0, 100.0)}}
     {
 
     }

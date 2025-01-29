@@ -330,19 +330,19 @@ struct ViewGroupTemplates_
             // When virtual panel begins to the right or bottom of the top left
             // corner, the position is negative.
             auto AdjustVirtualSize =
-                [](auto position, auto virtualSize, auto viewSize)
+                [](auto position_, auto virtual_, auto view_)
                 {
-                    if (position > 0)
+                    if (position_ > 0)
                     {
                         // Off screen to the left or top
                         // We must be able to scroll it back into view.
-                        // THe virtualSize needs to as big as what is off
-                        // screen plus the viewSize.
-                        auto minimumVirtual = position + viewSize;
-                        return std::max(minimumVirtual, virtualSize);
+                        // THe virtual_ needs to as big as what is off
+                        // screen plus the view_.
+                        auto minimumVirtual = position_ + view_;
+                        return std::max(minimumVirtual, virtual_);
                     }
 
-                    return virtualSize;
+                    return virtual_;
                 };
 
             virtualAsInt.width =

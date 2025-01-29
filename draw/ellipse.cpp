@@ -8,7 +8,7 @@ namespace draw
 Ellipse::Ellipse()
     :
     EllipseTemplate<pex::Identity>{
-        {{400.0, 400.0}},
+        Point(400.0, 400.0),
         200.0,
         300.0,
         45.0,
@@ -18,13 +18,13 @@ Ellipse::Ellipse()
 }
 
 
-bool Ellipse::Contains(const tau::Point2d<double> &point) const
+bool Ellipse::Contains(const Point &point) const
 {
     return this->Contains(point, 0.0);
 }
 
 
-bool Ellipse::Contains(const tau::Point2d<double> &point, double margin) const
+bool Ellipse::Contains(const Point &point, double margin) const
 {
     auto relative = point - this->center;
 
@@ -39,7 +39,7 @@ bool Ellipse::Contains(const tau::Point2d<double> &point, double margin) const
     auto cosine = std::cos(parameter);
 
     auto ellipseExtent =
-        tau::Point2d<double>(
+        Point(
             cosine * this->major / 2.0,
             sine * this->minor / 2.0) * this->scale;
 
@@ -68,7 +68,7 @@ PointsDouble Ellipse::GetPoints() const
 
 
 void Ellipse::EditPoint(
-    const tau::Point2d<double> &point,
+    const Point &point,
     size_t pointIndex)
 {
     auto axis = point - this->center;

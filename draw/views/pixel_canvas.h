@@ -58,7 +58,7 @@ private:
             return false;
         }
 
-        tau::Point2d<int> correction{{0, 0}};
+        tau::Point2d<int> correction(0, 0);
 
         if (view.HasArea())
         {
