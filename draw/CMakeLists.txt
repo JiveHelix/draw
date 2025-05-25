@@ -4,20 +4,29 @@ if (${fPIC})
     set_property(TARGET draw PROPERTY POSITION_INDEPENDENT_CODE ON)
 endif ()
 
+find_package(Jive REQUIRED)
+find_package(Fields REQUIRED)
+find_package(Pex REQUIRED)
+find_package(Tau REQUIRED)
+find_package(Wxpex REQUIRED)
+find_package(PNG REQUIRED)
+find_package(Fmt REQUIRED)
+find_package(Nlohmann_json REQUIRED)
+
 # Projects that include this project must #include "draw/<header-name>"
 target_include_directories(draw PUBLIC ${PROJECT_SOURCE_DIR})
 
 target_link_libraries(
     draw
     PUBLIC
-    CONAN_PKG::jive
-    CONAN_PKG::fields
-    CONAN_PKG::tau
-    CONAN_PKG::pex
-    CONAN_PKG::libpng
-    CONAN_PKG::wxpex
-    CONAN_PKG::fmt
-    CONAN_PKG::nlohmann_json)
+    wxpex::wxpex
+    tau::tau
+    pex::pex
+    fields::fields
+    jive::jive
+    PNG::PNG
+    fmt::fmt
+    nlohmann_json::nlohmann_json)
 
 target_sources(
     draw
@@ -32,6 +41,8 @@ target_sources(
     draw_lines.h
     draw_segments.h
     draw_spline.h
+    edge.h
+    edge_shape.h
     ellipse.h
     ellipse_shape.h
     error.h
@@ -101,6 +112,8 @@ target_sources(
     draw_context.cpp
     draw_segments.cpp
     draw_spline.cpp
+    edge.cpp
+    edge_shape.cpp
     ellipse.cpp
     oddeven.cpp
     font_look.cpp

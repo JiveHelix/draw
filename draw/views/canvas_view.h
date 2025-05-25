@@ -96,7 +96,10 @@ public:
                 new wxpex::Button(this, "Fit", control.viewSettings.fitZoom);
 
             auto recenter =
-                new wxpex::Button(this, "Recenter", control.viewSettings.recenter);
+                new wxpex::Button(
+                    this,
+                    "Recenter",
+                    control.viewSettings.recenter);
 
             this->controlsSizer_->Add(this->horizontalZoom_, 0, wxRIGHT, 3);
             this->controlsSizer_->Add(resetZoom, 0, wxRIGHT, 3);
@@ -109,14 +112,14 @@ public:
             {
                 auto linkZoom =
                     new wxpex::CheckBox(
-
                         this,
                         "Link",
                         control.viewSettings.linkZoom);
 
                 this->controlsSizer_->Add(linkZoom, 0, wxRIGHT);
 
-                auto gridSizer = new wxFlexGridSizer(2, gridSpacing, gridSpacing);
+                auto gridSizer =
+                    new wxFlexGridSizer(2, gridSpacing, gridSpacing);
 
                 gridSizer->SetFlexibleDirection(wxBOTH);
                 gridSizer->AddGrowableRow(1, 1);

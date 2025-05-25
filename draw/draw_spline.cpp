@@ -11,11 +11,6 @@ using Point = tau::Point2d<double>;
 
 void SmoothJoin(Point &controlA, const Point &join, Point &controlB)
 {
-#ifndef NDEBUG
-    auto pointA = controlA;
-    auto pointB = controlB;
-#endif
-
     auto lineA = tau::Line2d<double>(join, controlA);
     auto sizeA = join.Distance(controlA);
     auto lineB = tau::Line2d<double>(join, controlB);

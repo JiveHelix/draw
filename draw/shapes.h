@@ -326,13 +326,6 @@ public:
             std::make_shared<Derived>(std::forward<Args>(args)...));
     }
 
-#if 0
-    void Append(const DrawnShape &shape)
-    {
-        this->shapes_.push_back(shape.Copy());
-    }
-#endif
-
     void Append(const std::shared_ptr<DrawnShape> &shape)
     {
         this->shapes_.push_back(shape);

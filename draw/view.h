@@ -134,8 +134,8 @@ struct View
 
         ConstrainRegion(this->source, sourceSize);
 
-        assert(this->source.topLeft.y < sourceSize.height);
-        assert(this->source.topLeft.x < sourceSize.width);
+        assert(this->source.topLeft.y <= sourceSize.height);
+        assert(this->source.topLeft.x <= sourceSize.width);
         assert(this->source.GetBottomRight().x <= sourceSize.width);
         assert(this->source.GetBottomRight().y <= sourceSize.height);
 

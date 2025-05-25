@@ -1,5 +1,16 @@
 add_subdirectory(common)
 
+# add_library(foo INTERFACE)
+
+# target_link_libraries(
+#     foo
+#     INTERFACE
+    #    jive::jive
+    #fields::fields
+    #pex::pex
+    #tau::tau
+    #wxpex::wxpex
+#     draw)
 
 if (MSVC)
     set(windowed WIN32)

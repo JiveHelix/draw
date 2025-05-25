@@ -20,24 +20,26 @@ FontLookView::FontLookView(
 {
     using namespace wxpex;
 
+    auto panel = this->GetPanel();
+
     auto enable =
-        new CheckBox(this, "Enable", control.enable);
+        new CheckBox(panel, "Enable", control.enable);
 
     auto pointsSize = wxpex::LabeledWidget(
-        this,
+        panel,
         "Point Size",
         new Field(
-            this,
+            panel,
             control.pointSize));
 
     auto color =
         new HsvPicker(
-            this,
+            panel,
             "Color",
             control.color);
 
     auto antialias =
-        new CheckBox(this, "Anti-alias", control.antialias);
+        new CheckBox(panel, "Anti-alias", control.antialias);
 
     auto sizer = wxpex::LayoutItems(
         verticalItems,

@@ -6,3 +6,4 @@ build
 CMakeFiles/
 bin/
 lib/
+CMakeUserPresets.json

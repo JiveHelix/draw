@@ -28,7 +28,8 @@ PixelCanvas::PixelCanvas(
 
     image_(
         this->imageSizeEndpoint_.Get().width,
-        this->imageSizeEndpoint_.Get().height),
+        this->imageSizeEndpoint_.Get().height,
+        true),
 
     pixelsEndpoint_(this, control.pixels, &PixelCanvas::OnPixels_),
     pixelData_(),
@@ -41,6 +42,13 @@ PixelCanvas::PixelCanvas(
 
 void PixelCanvas::OnImageSize_(const Size &imageSize)
 {
+    if (!this->image_.IsOk())
+    {
+        this->image_ = wxImage(imageSize.width, imageSize.height, true);
+
+        return;
+    }
+
     auto currentImageSize =
         wxpex::ToSize<draw::SizeType>(this->image_.GetSize());
 

@@ -706,10 +706,15 @@ public:
 
         size_t i = 0;
 
+        draw::SegmentsSettings settings{};
+        settings.isSpline = true;
+
         for (auto &function: this->demoControl_.functions)
         {
+            settings.look = function.look.Get();
+
             shapes.EmplaceBack<draw::SegmentsShape>(
-                function.look.Get(),
+                settings,
                 this->functionPoints_.at(i++));
         }
 

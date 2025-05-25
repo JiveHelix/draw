@@ -3,23 +3,29 @@
 #include <tau/color_maps/gray.h>
 #include <wxpex/app.h>
 #include <wxpex/file_field.h>
+#include <wxpex/scrolled.h>
 
 #include <draw/pixels.h>
 #include <draw/png.h>
+#include <draw/cross_shape.h>
+#include <draw/shapes.h>
+#include <draw/views/cross_shape_view.h>
+
 
 #include "common/about_window.h"
 #include "common/observer.h"
 #include "common/brain.h"
 
 
-class DemoControls: public wxPanel
+class DemoControls: public wxpex::Scrolled
 {
 public:
     DemoControls(
         wxWindow *parent,
-        UserControl userControl)
+        UserControl userControl,
+        draw::CrossShapeControl crossShapeControl)
         :
-        wxPanel(parent)
+        wxpex::Scrolled(parent)
     {
         wxpex::FileDialogOptions options{};
         options.message = "Choose a PNG file";
@@ -30,9 +36,20 @@ public:
             userControl.fileName,
             options);
 
+        auto crossShapeView =
+            new draw::CrossShapeView(
+                this,
+                "Target",
+                crossShapeControl,
+                wxpex::LayoutOptions{});
+
         auto sizer = std::make_unique<wxBoxSizer>(wxVERTICAL);
         sizer->Add(fileSelector, 0, wxEXPAND | wxALL, 5);
-        this->SetSizerAndFit(sizer.release());
+        sizer->Add(crossShapeView, 0, wxEXPAND | wxALL, 5);
+
+        this->ConfigureSizer(
+            wxpex::verticalScrolled,
+            std::move(sizer));
     }
 };
 
@@ -43,7 +60,13 @@ public:
     DemoBrain()
         :
         Brain<DemoBrain>(),
+        shapesId_(),
         observer_(this, UserControl(this->user_)),
+        crossShapeModel_(),
+        crossShapeEndpoint_(
+            this,
+            this->crossShapeModel_,
+            &DemoBrain::OnCrossShape_),
 
         pngIsLoaded_(false),
         pngData_(),
@@ -72,7 +95,8 @@ public:
     {
         return new DemoControls(
             parent,
-            this->GetUserControls());
+            this->GetUserControls(),
+            this->crossShapeModel_);
     }
 
     void ShowAbout()
@@ -97,10 +121,26 @@ public:
         }
 
         this->user_.pixelView.pixels.Set(this->MakePixels());
+        auto shapes = draw::Shapes(this->shapesId_.Get());
+
+        shapes.Append(
+            std::make_shared<draw::CrossShape>(this->crossShapeModel_.Get()));
+
+        this->userControl_.pixelView.asyncShapes.Set(shapes);
+    }
+
+protected:
+    void OnCrossShape_(const draw::CrossShape &)
+    {
+        this->Display();
     }
 
 private:
+    draw::ShapesId shapesId_;
     Observer<DemoBrain> observer_;
+    draw::CrossShapeModel crossShapeModel_;
+    pex::Endpoint<DemoBrain, draw::CrossShapeControl> crossShapeEndpoint_;
+
 
     bool pngIsLoaded_;
     draw::GrayPng<PngPixel> pngData_;

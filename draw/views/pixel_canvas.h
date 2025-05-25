@@ -1,8 +1,6 @@
 #pragma once
 
-
 #include "draw/views/canvas.h"
-
 #include "draw/pixels.h"
 #include "draw/views/pixel_view_settings.h"
 
@@ -58,12 +56,15 @@ private:
             return false;
         }
 
+#ifdef CORRECT_PIXEL_CANVAS
         tau::Point2d<int> correction(0, 0);
+#endif
 
         if (view.HasArea())
         {
+#ifdef CORRECT_PIXEL_CANVAS
             correction = this->CorrectCenterPixel_(view);
-
+#endif
             auto bitmap = wxBitmap(this->image_);
             auto source = wxMemoryDC(bitmap);
 
@@ -86,9 +87,14 @@ private:
 
         auto gc = DrawContext(context);
 
+#ifdef CORRECT_PIXEL_CANVAS
         auto viewPosition =
             (this->viewPositionEndpoint_.Get() + correction)
                 .template Cast<double>();
+#else
+        auto viewPosition =
+            this->viewPositionEndpoint_.Get().template Cast<double>();
+#endif
 
         gc->Translate(-viewPosition.x, -viewPosition.y);
         gc->Scale(scale.horizontal, scale.vertical);
