@@ -3,6 +3,7 @@
 
 #include <wxpex/button.h>
 #include <wxpex/collapsible.h>
+#include <wxpex/layout_items.h>
 #include "draw/views/node_settings_view.h"
 #include "draw/views/shape_display.h"
 #include "draw/views/order_view.h"

@@ -5,6 +5,7 @@
 #include <wxpex/knob.h>
 #include <wxpex/button.h>
 #include <wxpex/converter.h>
+#include <wxpex/layout_items.h>
 
 #include "draw/views/affine_view.h"
 #include "draw/views/size_view.h"
@@ -109,7 +110,7 @@ QuadView::QuadView(
 
     auto topSizer = wxpex::LayoutItems(
         wxpex::verticalItems,
-        sizer.release(),
+        sizer,
         reset);
 
     this->ConfigureSizer(std::move(topSizer));

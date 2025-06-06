@@ -4,6 +4,7 @@
 #include <wxpex/slider.h>
 #include <wxpex/check_box.h>
 #include <wxpex/color_picker.h>
+#include <wxpex/layout_items.h>
 
 
 #ifdef __WXMSW__
@@ -70,7 +71,7 @@ WaveformColorView::WaveformColorView(
         wxpex::verticalItems,
         color,
         highlight,
-        sliderSizer.release());
+        sliderSizer);
 
     this->ConfigureSizer(std::move(sizer));
 }
@@ -129,7 +130,7 @@ WaveformSettingsView::WaveformSettingsView(
     auto sizer = wxpex::LayoutItems(
         wxpex::verticalItems,
         enable,
-        sliderSizer.release(),
+        sliderSizer,
         color);
 
     this->ConfigureSizer(std::move(sizer));

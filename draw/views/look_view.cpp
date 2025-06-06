@@ -5,6 +5,7 @@
 #include <wxpex/field.h>
 #include <wxpex/check_box.h>
 #include <wxpex/color_picker.h>
+#include <wxpex/layout_items.h>
 
 
 #ifdef __WXMSW__
@@ -73,13 +74,13 @@ void StrokeView::Initialize_(StrokeControl control)
     auto sizer = wxpex::LayoutItems(
         wxpex::verticalItems,
         enable,
-        weight.Layout(wxHORIZONTAL).release(),
+        weight.Layout(wxHORIZONTAL),
         color,
         wxpex::LayoutLabeled(
             wxpex::LayoutOptions{},
             penStyle,
             penCap,
-            penJoin).release(),
+            penJoin),
         antialias);
 
     this->ConfigureSizer(std::move(sizer));

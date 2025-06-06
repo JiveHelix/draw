@@ -11,6 +11,7 @@
 #include <wxpex/list_view.h>
 #include <wxpex/check_box.h>
 #include <wxpex/button.h>
+#include <wxpex/layout_items.h>
 
 
 #include <draw/pixels.h>
@@ -574,8 +575,8 @@ public:
             phase);
 
         auto sizer = wxpex::LayoutItems(
-            wxpex::ItemOptions(wxpex::verticalItems).Proportion(1),
-            labeledSizer.release(),
+            wxpex::VerticalItems().Proportion(1),
+            labeledSizer,
             look);
 
         this->ConfigureSizer(std::move(sizer));

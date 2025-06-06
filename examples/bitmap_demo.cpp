@@ -2,6 +2,7 @@
 #include <wxpex/scrolled.h>
 #include <wxpex/border_sizer.h>
 #include <wxpex/labeled_widget.h>
+#include <wxpex/layout_items.h>
 #include <wxpex/app.h>
 #include <draw/size.h>
 #include <draw/bitmap.h>
@@ -170,7 +171,7 @@ public:
 
         auto sizer = wxpex::LayoutItems(
             wxpex::verticalItems,
-            size.Layout().release(),
+            size.Layout(),
             regularPolygon,
             look,
             colorMap);

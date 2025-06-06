@@ -4,6 +4,7 @@
 #include <wxpex/field.h>
 #include <wxpex/check_box.h>
 #include <wxpex/color_picker.h>
+#include <wxpex/layout_items.h>
 
 
 namespace draw
@@ -44,7 +45,7 @@ FontLookView::FontLookView(
     auto sizer = wxpex::LayoutItems(
         verticalItems,
         enable,
-        pointsSize.Layout(wxHORIZONTAL).release(),
+        pointsSize.Layout(wxHORIZONTAL),
         color,
         antialias);
 

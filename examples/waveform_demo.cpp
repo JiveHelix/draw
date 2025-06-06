@@ -6,6 +6,7 @@
 #include <wxpex/app.h>
 #include <wxpex/file_field.h>
 #include <wxpex/border_sizer.h>
+#include <wxpex/layout_items.h>
 
 #include <draw/pixels.h>
 #include <draw/waveform_settings.h>

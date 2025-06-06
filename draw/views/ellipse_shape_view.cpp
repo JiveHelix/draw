@@ -1,5 +1,6 @@
 #include "draw/views/ellipse_shape_view.h"
 
+#include <wxpex/layout_items.h>
 #include "draw/views/ellipse_view.h"
 #include "draw/views/look_view.h"
 

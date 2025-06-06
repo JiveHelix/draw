@@ -2,6 +2,7 @@
 
 
 #include <wxpex/slider.h>
+#include <wxpex/layout_items.h>
 #include "draw/views/look_view.h"
 
 
@@ -30,7 +31,7 @@ PointsShapeView::PointsShapeView(
 
     auto sizer = wxpex::LayoutItems(
         wxpex::verticalItems,
-        radius.release(),
+        radius,
         look);
 
     this->ConfigureSizer(std::move(sizer));

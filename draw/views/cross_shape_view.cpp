@@ -1,5 +1,7 @@
 #include "draw/views/cross_shape_view.h"
 
+#include <wxpex/layout_items.h>
+
 
 namespace draw
 {

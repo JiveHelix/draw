@@ -3,6 +3,7 @@
 
 #include <wxpex/slider.h>
 #include <wxpex/check_box.h>
+#include <wxpex/layout_items.h>
 #include "draw/views/look_view.h"
 
 
@@ -38,7 +39,7 @@ LinesShapeView::LinesShapeView(
     auto sizer = wxpex::LayoutItems(
         wxpex::verticalItems,
         infinite,
-        length.Layout(wxHORIZONTAL).release(),
+        length.Layout(wxHORIZONTAL),
         look);
 
     this->ConfigureSizer(std::move(sizer));
