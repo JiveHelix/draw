@@ -32,6 +32,8 @@ struct NodeSettingsTemplate
 
     static constexpr auto fields =
         NodeSettingsFields<NodeSettingsTemplate>::fields;
+
+    static constexpr auto fieldsTypeName = "NodeSettings";
 };
 
 

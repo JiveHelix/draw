@@ -56,6 +56,7 @@ struct ViewTemplate
     T<bool> bypass;
 
     static constexpr auto fields = ViewFields<ViewTemplate>::fields;
+    static constexpr auto fieldsTypeName = "View";
 };
 
 

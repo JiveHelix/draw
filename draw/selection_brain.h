@@ -86,9 +86,12 @@ public:
         lists_(lists),
         countWillChangeEndpoints_(),
         countEndpoints_(),
+        memberAddedEndpoints_(),
         selectConnections_(lists.size()),
         itemCreatedEndpoints_(lists.size())
     {
+        REGISTER_PEX_NAME(this, "SelectionBrain");
+
         for (size_t i = 0; i < this->lists_.size(); ++i)
         {
             auto &list = this->lists_[i];
@@ -105,6 +108,12 @@ public:
                 &SelectionBrain::OnCount_,
                 i);
 
+            this->memberAddedEndpoints_.emplace_back(
+                this,
+                list.memberAdded,
+                &SelectionBrain::OnMemberAdded_,
+                i);
+
             this->OnCount_(list.count.Get(), i);
         }
     }
@@ -114,6 +123,11 @@ public:
         SelectionBrain(std::vector<ListControl>({list}))
     {
 
+    }
+
+    ~SelectionBrain()
+    {
+        UNREGISTER_PEX_NAME(this, "SelectionBrain");
     }
 
     NodeSettingsControl & GetNode(size_t listIndex, size_t nodeIndex)
@@ -126,6 +140,26 @@ public:
         {
             return ::draw::GetNode(this->lists_[listIndex], nodeIndex);
         }
+    }
+
+    bool IsSameSelection(size_t unordered, size_t listIndex)
+    {
+        for (size_t i = 0; i < this->lists_.size(); ++i)
+        {
+            auto wasSelected = this->lists_[i].selected.Get();
+
+            bool sameSelection =
+                wasSelected
+                && (*wasSelected == unordered)
+                && (i == listIndex);
+
+            if (sameSelection)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     void ToggleSelect(size_t unordered, size_t listIndex)
@@ -156,6 +190,39 @@ public:
         auto &list = this->lists_.at(listIndex);
         list.selected.Set(unordered);
         this->GetNode(listIndex, unordered).isSelected.Set(true);
+    }
+
+    void Deselect(size_t listIndex, size_t unordered)
+    {
+        auto &shapeList = this->lists_.at(listIndex);
+        shapeList.selected.Set({});
+        ::draw::GetNode(shapeList, unordered).isSelected.Set(false);
+    }
+
+    void DeselectAll()
+    {
+        for (auto &shapeList: this->lists_)
+        {
+            auto selectedIndex = shapeList.selected.Get();
+
+            if (selectedIndex)
+            {
+                shapeList.selected.Set({});
+
+                ::draw::GetNode(shapeList, *selectedIndex)
+                    .isSelected.Set(false);
+            }
+        }
+    }
+
+    void Select_(size_t listIndex, size_t unorderedMemberIndex)
+    {
+        this->DeselectAll();
+
+        auto &list = this->lists_.at(listIndex);
+        list.selected.Set(unorderedMemberIndex);
+
+        ::draw::GetNode(list, unorderedMemberIndex).isSelected.Set(true);
     }
 
 private:
@@ -251,6 +318,14 @@ private:
         }
     }
 
+    void OnMemberAdded_(std::optional<size_t> memberIndex, size_t listIndex)
+    {
+        if (memberIndex)
+        {
+            this->Select_(listIndex, *memberIndex);
+        }
+    }
+
 protected:
     std::vector<ListControl> lists_;
 
@@ -268,8 +343,16 @@ protected:
             decltype(&SelectionBrain::OnCount_)
         >;
 
+    using MemberAddedEndpoint =
+        pex::BoundEndpoint
+        <
+            typename pex::control::ListOptionalIndex,
+            decltype(&SelectionBrain::OnMemberAdded_)
+        >;
+
     std::vector<CountWillChangeEndpoint> countWillChangeEndpoints_;
     std::vector<CountEndpoint> countEndpoints_;
+    std::vector<MemberAddedEndpoint> memberAddedEndpoints_;
 
     using BoundSelection =
         pex::BoundEndpoint

@@ -26,6 +26,7 @@ struct EdgeTemplate
     T<tau::Point2dGroup<double>> end;
 
     static constexpr auto fields = EdgeFields<EdgeTemplate>::fields;
+    static constexpr auto fieldsTypeName = "Edge";
 };
 
 

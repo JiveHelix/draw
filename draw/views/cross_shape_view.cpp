@@ -21,7 +21,7 @@ CrossShapeView::CrossShapeView(
         new CrossView(
             this->GetPanel(),
             "Cross",
-            control.cross,
+            control.shape,
             layoutOptions);
 
     auto look =

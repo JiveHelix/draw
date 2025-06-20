@@ -47,6 +47,8 @@ void NodeSettingsView::InitializeHighlight_()
                 this,
                 this->control_->isSelected,
                 &NodeSettingsView::OnHighlight_);
+
+        this->OnHighlight_(this->control_->isSelected.Get());
     }
 }
 

@@ -34,6 +34,7 @@ struct ShapeListTemplate
     T<ShapeDisplayListMaker> shapesDisplay;
 
     static constexpr auto fields = ShapeListFields<ShapeListTemplate>::fields;
+    static constexpr auto fieldsTypeName = "ShapeList";
 };
 
 
@@ -56,6 +57,8 @@ struct ShapeListCustom
                 this->shapes.indices,
                 &Model::OnShapesIndices_)
         {
+            // REGISTER_PEX_NAME(this, "ShapeListModel");
+            // REGISTER_PEX_NAME_WITH_PARENT(&this->shapes, this, "shapes");
             this->OnShapesCount_(this->shapes.count.Get());
         }
 

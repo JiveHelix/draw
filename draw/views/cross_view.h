@@ -26,6 +26,11 @@ public:
         const std::string &name,
         CrossControl control,
         const LayoutOptions &layoutOptions);
+
+    CrossView(
+        wxWindow *parent,
+        CrossControl control,
+        const LayoutOptions &layoutOptions);
 };
 
 

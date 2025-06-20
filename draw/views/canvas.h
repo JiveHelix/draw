@@ -115,7 +115,14 @@ public:
             &Canvas::OnKeyUp_,
             this);
 
+        this->Bind(
+            wxEVT_MENU,
+            &Canvas::OnEventMenu_,
+            this);
+
         this->cursorEndpoint_.Connect(&Canvas::OnCursor_);
+
+        this->control_.window.Set(this);
 
         // Configure the scrollable area
         this->OnVirtualSize_(this->virtualSizeEndpoint_.Get());
@@ -219,10 +226,9 @@ protected:
     void OnLeftDown_(wxMouseEvent &event)
     {
         event.Skip();
-        auto mousePosition = pex::MakeDefer(this->control_.mousePosition);
-        auto mouseDown = pex::MakeDefer(this->control_.mouseDown);
-        mousePosition.Set(wxpex::ToPoint<int>(event.GetPosition()));
-        mouseDown.Set(true);
+        auto defer = pex::MakeDefer(this->control_);
+        defer.mousePosition.Set(wxpex::ToPoint<int>(event.GetPosition()));
+        defer.mouseDown.Set(true);
     }
 
     void OnLeftUp_(wxMouseEvent &event)
@@ -234,13 +240,9 @@ protected:
     void OnRightDown_(wxMouseEvent &event)
     {
         event.Skip();
-        auto mousePosition = pex::MakeDefer(this->control_.mousePosition);
-        auto rightMouseDown = pex::MakeDefer(this->control_.rightMouseDown);
-
-        mousePosition.Set(
-            wxpex::ToPoint<int>(event.GetPosition()));
-
-        rightMouseDown.Set(true);
+        auto defer = pex::MakeDefer(this->control_);
+        defer.mousePosition.Set( wxpex::ToPoint<int>(event.GetPosition()));
+        defer.rightMouseDown.Set(true);
     }
 
     void OnRightUp_(wxMouseEvent &event)
@@ -279,7 +281,9 @@ protected:
                 break;
         };
 
-        this->control_.modifier.Set(modifier);
+        auto defer = pex::MakeDefer(this->control_);
+        defer.modifier.Set(modifier);
+        defer.keyCode.Set(keyCode);
     }
 
     void OnKeyUp_(wxKeyEvent &event)
@@ -315,6 +319,10 @@ protected:
         this->control_.modifier.Set(modifier);
     }
 
+    void OnEventMenu_(wxCommandEvent &event)
+    {
+        this->control_.menuId.Set(event.GetId());
+    }
 
     void OnScale_(const Scale &)
     {

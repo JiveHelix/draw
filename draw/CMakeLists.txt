@@ -69,6 +69,7 @@ target_sources(
     scale.h
     segments_shape.h
     shapes.h
+    shape_creator.cpp
     shape_edit.cpp
     size.h
     waveform.h

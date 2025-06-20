@@ -179,6 +179,8 @@ struct ShapeCommon
             pex::SetOverride(this->id, this->polyShapeId_.Get());
         }
 
+        virtual ~Model() {}
+
         pex::OrderControl GetOrder() override
         {
             return this->order;
@@ -193,6 +195,8 @@ struct ShapeCommon
     {
     public:
         using Base::Base;
+
+        virtual ~Control() {}
 
         ssize_t GetId() const override
         {
@@ -257,6 +261,8 @@ public:
     using Base::Base;
     using PlainShape = decltype(Base::shape);
     static constexpr auto fieldsTypeName = PlainShape::fieldsTypeName;
+
+    virtual ~ShapeDerived() {}
 
     ssize_t GetId() const override
     {

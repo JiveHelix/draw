@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include <concepts>
 #include <pex/endpoint.h>
 #include <pex/list_observer.h>
 #include "draw/selection_brain.h"
@@ -44,6 +45,8 @@ template<typename DerivedShape>
 class DragShape: public Drag
 {
 public:
+    virtual ~DragShape() {}
+
     DragShape(
         size_t index,
         const tau::Point2d<int> &start,
@@ -63,6 +66,13 @@ public:
                     "Selected indexed exceeds point count.");
             }
         }
+
+        REGISTER_PEX_NAME(this, "DragShape");
+
+        REGISTER_PEX_NAME_WITH_PARENT(
+            this->startingShape_.get(),
+            this,
+            "startingShape_");
     }
 
     DragShape(
@@ -75,7 +85,12 @@ public:
         control_(control),
         startingShape_(startingShape)
     {
+        REGISTER_PEX_NAME(this, "DragShape");
 
+        REGISTER_PEX_NAME_WITH_PARENT(
+            &this->startingShape_,
+            this,
+            "startingShape_");
     }
 
     void ReportLogicalPosition(const tau::Point2d<int> &position) override
@@ -94,6 +109,8 @@ template<typename DerivedShape>
 class DragEditShape: public Drag
 {
 public:
+    virtual ~DragEditShape() {}
+
     DragEditShape(
         size_t index,
         const tau::Point2d<int> &start,
@@ -113,6 +130,18 @@ public:
                     "Selected indexed exceeds point count.");
             }
         }
+
+        REGISTER_PEX_NAME(this, "DragEditShape");
+
+        REGISTER_PEX_NAME_WITH_PARENT(
+            this->control_.get(),
+            this,
+            "control_");
+
+        REGISTER_PEX_NAME_WITH_PARENT(
+            &this->startingShape_,
+            this,
+            "startingShape_");
     }
 
     DragEditShape(
@@ -125,7 +154,17 @@ public:
         control_(control),
         startingShape_(startingShape)
     {
+        REGISTER_PEX_NAME(this, "DragEditShape");
 
+        REGISTER_PEX_NAME_WITH_PARENT(
+            this->control_.get(),
+            this,
+            "control_");
+
+        REGISTER_PEX_NAME_WITH_PARENT(
+            &this->startingShape_,
+            this,
+            "startingShape_");
     }
 
     void ReportLogicalPosition(const tau::Point2d<int> &position) override
@@ -155,7 +194,12 @@ public:
         shapeList_(shapeList),
         position_(start)
     {
+        REGISTER_PEX_NAME(this, "DragCreateShape");
 
+        REGISTER_PEX_NAME_WITH_PARENT(
+            &this->shapeList_,
+            this,
+            "shapeList_");
     }
 
     virtual ~DragCreateShape()
@@ -185,27 +229,7 @@ protected:
             return;
         }
 
-        auto newIndex = this->shapeList_.Append(*shape);
-
-        if (newIndex)
-        {
-            this->shapeList_.MoveToTop(*newIndex);
-            this->Select_(*newIndex);
-        }
-    }
-
-    void Select_(size_t unordered)
-    {
-        auto wasSelected = this->shapeList_.selected.Get();
-
-        if (wasSelected)
-        {
-            ::draw::GetNode(this->shapeList_, *wasSelected)
-                .isSelected.Set(false);
-        }
-
-        this->shapeList_.selected.Set(unordered);
-        ::draw::GetNode(this->shapeList_, unordered).isSelected.Set(true);
+        this->shapeList_.Prepend(*shape);
     }
 
 protected:
@@ -228,7 +252,12 @@ public:
         shapeList_(shapeList),
         position_(start)
     {
+        REGISTER_PEX_NAME(this, "DragReplaceShape");
 
+        REGISTER_PEX_NAME_WITH_PARENT(
+            &this->shapeList_,
+            this,
+            "shapeList_");
     }
 
     virtual ~DragReplaceShape()
@@ -274,6 +303,8 @@ class DragEditPoint: public DragEditShape<DerivedShape>
 {
 public:
     using Base = DragEditShape<DerivedShape>;
+
+    virtual ~DragEditPoint() {}
 
     DragEditPoint(
         size_t index,
@@ -408,6 +439,35 @@ struct FoundShape
 };
 
 
+template<typename T>
+concept IsRightClickMenu = requires (T t)
+{
+    { t.GetMenu(std::declval<bool>()) } -> std::convertible_to<wxMenu &>;
+    { t.IsDeletion(std::declval<wxWindowID>()) } -> std::convertible_to<bool>;
+    { t.ReportId(std::declval<wxWindowID>()) };
+};
+
+
+template<typename T>
+concept HasRightClickMenu = IsRightClickMenu<typename T::RightClickMenu>;
+
+
+template<typename T, typename = void>
+struct RightClickMenu {};
+
+template<typename T>
+struct RightClickMenu
+<
+    T,
+    std::enable_if_t<HasRightClickMenu<T>>
+>
+    :
+    public T::RightClickMenu
+{
+
+};
+
+
 template<typename Create>
 class ShapeBrain: public SelectionBrain<ShapesControl>
 {
@@ -430,6 +490,10 @@ public:
             canvasControl.mouseDown,
             &ShapeBrain::OnMouseDown_),
 
+        rightMouseDownEndpoint_(
+            this,
+            canvasControl.rightMouseDown),
+
         logicalPositionEndpoint_(
             this,
             canvasControl.logicalPosition,
@@ -440,9 +504,25 @@ public:
             canvasControl.modifier,
             &ShapeBrain::OnModifier_),
 
+        keyCodeEndpoint_(
+            this,
+            canvasControl.keyCode,
+            &ShapeBrain::OnKeyCode_),
 
-        drag_()
+        menuIdEndpoint_(
+            this,
+            canvasControl.menuId),
+
+        drag_(),
+        rightClickMenu_{}
     {
+        if constexpr (HasRightClickMenu<Create>)
+        {
+            this->rightMouseDownEndpoint_.Connect(
+                &ShapeBrain::OnRightMouseDown_);
+
+            this->menuIdEndpoint_.Connect(&ShapeBrain::OnMenuId_);
+        }
     }
 
     ShapeBrain(
@@ -451,7 +531,17 @@ public:
         :
         ShapeBrain(std::vector<ShapesControl>({shapeList}), canvasControl)
     {
+        REGISTER_PEX_NAME(this, "ShapeBrain");
 
+        REGISTER_PEX_NAME_WITH_PARENT(
+            &this->lists_,
+            this,
+            "lists_");
+
+        REGISTER_PEX_NAME_WITH_PARENT(
+            &this->lists_[0],
+            &this->lists_,
+            "shapeList 0");
     }
 
     ~ShapeBrain()
@@ -499,6 +589,18 @@ public:
         this->UpdateCursor_();
     }
 
+    void OnKeyCode_(int keyCode)
+    {
+        if (!this->isEnabled_)
+        {
+            return;
+        }
+
+        if (keyCode == WXK_BACK || keyCode == WXK_DELETE)
+        {
+            this->DeleteSelected();
+        }
+    }
 
     void OnLogicalPosition_(const tau::Point2d<int> &position)
     {
@@ -542,56 +644,163 @@ protected:
 
         auto found = this->FindClicked_(click.template Cast<double>());
 
-        if (!found)
+        if (found)
         {
-            if (wasSelected)
+            // The user clicked on a shape.
+
+            if (!this->IsSameSelection(found->unordered, found->listIndex))
             {
-                auto selected = wasSelected->shape;
-                auto shape = selected.Get();
-
-                if (shape.GetValueBase()->HandlesControlClick())
-                {
-                    if (this->canvasControl_.modifier.Get().IsControl())
-                    {
-                        // There was a selected shape.
-                        // Keep it selected and handle a control modifier.
-                        // Handles
-                        shape.GetValueBase()->ProcessControlClick(
-                            *selected.GetVirtual(),
-                            click);
-
-                        return;
-                    }
-                }
+                // Toggle to the new selection.
+                this->ToggleSelect(found->unordered, found->listIndex);
             }
 
-            // The user clicked away from a shape without holding control.
+            // else
+            // The user has right-clicked on an already selected shape.
+            // Leave it selected.
 
-            if (wasSelected)
-            {
-                this->Deselect(*wasSelected);
-            }
-
-            if constexpr (!std::is_same_v<DoNotCreate, Create>)
-            {
-                // There is no selection to edit.
-                // Begin creating a new shape.
-                // DragCreate
-                this->drag_ =
-                    std::make_unique<Create>(click, this->lists_.at(0));
-            }
+            this->drag_ = found->shape.Get().GetValueBase()->ProcessMouseDown(
+                found->shape.GetVirtual()->Copy(),
+                click,
+                this->canvasControl_.modifier.Get(),
+                this->canvasControl_.cursor);
 
             return;
         }
 
-        // The user clicked on a shape.
-        this->ToggleSelect(found->unordered, found->listIndex);
+        // The user clicked in empty space.
 
-        this->drag_ = found->shape.Get().GetValueBase()->ProcessMouseDown(
-            found->shape.GetVirtual()->Copy(),
-            click,
-            this->canvasControl_.modifier.Get(),
-            this->canvasControl_.cursor);
+        if (wasSelected)
+        {
+            auto selected = wasSelected->shape;
+            auto shape = selected.Get();
+
+            if (shape.GetValueBase()->HandlesControlClick())
+            {
+                if (this->canvasControl_.modifier.Get().IsControl())
+                {
+                    // There was a selected shape.
+                    // Keep it selected and handle a control modifier.
+                    // Handles
+                    shape.GetValueBase()->ProcessControlClick(
+                        *selected.GetVirtual(),
+                        click);
+
+                    return;
+                }
+            }
+        }
+
+        // The user clicked away from a shape without holding control.
+
+        if (wasSelected)
+        {
+            this->Deselect(wasSelected->listIndex, wasSelected->unordered);
+        }
+
+        if constexpr (!std::is_same_v<DoNotCreate, Create>)
+        {
+            // There is no selection to edit.
+            // Begin creating a new shape.
+            // DragCreate
+            if constexpr (HasRightClickMenu<Create>)
+            {
+                this->drag_ =
+                    std::make_unique<Create>(
+                        this->rightClickMenu_,
+                        click,
+                        this->lists_.at(0));
+            }
+            else
+            {
+                this->drag_ =
+                    std::make_unique<Create>(click, this->lists_.at(0));
+            }
+        }
+    }
+
+    void OnRightMouseDown_(bool isDown)
+    {
+        if (!this->isEnabled_)
+        {
+            return;
+        }
+
+        if (!isDown)
+        {
+            // Mouse has been released.
+            this->UpdateCursor_();
+
+            return;
+        }
+
+        if constexpr (HasRightClickMenu<Create>)
+        {
+            auto click = this->canvasControl_.logicalPosition.Get();
+            auto found = this->FindClicked_(click.template Cast<double>());
+
+            bool foundHasValue = found.has_value();
+
+            if (foundHasValue)
+            {
+                if (!this->IsSameSelection(found->unordered, found->listIndex))
+                {
+                    // Toggle to the new selection.
+                    this->ToggleSelect(found->unordered, found->listIndex);
+                }
+                // else
+                // The user has right-clicked on an already selected shape.
+                // Leave it selected.
+            }
+
+            found.reset();
+
+            auto window = this->canvasControl_.window.Get();
+
+            assert(window);
+
+            window->PopupMenu(
+                &this->rightClickMenu_.GetMenu(foundHasValue));
+        }
+    }
+
+    void DeleteSelected()
+    {
+        assert(!this->drag_);
+        size_t listIndex;
+
+        {
+            auto foundShape = this->GetShapeSelection();
+
+            if (!foundShape)
+            {
+                return;
+            }
+
+            listIndex = foundShape->listIndex;
+
+            // foundShape is about to be deleted.
+            // Allow this scope to expire so that we do not hold a copy as the
+            // list attempts to delete it.
+            foundShape.reset();
+        }
+
+        auto &shapeList = this->lists_.at(listIndex);
+        shapeList.EraseSelected();
+    }
+
+    void OnMenuId_(wxWindowID id)
+    {
+        if constexpr (HasRightClickMenu<Create>)
+        {
+            if (this->rightClickMenu_.IsDeletion(id))
+            {
+                this->DeleteSelected();
+            }
+            else
+            {
+                this->rightClickMenu_.ReportId(id);
+            }
+        }
     }
 
     void UpdateCursor_()
@@ -712,28 +921,6 @@ protected:
         return {};
     }
 
-private:
-    void Deselect(const FoundShape &foundShape)
-    {
-        auto &shapeList = this->lists_.at(foundShape.listIndex);
-        shapeList.selected.Set({});
-        ::draw::GetNode(shapeList, foundShape.unordered).isSelected.Set(false);
-    }
-
-    void DeselectAll()
-    {
-        for (auto &shapeList: this->lists_)
-        {
-            auto selectedIndex = shapeList.selected.Get();
-
-            if (selectedIndex)
-            {
-                ::draw::GetNode(shapeList, *selectedIndex)
-                    .isSelected.Set(false);
-            }
-        }
-    }
-
     bool isEnabled_;
 
     CanvasControl canvasControl_;
@@ -741,12 +928,23 @@ private:
     pex::Endpoint<ShapeBrain, decltype(CanvasControl::mouseDown)>
         mouseDownEndpoint_;
 
+    pex::Endpoint<ShapeBrain, decltype(CanvasControl::rightMouseDown)>
+        rightMouseDownEndpoint_;
+
     pex::Endpoint<ShapeBrain, PointControl> logicalPositionEndpoint_;
 
     pex::Endpoint<ShapeBrain, decltype(CanvasControl::modifier)>
         modifierEndpoint_;
 
+    pex::Endpoint<ShapeBrain, decltype(CanvasControl::keyCode)>
+        keyCodeEndpoint_;
+
+    pex::Endpoint<ShapeBrain, decltype(CanvasControl::menuId)>
+        menuIdEndpoint_;
+
     std::unique_ptr<Drag> drag_;
+
+    RightClickMenu<Create> rightClickMenu_;
 };
 
 

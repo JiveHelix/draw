@@ -38,6 +38,7 @@ struct UserTemplate
     T<std::string> errors;
 
     static constexpr auto fields = UserFields<UserTemplate>::fields;
+    static constexpr auto fieldsTypeName = "User";
 };
 
 

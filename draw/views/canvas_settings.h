@@ -19,10 +19,13 @@ struct CanvasFields
         fields::Field(&T::viewSettings, "viewSettings"),
         fields::Field(&T::mousePosition, "mousePosition"),
         fields::Field(&T::logicalPosition, "logicalPosition"),
+        fields::Field(&T::window, "window"),
         fields::Field(&T::mouseDown, "mouseDown"),
         fields::Field(&T::rightMouseDown, "rightMouseDown"),
         fields::Field(&T::modifier, "modifier"),
-        fields::Field(&T::cursor, "cursor"));
+        fields::Field(&T::keyCode, "keyCode"),
+        fields::Field(&T::cursor, "cursor"),
+        fields::Field(&T::menuId, "menuId"));
 };
 
 
@@ -32,10 +35,13 @@ struct CanvasTemplate
     T<ViewSettingsGroup> viewSettings;
     T<PointGroup> mousePosition;
     T<PointGroup> logicalPosition;
+    T<wxWindow *> window;
     T<bool> mouseDown;
     T<bool> rightMouseDown;
     T<wxpex::Modifier> modifier;
+    T<int> keyCode;
     T<wxpex::Cursor> cursor;
+    T<wxWindowID> menuId;
 
     static constexpr auto fields = CanvasFields<CanvasTemplate>::fields;
     static constexpr auto fieldsTypeName = "CanvasSettings";

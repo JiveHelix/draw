@@ -40,7 +40,7 @@ public:
 
     // Get the position of the dragged element.
     // The start_ is usually near the dragged element.
-    // THe offset_ the position of the dragged shape feature.
+    // The offset_ the position of the dragged shape feature.
     tau::Point2d<double> GetPosition(const tau::Point2d<int> &end) const
     {
         tau::Point2d<int> delta = end - this->start_;

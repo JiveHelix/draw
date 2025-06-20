@@ -10,6 +10,8 @@ void DrawCross(
     DrawContext &context,
     const Cross &cross)
 {
+    wxpex::MaintainTransform maintainTransform(context);
+
     auto transform = context->GetTransform();
     transform.Translate(cross.center.x, cross.center.y);
     context->SetTransform(transform);
@@ -31,21 +33,6 @@ void DrawCross(
     path.CloseSubpath();
 
     context->DrawPath(path);
-}
-
-
-CrossShape::CrossShape(const Cross &cross_, const Look &look_)
-    :
-    CrossShapeTemplate<pex::Identity>({cross_, look_})
-{
-
-}
-
-void CrossShape::Draw(DrawContext &context)
-{
-    wxpex::MaintainTransform maintainTransform(context);
-    context.ConfigureLook(this->look);
-    DrawCross(context, this->cross);
 }
 
 

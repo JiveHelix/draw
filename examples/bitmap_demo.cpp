@@ -41,6 +41,7 @@ struct DrawingTemplate
     T<draw::ColorMapSettingsGroup<MonoValue>> colorMapSettings;
 
     static constexpr auto fields = DrawingFields<DrawingTemplate>::fields;
+    static constexpr auto fieldsTypeName = "DrawingSettings";
 };
 
 
@@ -71,6 +72,7 @@ struct DemoTemplate
     T<draw::PixelViewGroup> pixelView;
 
     static constexpr auto fields = DemoFields<DemoTemplate>::fields;
+    static constexpr auto fieldsTypeName = "Demo";
 };
 
 

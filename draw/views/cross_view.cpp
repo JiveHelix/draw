@@ -48,4 +48,15 @@ CrossView::CrossView(
 }
 
 
+CrossView::CrossView(
+    wxWindow *parent,
+    CrossControl control,
+    const LayoutOptions &layoutOptions)
+    :
+    CrossView(parent, "Cross", control, layoutOptions)
+{
+
+}
+
+
 } // end namespace draw

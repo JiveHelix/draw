@@ -61,6 +61,7 @@ struct SettingsTemplate
     T<pex::MakeSignal> resetLook;
 
     static constexpr auto fields = SettingsFields<SettingsTemplate>::fields;
+    static constexpr auto fieldsTypeName = "Settings";
 };
 
 
@@ -107,6 +108,9 @@ struct TrigTemplate
     T<FrequencyRange> frequency;
     T<pex::MakeRange<double, pex::Limit<-180>, pex::Limit<180>>> phase;
     T<draw::LookGroup> look;
+
+    static constexpr auto fields = TrigFields<TrigTemplate>::fields;
+    static constexpr auto fieldsTypeName = "TrigSettings";
 };
 
 
@@ -146,6 +150,9 @@ struct DemoTemplate
 {
     T<SettingsGroup> settings;
     T<pex::List<TrigGroup, initialFunctionCount>> functions;
+
+    static constexpr auto fields = DemoFields<DemoTemplate>::fields;
+    static constexpr auto fieldsTypeName = "Demo";
 };
 
 

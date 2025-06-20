@@ -131,7 +131,6 @@ protected:
                 adjusted.shape.perspective.y + verticalDifference * 2.0);
 
         return std::make_shared<DerivedShape>(adjusted);
-
     }
 };
 
@@ -167,6 +166,8 @@ template<typename DerivedShape, typename QuadControlMembers>
 class DragQuadLine: public DragEditShape<DerivedShape>
 {
 public:
+    virtual ~DragQuadLine() {}
+
     DragQuadLine(
         size_t index,
         const tau::Point2d<int> &start,

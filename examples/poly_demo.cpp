@@ -1,6 +1,7 @@
 
 
 #include "common/shape_demo_brain.h"
+#include <draw/shape_creator.h>
 #include <draw/hue_generator.h>
 
 
@@ -11,8 +12,9 @@ public:
         :
         ShapeDemoBrain<DemoBrain>(),
         hueGenerator_(),
+        lastCount_(0),
 
-        polygonBrain_(
+        shapeBrain_(
             this->demoControl_.shapes,
             this->userControl_.pixelView.canvas),
 
@@ -43,6 +45,16 @@ public:
             return;
         }
 
+        if (count <= this->lastCount_)
+        {
+            // A shape was removed.
+            this->lastCount_ = count;
+
+            return;
+        }
+
+        this->lastCount_ = count;
+
         auto &shapeControl = this->demoControl_.shapes.at(count - 1);
 
         auto &lookControl = shapeControl.GetVirtual()->GetLook();
@@ -66,7 +78,8 @@ public:
 
 private:
     HueGenerator hueGenerator_;
-    draw::PolygonBrain polygonBrain_;
+    size_t lastCount_;
+    draw::ShapeCreatorBrain shapeBrain_;
 
     using CountEndpoint = pex::Endpoint<DemoBrain, pex::control::ListCount>;
     CountEndpoint countEndpoint_;

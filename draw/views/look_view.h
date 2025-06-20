@@ -30,6 +30,8 @@ struct LookDisplayTemplate
 
     static constexpr auto fields =
         LookDisplayFields<LookDisplayTemplate>::fields;
+
+    static constexpr auto fieldsTypeName = "LookDisplay";
 };
 
 

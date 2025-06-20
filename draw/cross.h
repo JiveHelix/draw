@@ -5,6 +5,7 @@
 #include <pex/range.h>
 #include <tau/vector2d.h>
 #include "draw/scale.h"
+#include "draw/points.h"
 
 
 namespace draw
@@ -36,6 +37,7 @@ struct CrossTemplate
     T<RotationRange> rotation;
 
     static constexpr auto fields = CrossFields<CrossTemplate>::fields;
+    static constexpr auto fieldsTypeName = "Cross";
 };
 
 
@@ -50,6 +52,16 @@ struct Cross_: public Base
             0.0}
     {
 
+    }
+
+    PointsDouble GetPoints() const
+    {
+        return {this->center};
+    }
+
+    bool Contains(const tau::Point2d<double> &point, double margin) const
+    {
+        return point.Distance(this->center) < margin;
     }
 };
 

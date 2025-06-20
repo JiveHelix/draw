@@ -102,6 +102,8 @@ template<typename DerivedShape>
 class DragRegularPolygonLine: public DragEditShape<DerivedShape>
 {
 public:
+    virtual ~DragRegularPolygonLine() {}
+
     DragRegularPolygonLine(
         size_t index,
         const tau::Point2d<int> &start,

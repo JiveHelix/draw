@@ -9,64 +9,27 @@
 #include <draw/png.h>
 #include <draw/cross_shape.h>
 #include <draw/shapes.h>
+#include <draw/shape_creator.h>
 #include <draw/views/cross_shape_view.h>
 
 
 #include "common/about_window.h"
 #include "common/observer.h"
-#include "common/brain.h"
+#include "common/shape_demo_brain.h"
 
 
-class DemoControls: public wxpex::Scrolled
+class DemoBrain: public ShapeDemoBrain<DemoBrain>
 {
 public:
-    DemoControls(
-        wxWindow *parent,
-        UserControl userControl,
-        draw::CrossShapeControl crossShapeControl)
-        :
-        wxpex::Scrolled(parent)
-    {
-        wxpex::FileDialogOptions options{};
-        options.message = "Choose a PNG file";
-        options.wildcard = "*.png";
+    using Base = ShapeDemoBrain<DemoBrain>;
 
-        auto fileSelector = new wxpex::FileField(
-            this,
-            userControl.fileName,
-            options);
-
-        auto crossShapeView =
-            new draw::CrossShapeView(
-                this,
-                "Target",
-                crossShapeControl,
-                wxpex::LayoutOptions{});
-
-        auto sizer = std::make_unique<wxBoxSizer>(wxVERTICAL);
-        sizer->Add(fileSelector, 0, wxEXPAND | wxALL, 5);
-        sizer->Add(crossShapeView, 0, wxEXPAND | wxALL, 5);
-
-        this->ConfigureSizer(
-            wxpex::verticalScrolled,
-            std::move(sizer));
-    }
-};
-
-
-class DemoBrain: public Brain<DemoBrain>
-{
-public:
     DemoBrain()
         :
-        Brain<DemoBrain>(),
-        shapesId_(),
-        observer_(this, UserControl(this->user_)),
-        crossShapeModel_(),
-        crossShapeEndpoint_(
-            this,
-            this->crossShapeModel_,
-            &DemoBrain::OnCrossShape_),
+        Base(),
+
+        crossBrain_(
+            this->demoControl_.shapes,
+            this->userControl_.pixelView.canvas),
 
         pngIsLoaded_(false),
         pngData_(),
@@ -93,19 +56,30 @@ public:
 
     wxWindow * CreateControls(wxWindow *parent)
     {
-        return new DemoControls(
-            parent,
-            this->GetUserControls(),
-            this->crossShapeModel_);
+        auto controls = new wxPanel(parent, wxID_ANY);
+
+        wxpex::FileDialogOptions options{};
+        options.message = "Choose a PNG file";
+        options.wildcard = "*.png";
+
+        auto fileSelector = new wxpex::FileField(
+            controls,
+            this->GetUserControls().fileName,
+            options);
+
+        auto shapeControls = this->Base::CreateControls(controls);
+
+        auto sizer = wxpex::LayoutItems(
+            wxpex::verticalItems,
+            fileSelector,
+            shapeControls);
+
+        controls->SetSizerAndFit(sizer.release());
+
+        return controls;
     }
 
-    void ShowAbout()
-    {
-        wxAboutBox(MakeAboutDialogInfo("PNG Demo"));
-    }
-
-    std::shared_ptr<draw::Pixels>
-    MakePixels() const
+    std::shared_ptr<draw::Pixels> MakePixels() const
     {
         auto result = draw::Pixels::CreateShared(this->pngData_.GetSize());
         this->colorMap_(this->pngData_.GetValues(), &result->data);
@@ -115,36 +89,20 @@ public:
 
     void Display()
     {
+        this->Base::Display();
+
         if (!this->pngIsLoaded_)
         {
             return;
         }
 
         this->user_.pixelView.pixels.Set(this->MakePixels());
-        auto shapes = draw::Shapes(this->shapesId_.Get());
-
-        shapes.Append(
-            std::make_shared<draw::CrossShape>(this->crossShapeModel_.Get()));
-
-        this->userControl_.pixelView.asyncShapes.Set(shapes);
-    }
-
-protected:
-    void OnCrossShape_(const draw::CrossShape &)
-    {
-        this->Display();
     }
 
 private:
-    draw::ShapesId shapesId_;
-    Observer<DemoBrain> observer_;
-    draw::CrossShapeModel crossShapeModel_;
-    pex::Endpoint<DemoBrain, draw::CrossShapeControl> crossShapeEndpoint_;
-
-
+    draw::CrossCreatorBrain crossBrain_;
     bool pngIsLoaded_;
     draw::GrayPng<PngPixel> pngData_;
-
     tau::LimitedColorMap<draw::PixelMatrix, int32_t> colorMap_;
 };
 

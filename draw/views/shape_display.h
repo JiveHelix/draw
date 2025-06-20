@@ -26,6 +26,8 @@ struct ShapeDisplayTemplate
 
     static constexpr auto fields =
         ShapeDisplayFields<ShapeDisplayTemplate>::fields;
+
+    static constexpr auto fieldsTypeName = "ShapeDisplay";
 };
 
 
