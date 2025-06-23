@@ -5,7 +5,7 @@
 #include "draw/cross.h"
 #include "draw/look.h"
 #include "draw/shapes.h"
-#include "draw/shape_edit.h"
+#include "draw/shape_editor.h"
 #include "draw/views/cross_view.h"
 
 
@@ -101,7 +101,7 @@ struct CreateCross
 
 
 using DragCreateCross = DragCreateShape<CreateCross>;
-using CrossBrain = draw::ShapeBrain<DragCreateCross>;
+using CrossBrain = draw::ShapeEditor<DragCreateCross>;
 
 
 

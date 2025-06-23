@@ -6,7 +6,7 @@
 #include "draw/drag.h"
 #include "draw/views/pixel_view_settings.h"
 #include "draw/polygon.h"
-#include "draw/shape_edit.h"
+#include "draw/shape_editor.h"
 
 
 namespace draw

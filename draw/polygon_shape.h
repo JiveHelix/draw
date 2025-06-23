@@ -139,7 +139,7 @@ struct CreatePolygon
 using DragCreatePolygon = DragCreateShape<CreatePolygon>;
 using DragReplacePolygon = DragReplaceShape<CreatePolygon>;
 
-using PolygonBrain = draw::ShapeBrain<DragCreatePolygon>;
+using PolygonBrain = draw::ShapeEditor<DragCreatePolygon>;
 
 
 } // end namespace draw

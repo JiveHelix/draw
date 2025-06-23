@@ -1,6 +1,6 @@
 #pragma once
 
-
+#include <pex/ordered_list.h>
 #include "draw/node_settings.h"
 
 
@@ -8,71 +8,20 @@ namespace draw
 {
 
 
-template<typename T>
-concept IsNode =
-    std::is_same_v<std::remove_reference_t<T>, NodeSettingsModel>
-    || std::is_same_v<std::remove_reference_t<T>, NodeSettingsControl>;
-
-
-template<typename T>
-concept HasVirtualGetNode = requires(T t)
-{
-    { t.GetVirtual()->GetNode() } -> IsNode;
-};
-
-
-template<typename T>
-concept HasNodeMember = requires (T t)
-{
-    { t.node } -> IsNode;
-};
-
-
-template<typename T>
-concept HasNode =
-    HasNodeMember<T> || HasVirtualGetNode<T>;
-
-
-template<typename T>
-concept HasGetUnordered = requires(T t, size_t index)
-{
-    { t.GetUnordered(index) };
-};
-
-
-template<typename List>
-auto & GetUnordered(List &list, size_t index)
-{
-    if constexpr (HasGetUnordered<List>)
-    {
-        return list.GetUnordered(index);
-    }
-    else
-    {
-        return list.at(index);
-    }
-}
-
-
-template<typename List>
-auto GetVirtual(List &list, size_t unordered)
-{
-    return GetUnordered(list, unordered).GetVirtual();
-}
-
-
-template<typename List>
-auto GetValueBase(List &list, size_t unordered)
-{
-    return GetUnordered(list, unordered).Get().GetValueBase();
-}
-
-
 template<typename List>
 NodeSettingsControl & GetNode(List &list, size_t unordered)
 {
-    return GetVirtual(list, unordered)->GetNode();
+    return GetNode(pex::GetUnordered(list, unordered));
 }
+
+
+template<typename Item>
+struct FoundItem
+{
+    size_t listIndex;
+    size_t unordered;
+    Item item;
+};
 
 
 template<typename ListControl>
@@ -80,6 +29,8 @@ class SelectionBrain
 {
 public:
     using ListItem = typename ListControl::ListItem;
+
+    using Found = FoundItem<ListItem>;
 
     SelectionBrain(const std::vector<ListControl> &lists)
         :
@@ -92,9 +43,19 @@ public:
     {
         REGISTER_PEX_NAME(this, "SelectionBrain");
 
+        REGISTER_PEX_NAME_WITH_PARENT(
+            &this->lists_,
+            this,
+            "lists_");
+
         for (size_t i = 0; i < this->lists_.size(); ++i)
         {
             auto &list = this->lists_[i];
+
+            REGISTER_PEX_NAME_WITH_PARENT(
+                &list,
+                &this->lists_,
+                fmt::format("list {}", i));
 
             this->countWillChangeEndpoints_.emplace_back(
                 this,
@@ -130,39 +91,96 @@ public:
         UNREGISTER_PEX_NAME(this, "SelectionBrain");
     }
 
-    NodeSettingsControl & GetNode(size_t listIndex, size_t nodeIndex)
+    ListControl & GetListControl()
     {
-        if constexpr (HasNodeMember<ListItem>)
-        {
-            return GetUnordered(this->lists_[listIndex], nodeIndex).node;
-        }
-        else
-        {
-            return ::draw::GetNode(this->lists_[listIndex], nodeIndex);
-        }
+        return this->lists_.at(0);
     }
 
-    bool IsSameSelection(size_t unordered, size_t listIndex)
+    std::optional<Found> FindSelected() const
     {
         for (size_t i = 0; i < this->lists_.size(); ++i)
         {
-            auto wasSelected = this->lists_[i].selected.Get();
+            const auto &list = this->lists_[i];
 
-            bool sameSelection =
-                wasSelected
-                && (*wasSelected == unordered)
-                && (i == listIndex);
-
-            if (sameSelection)
+            if (list.selected.Get())
             {
-                return true;
+                auto unordered = *list.selected.Get();
+
+                return Found{
+                        i,
+                        unordered,
+                        pex::GetUnordered(list, unordered)};
             }
         }
 
-        return false;
+        return {};
     }
 
-    void ToggleSelect(size_t unordered, size_t listIndex)
+    std::optional<Found> FindClicked(
+        const tau::Point2d<int> &position)
+    {
+        auto listCount = this->lists_.size();
+
+        for (size_t listIndex = 0; listIndex < listCount; ++listIndex)
+        {
+            auto &list = this->lists_[listIndex];
+            auto count = list.count.Get();
+
+            for (size_t index = 0; index < count; ++index)
+            {
+                auto &shapeControl = list[index];
+                auto value = shapeControl.Get();
+                auto shape = value.GetValueBase();
+
+                if (shape->Contains(position, 10.0))
+                {
+                    if constexpr (pex::HasIndices<ListControl>)
+                    {
+                        return Found{
+                            listIndex,
+                            list.indices.at(index).Get(),
+                            shapeControl};
+                    }
+                    else
+                    {
+                        return Found{
+                            listIndex,
+                            index,
+                            shapeControl};
+                    }
+                }
+            }
+        }
+
+        return {};
+    }
+
+    void DeleteSelected()
+    {
+        size_t listIndex;
+
+        {
+            auto found = this->FindSelected();
+
+            if (!found)
+            {
+                return;
+            }
+
+            listIndex = found->listIndex;
+
+            // found is about to be deleted.
+            // Allow this scope to expire so that we do not hold a copy as the
+            // list attempts to delete it.
+            found.reset();
+        }
+
+        this->lists_.at(listIndex).EraseSelected();
+    }
+
+
+private:
+    void ToggleSelect_(size_t unordered, size_t listIndex)
     {
         for (size_t i = 0; i < this->lists_.size(); ++i)
         {
@@ -176,7 +194,7 @@ public:
             if (wasSelected)
             {
                 // Unselect the previous selection.
-                this->GetNode(i, *wasSelected).isSelected.Set(false);
+                this->GetNode_(i, *wasSelected).isSelected.Set(false);
                 this->lists_[i].selected.Set({});
             }
 
@@ -189,27 +207,26 @@ public:
 
         auto &list = this->lists_.at(listIndex);
         list.selected.Set(unordered);
-        this->GetNode(listIndex, unordered).isSelected.Set(true);
+        this->GetNode_(listIndex, unordered).isSelected.Set(true);
     }
 
-    void Deselect(size_t listIndex, size_t unordered)
+
+    NodeSettingsControl & GetNode_(size_t listIndex, size_t nodeIndex)
     {
-        auto &shapeList = this->lists_.at(listIndex);
-        shapeList.selected.Set({});
-        ::draw::GetNode(shapeList, unordered).isSelected.Set(false);
+        return ::draw::GetNode(this->lists_.at(listIndex), nodeIndex);
     }
 
-    void DeselectAll()
+    void DeselectAll_()
     {
-        for (auto &shapeList: this->lists_)
+        for (auto &list: this->lists_)
         {
-            auto selectedIndex = shapeList.selected.Get();
+            auto selectedIndex = list.selected.Get();
 
             if (selectedIndex)
             {
-                shapeList.selected.Set({});
+                list.selected.Set({});
 
-                ::draw::GetNode(shapeList, *selectedIndex)
+                ::draw::GetNode(list, *selectedIndex)
                     .isSelected.Set(false);
             }
         }
@@ -217,7 +234,7 @@ public:
 
     void Select_(size_t listIndex, size_t unorderedMemberIndex)
     {
-        this->DeselectAll();
+        this->DeselectAll_();
 
         auto &list = this->lists_.at(listIndex);
         list.selected.Set(unorderedMemberIndex);
@@ -225,7 +242,6 @@ public:
         ::draw::GetNode(list, unorderedMemberIndex).isSelected.Set(true);
     }
 
-private:
     void ClearListConnections_(size_t listIndex)
     {
         this->selectConnections_.at(listIndex).clear();
@@ -241,8 +257,8 @@ private:
     {
         this->selectConnections_.at(listIndex).emplace_back(
             this,
-            this->GetNode(listIndex, index).toggleSelect,
-            &SelectionBrain::ToggleSelect,
+            this->GetNode_(listIndex, index).toggleSelect,
+            &SelectionBrain::ToggleSelect_,
             index,
             listIndex);
     }
@@ -272,23 +288,20 @@ private:
         if constexpr (pex::HasGetVirtual<ListItem>)
         {
             itemCreatedEndpoints.reserve(count_);
-        }
 
-        if constexpr (pex::HasGetVirtual<ListItem>)
-        {
             // Connect any list items that exist.
             auto &list = this->lists_.at(listIndex);
 
             for (size_t i = 0; i < count_; ++i)
             {
-                auto itemBase = GetVirtual(list, i);
+                auto itemBase = pex::GetUnordered(list, i).GetVirtual();
 
                 if (itemBase)
                 {
                     this->selectConnections_.at(listIndex).emplace_back(
                         this,
                         itemBase->GetNode().toggleSelect,
-                        &SelectionBrain::ToggleSelect,
+                        &SelectionBrain::ToggleSelect_,
                         i,
                         listIndex);
 
@@ -297,7 +310,7 @@ private:
                 {
                     itemCreatedEndpoints.emplace_back(
                         this,
-                        GetUnordered(list, i).baseCreated,
+                        pex::GetUnordered(list, i).baseCreated,
                         &SelectionBrain::OnItemCreated_,
                         i,
                         listIndex);
@@ -310,8 +323,8 @@ private:
             {
                 this->selectConnections_.at(listIndex).emplace_back(
                     this,
-                    this->GetNode(listIndex, i).toggleSelect,
-                    &SelectionBrain::ToggleSelect,
+                    this->GetNode_(listIndex, i).toggleSelect,
+                    &SelectionBrain::ToggleSelect_,
                     i,
                     listIndex);
             }
@@ -329,6 +342,7 @@ private:
 protected:
     std::vector<ListControl> lists_;
 
+private:
     using CountWillChangeEndpoint =
         pex::BoundEndpoint
         <
@@ -358,7 +372,7 @@ protected:
         pex::BoundEndpoint
         <
             NodeToggleSelectSignal,
-            decltype(&SelectionBrain::ToggleSelect)
+            decltype(&SelectionBrain::ToggleSelect_)
         >;
 
     std::vector<std::vector<BoundSelection>> selectConnections_;

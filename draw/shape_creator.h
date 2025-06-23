@@ -5,7 +5,8 @@
 #include <draw/polygon_shape.h>
 #include <draw/quad_shape.h>
 #include <draw/cross_shape.h>
-#include <draw/shape_edit.h>
+#include <draw/shape_editor.h>
+#include <draw/shape_list.h>
 
 
 namespace draw
@@ -22,37 +23,105 @@ enum class SelectedShape
 };
 
 
-struct SelectedShapeChoices
-{
-    using Type = SelectedShape;
-    static std::vector<SelectedShape> GetChoices();
-};
-
-
 struct SelectedShapeConverter
 {
     static std::string ToString(SelectedShape selectedShape);
 };
 
 
+struct SelectedShapeChoices
+{
+    using Type = SelectedShape;
+    static std::vector<SelectedShape> GetChoices();
+
+    using Converter = SelectedShapeConverter;
+
+    static std::string ToString(SelectedShape selectedShape)
+    {
+        return Converter::ToString(selectedShape);
+    }
+};
+
+
+
+
 std::ostream & operator<<(std::ostream &, SelectedShape);
 
 
-template<typename Choices>
+enum class Action
+{
+    moveUp,
+    moveDown,
+    remove,
+    cancel
+};
+
+
+struct ActionConverter
+{
+    static std::string ToString(Action);
+};
+
+
+struct Actions
+{
+    using Type = Action;
+    static std::vector<Action> GetChoices();
+
+    using Converter = ActionConverter;
+
+    static std::string ToString(Action action)
+    {
+        return Converter::ToString(action);
+    }
+
+    static bool ProcessAction(Action action, ListedShape &shapeControl)
+    {
+        switch (action)
+        {
+            case (Action::moveUp):
+                pex::GetOrder(shapeControl).moveUp.Trigger();
+                break;
+
+            case (Action::moveDown):
+                pex::GetOrder(shapeControl).moveDown.Trigger();
+                break;
+
+            case (Action::remove):
+                return true;
+                break;
+
+            case (Action::cancel):
+                break;
+
+            default:
+                throw std::logic_error("Not an action");
+        }
+
+        return false;
+    }
+};
+
+
+std::ostream & operator<<(std::ostream &, Action);
+
+
+template<typename ShapeChoices, typename Actions>
 class SelectedMenu
 {
 public:
-    using SelectionType = typename Choices::Type;
+    using SelectionType = typename ShapeChoices::Type;
+    using ActionType = typename Actions::Type;
 
     SelectedMenu()
         :
         shapesById_{},
+        actionsById_{},
         creationMenu_{},
-        selectedId_{},
-        deletionId_{wxWindow::NewControlId()},
-        deletionMenu_{}
+        actionMenu_{},
+        selectedId_{}
     {
-        auto choices = Choices::GetChoices();
+        auto choices = ShapeChoices::GetChoices();
 
         for (auto &choice: choices)
         {
@@ -61,7 +130,7 @@ public:
 
             this->creationMenu_.AppendCheckItem(
                 menuId,
-                SelectedShapeConverter::ToString(choice));
+                ShapeChoices::ToString(choice));
         }
 
         auto &menuItems = this->creationMenu_.GetMenuItems();
@@ -70,9 +139,17 @@ public:
         first->Check(true);
         this->selectedId_ = first->GetId();
 
-        this->deletionMenu_.Append(
-            this->deletionId_,
-            "delete");
+        auto actions = Actions::GetChoices();
+
+        for (auto &action: actions)
+        {
+            auto menuId = wxWindow::NewControlId();
+            this->actionsById_[menuId] = action;
+
+            this->actionMenu_.Append(
+                menuId,
+                Actions::ToString(action));
+        }
     }
 
     SelectionType GetSelectedShape() const
@@ -84,20 +161,38 @@ public:
     {
         if (objectSelected)
         {
-            return this->deletionMenu_;
+            return this->actionMenu_;
         }
 
         return this->creationMenu_;
     }
 
-    bool IsDeletion(wxWindowID id) const
+    using ShapeControl = pex::poly::Control<ShapeSupers>;
+
+    // Returns true if the shape should be deleted
+    bool ProcessAction(ActionType action, ListedShape &shapeControl)
     {
-        return id == this->deletionId_;
+        return Actions::ProcessAction(action, shapeControl);
+    }
+
+    bool IsActionId(wxWindowID id) const
+    {
+        return this->actionsById_.count(id);
+    }
+
+    std::optional<ActionType> GetAction(wxWindowID id) const
+    {
+        if (this->IsActionId(id))
+        {
+            return this->actionsById_.at(id);
+        }
+
+        return {};
     }
 
     void ReportId(wxWindowID id)
     {
-        if (id == this->deletionId_ || id == wxID_NONE)
+        if (this->IsActionId(id) || id == wxID_NONE)
         {
             return;
         }
@@ -124,14 +219,14 @@ public:
 
 private:
     std::map<wxWindowID, SelectionType> shapesById_;
+    std::map<wxWindowID, ActionType> actionsById_;
     wxMenu creationMenu_;
+    wxMenu actionMenu_;
     wxWindowID selectedId_;
-    wxWindowID deletionId_;
-    wxMenu deletionMenu_;
 };
 
 
-using SelectedShapesMenu = SelectedMenu<SelectedShapeChoices>;
+using SelectedShapesMenu = SelectedMenu<SelectedShapeChoices, Actions>;
 
 static_assert(IsRightClickMenu<SelectedShapesMenu>);
 
@@ -139,14 +234,20 @@ static_assert(IsRightClickMenu<SelectedShapesMenu>);
 struct SelectedCrossChoices
 {
     using Type = SelectedShape;
+
     static std::vector<SelectedShape> GetChoices()
     {
         return {SelectedShape::cross};
     }
+
+    static std::string ToString(SelectedShape selectedShape)
+    {
+        return SelectedShapeConverter::ToString(selectedShape);
+    }
 };
 
 
-using SelectedCrossMenu = SelectedMenu<SelectedCrossChoices>;
+using SelectedCrossMenu = SelectedMenu<SelectedCrossChoices, Actions>;
 
 
 
@@ -242,7 +343,7 @@ using DragCreateSelectedShape = DragCreateSelected<SelectedShapesMenu>;
 static_assert(HasRightClickMenu<DragCreateSelectedShape>);
 
 
-using ShapeCreatorBrain = draw::ShapeBrain<DragCreateSelectedShape>;
+using ShapeCreatorBrain = draw::ShapeEditor<DragCreateSelectedShape>;
 
 
 using DragCreateSelectedCross = DragCreateSelected<SelectedCrossMenu>;
@@ -251,14 +352,14 @@ using DragCreateSelectedCross = DragCreateSelected<SelectedCrossMenu>;
 static_assert(HasRightClickMenu<DragCreateSelectedCross>);
 
 
-using CrossCreatorBrain = draw::ShapeBrain<DragCreateSelectedCross>;
+using CrossCreatorBrain = draw::ShapeEditor<DragCreateSelectedCross>;
 
 
 } // end namespace draw
 
 
-extern template class draw::SelectedMenu<draw::SelectedShapeChoices>;
+extern template class draw::SelectedMenu<draw::SelectedShapeChoices, draw::Actions>;
 extern template class draw::DragCreateSelected<draw::SelectedShapesMenu>;
 
-extern template class draw::SelectedMenu<draw::SelectedCrossChoices>;
+extern template class draw::SelectedMenu<draw::SelectedCrossChoices, draw::Actions>;
 extern template class draw::DragCreateSelected<draw::SelectedCrossMenu>;

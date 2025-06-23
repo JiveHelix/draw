@@ -6,7 +6,7 @@
 #include "draw/views/ellipse_view.h"
 #include "draw/look.h"
 #include "draw/shapes.h"
-#include "draw/shape_edit.h"
+#include "draw/shape_editor.h"
 
 
 namespace draw
@@ -150,7 +150,7 @@ struct CreateEllipse
 
 
 using DragCreateEllipse = DragCreateShape<CreateEllipse>;
-using EllipseBrain = draw::ShapeBrain<DragCreateEllipse>;
+using EllipseBrain = draw::ShapeEditor<DragCreateEllipse>;
 
 
 } // end namespace draw

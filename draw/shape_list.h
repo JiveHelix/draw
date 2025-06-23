@@ -95,6 +95,7 @@ using ShapeListGroup =
 using ShapeListModel = typename ShapeListGroup::Model;
 using ShapeListControl = typename ShapeListGroup::Control;
 using ShapesControl = decltype(ShapeListControl::shapes);
+using ListedShape = typename ShapesControl::ListItem;
 
 template<typename Observer>
 using ShapesEndpoint = pex::Endpoint<Observer, ShapesControl>;

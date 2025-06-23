@@ -78,4 +78,43 @@ using NodeToggleSelectEndpoint =
     pex::Endpoint<Observer, NodeToggleSelectSignal>;
 
 
+template<typename T>
+concept IsNode =
+    std::is_same_v<std::remove_reference_t<T>, NodeSettingsModel>
+    || std::is_same_v<std::remove_reference_t<T>, NodeSettingsControl>;
+
+
+template<typename T>
+concept HasVirtualGetNode = requires(T t)
+{
+    { t.GetVirtual()->GetNode() } -> IsNode;
+};
+
+
+template<typename T>
+concept HasNodeMember = requires (T t)
+{
+    { t.node } -> IsNode;
+};
+
+
+template<typename T>
+concept HasNode =
+    HasNodeMember<T> || HasVirtualGetNode<T>;
+
+
+template<HasNode Item>
+auto & GetNode(Item &item)
+{
+    if constexpr (HasNodeMember<Item>)
+    {
+        return item.node;
+    }
+    else
+    {
+        return item.GetVirtual()->GetNode();
+    }
+}
+
+
 } // end namespace draw

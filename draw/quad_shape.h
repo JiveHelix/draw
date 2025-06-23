@@ -110,7 +110,7 @@ struct CreateQuad
 
 
 using DragCreateQuad = DragCreateShape<CreateQuad>;
-using QuadBrain = draw::ShapeBrain<DragCreateQuad>;
+using QuadBrain = draw::ShapeEditor<DragCreateQuad>;
 
 
 } // end namespace draw

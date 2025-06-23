@@ -70,7 +70,7 @@ target_sources(
     segments_shape.h
     shapes.h
     shape_creator.cpp
-    shape_edit.cpp
+    shape_editor.cpp
     size.h
     waveform.h
     waveform_generator.h

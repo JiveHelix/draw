@@ -48,11 +48,51 @@ std::ostream & operator<<(std::ostream &output, SelectedShape value)
 }
 
 
+std::vector<Action> Actions::GetChoices()
+{
+    return {
+        Action::moveUp,
+        Action::moveDown,
+        Action::remove,
+        Action::cancel};
+}
+
+
+std::string ActionConverter::ToString(
+    Action selectedShape)
+{
+    switch (selectedShape)
+    {
+        case (Action::moveUp):
+            return "Move up";
+
+        case (Action::moveDown):
+            return "Move down";
+
+        case (Action::remove):
+            return "Remove";
+
+        case (Action::cancel):
+            return "Cancel";
+
+        default:
+            throw std::logic_error("Unknown Action");
+    }
+}
+
+
+std::ostream & operator<<(std::ostream &output, Action value)
+{
+    return output << ActionConverter::ToString(value);
+}
+
+
+
 } // end namespace draw
 
 
-template class draw::SelectedMenu<draw::SelectedShapeChoices>;
+template class draw::SelectedMenu<draw::SelectedShapeChoices, draw::Actions>;
 template class draw::DragCreateSelected<draw::SelectedShapesMenu>;
 
-template class draw::SelectedMenu<draw::SelectedCrossChoices>;
+template class draw::SelectedMenu<draw::SelectedCrossChoices, draw::Actions>;
 template class draw::DragCreateSelected<draw::SelectedCrossMenu>;

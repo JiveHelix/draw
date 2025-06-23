@@ -4,7 +4,7 @@
 #include <tau/vector2d.h>
 #include "draw/polygon.h"
 #include "draw/drag.h"
-#include "draw/shape_edit.h"
+#include "draw/shape_editor.h"
 #include "draw/shape_list.h"
 
 

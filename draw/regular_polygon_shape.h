@@ -259,7 +259,7 @@ struct CreateRegularPolygon
 
 
 using DragCreateRegularPolygon = DragCreateShape<CreateRegularPolygon>;
-using RegularPolygonBrain = draw::ShapeBrain<DragCreateRegularPolygon>;
+using RegularPolygonBrain = draw::ShapeEditor<DragCreateRegularPolygon>;
 
 
 } // end namespace draw

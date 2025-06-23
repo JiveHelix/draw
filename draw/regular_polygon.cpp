@@ -1,5 +1,5 @@
 #include "draw/regular_polygon.h"
-#include "draw/shape_edit.h"
+#include "draw/shape_editor.h"
 #include <limits>
 
 
