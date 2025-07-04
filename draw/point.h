@@ -11,9 +11,17 @@ namespace draw
 {
 
 
-using PointGroup = tau::Point2dGroup<int>;
+using PointGroup = tau::Point2dGroup<double>;
 using Point = typename PointGroup::Plain;
 using PointControl = typename PointGroup::Control;
+
+template<typename Observer>
+using PointEndpoint = pex::EndpointGroup<Observer, PointControl>;
+
+
+using IntPointGroup = tau::Point2dGroup<int>;
+using IntPoint = typename IntPointGroup::Plain;
+using IntPointControl = typename IntPointGroup::Control;
 
 template<typename Observer>
 using PointEndpoint = pex::EndpointGroup<Observer, PointControl>;

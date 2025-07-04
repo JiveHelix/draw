@@ -59,7 +59,7 @@ struct PolygonShapeTemplates: public ShapeCommon<PolygonGroup, PolygonView>
 
         std::unique_ptr<Drag> ProcessMouseDown(
             std::shared_ptr<ShapeControl> control,
-            const tau::Point2d<int> &click,
+            const tau::Point2d<double> &click,
             const wxpex::Modifier &modifier,
             CursorControl cursor) override
         {
@@ -75,7 +75,7 @@ struct PolygonShapeTemplates: public ShapeCommon<PolygonGroup, PolygonView>
 
         bool ProcessControlClick(
             ShapeControl &control,
-            const tau::Point2d<int> &click) override
+            const tau::Point2d<double> &click) override
         {
             auto points = this->shape.GetPoints();
             points.push_back(click.template Cast<double>());
@@ -113,7 +113,7 @@ struct CreatePolygon
 {
     std::optional<ShapeValue> operator()(
         const Drag &drag,
-        const tau::Point2d<int> position)
+        const tau::Point2d<double> position)
     {
         auto size = drag.GetSize(position);
 

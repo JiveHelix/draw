@@ -57,7 +57,7 @@ struct QuadShapeTemplates: public ShapeCommon<QuadGroup, QuadView>
 
         std::unique_ptr<Drag> ProcessMouseDown(
             std::shared_ptr<ShapeControl> control,
-            const tau::Point2d<int> &click,
+            const tau::Point2d<double> &click,
             const wxpex::Modifier &modifier,
             CursorControl cursor) override
         {
@@ -86,7 +86,7 @@ struct CreateQuad
 {
     std::optional<ShapeValue> operator()(
         const Drag &drag,
-        const tau::Point2d<int> position)
+        const tau::Point2d<double> position)
     {
         auto size = drag.GetSize(position);
 

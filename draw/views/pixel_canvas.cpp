@@ -68,11 +68,9 @@ void PixelCanvas::OnPixels_(const std::shared_ptr<Pixels> &pixels)
 {
     if (!pixels)
     {
-#ifdef DEBUG_REQUIRE_PIXELS
-        throw std::logic_error("pixels must not be NULL");
-#else
+        this->pixelData_ = pixels;
+
         return;
-#endif
     }
 
     auto dataSize = pixels->size;

@@ -58,6 +58,14 @@ std::vector<Action> Actions::GetChoices()
 }
 
 
+std::vector<Action> CrossActions::GetChoices()
+{
+    return {
+        Action::remove,
+        Action::cancel};
+}
+
+
 std::string ActionConverter::ToString(
     Action selectedShape)
 {
@@ -94,5 +102,10 @@ std::ostream & operator<<(std::ostream &output, Action value)
 template class draw::SelectedMenu<draw::SelectedShapeChoices, draw::Actions>;
 template class draw::DragCreateSelected<draw::SelectedShapesMenu>;
 
-template class draw::SelectedMenu<draw::SelectedCrossChoices, draw::Actions>;
+template class draw::SelectedMenu
+<
+    draw::SelectedCrossChoices,
+    draw::CrossActions
+>;
+
 template class draw::DragCreateSelected<draw::SelectedCrossMenu>;

@@ -98,13 +98,13 @@ public:
 
     virtual std::unique_ptr<Drag> ProcessMouseDown(
         std::shared_ptr<ControlBase> shapeControl,
-        const tau::Point2d<int> &click,
+        const tau::Point2d<double> &click,
         const wxpex::Modifier &modifier,
         CursorControl cursor) = 0;
 
     virtual bool ProcessControlClick(
         ControlBase &,
-        const tau::Point2d<int> &)
+        const tau::Point2d<double> &)
     {
         return false;
     }

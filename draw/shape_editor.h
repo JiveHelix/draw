@@ -18,11 +18,23 @@ namespace draw
 
 
 std::optional<PointsIterator> FindPoint(
-    const tau::Point2d<int> &click,
+    const tau::Point2d<double> &click,
     const PointsDouble &points);
 
 
 double DragAngleDifference(double first, double second);
+
+
+static constexpr double pointEpsilon = 0.01;
+
+
+inline bool IsSamePoint(
+    const tau::Point2d<double> &left,
+    const tau::Point2d<double> &right)
+{
+    return std::abs(left.x - right.x) < pointEpsilon
+        && std::abs(left.y - right.y) < pointEpsilon;
+}
 
 
 // TODO: Document what Modulo does.
@@ -49,7 +61,7 @@ public:
 
     DragShape(
         size_t index,
-        const tau::Point2d<int> &start,
+        const tau::Point2d<double> &start,
         const tau::Point2d<double> &offset,
         std::shared_ptr<ShapeControl> control,
         const DerivedShape &startingShape)
@@ -76,7 +88,7 @@ public:
     }
 
     DragShape(
-        const tau::Point2d<int> &start,
+        const tau::Point2d<double> &start,
         const tau::Point2d<double> &offset,
         std::shared_ptr<ShapeControl> control,
         const DerivedShape &startingShape)
@@ -93,7 +105,7 @@ public:
             "startingShape_");
     }
 
-    void ReportLogicalPosition(const tau::Point2d<int> &position) override
+    void ReportLogicalPosition(const tau::Point2d<double> &position) override
     {
         this->startingShape_.shape.center = this->GetPosition(position);
         this->control_->SetValue(this->startingShape_);
@@ -113,7 +125,7 @@ public:
 
     DragEditShape(
         size_t index,
-        const tau::Point2d<int> &start,
+        const tau::Point2d<double> &start,
         const tau::Point2d<double> &offset,
         std::shared_ptr<ShapeControl> control,
         const DerivedShape &startingShape)
@@ -145,7 +157,7 @@ public:
     }
 
     DragEditShape(
-        const tau::Point2d<int> &start,
+        const tau::Point2d<double> &start,
         const tau::Point2d<double> &offset,
         std::shared_ptr<ShapeControl> control,
         const DerivedShape &startingShape)
@@ -167,14 +179,14 @@ public:
             "startingShape_");
     }
 
-    void ReportLogicalPosition(const tau::Point2d<int> &position) override
+    void ReportLogicalPosition(const tau::Point2d<double> &position) override
     {
         this->control_->SetValue(*this->MakeShape_(position));
     }
 
 protected:
     virtual std::shared_ptr<Shape> MakeShape_(
-        const tau::Point2d<int> &end) const = 0;
+        const tau::Point2d<double> &end) const = 0;
 
 protected:
     std::shared_ptr<ShapeControl> control_;
@@ -187,7 +199,7 @@ class DragCreateShape: public Drag
 {
 public:
     DragCreateShape(
-        const tau::Point2d<int> &start,
+        const tau::Point2d<double> &start,
         const ShapesControl &shapeList)
         :
         Drag(start, start),
@@ -214,7 +226,7 @@ public:
         }
     }
 
-    void ReportLogicalPosition(const tau::Point2d<int> &position) override
+    void ReportLogicalPosition(const tau::Point2d<double> &position) override
     {
         this->position_ = position;
     }
@@ -234,7 +246,7 @@ protected:
 
 protected:
     ShapesControl shapeList_;
-    tau::Point2d<int> position_;
+    tau::Point2d<double> position_;
 };
 
 
@@ -245,7 +257,7 @@ class DragReplaceShape: public Drag
 {
 public:
     DragReplaceShape(
-        const tau::Point2d<int> &start,
+        const tau::Point2d<double> &start,
         const ShapesControl &shapeList)
         :
         Drag(start, start),
@@ -272,7 +284,7 @@ public:
         }
     }
 
-    void ReportLogicalPosition(const tau::Point2d<int> &position) override
+    void ReportLogicalPosition(const tau::Point2d<double> &position) override
     {
         this->position_ = position;
     }
@@ -293,7 +305,7 @@ protected:
 
 protected:
     ShapesControl shapeList_;
-    tau::Point2d<int> position_;
+    tau::Point2d<double> position_;
 };
 
 
@@ -308,7 +320,7 @@ public:
 
     DragEditPoint(
         size_t index,
-        const tau::Point2d<int> &start,
+        const tau::Point2d<double> &start,
         std::shared_ptr<ShapeControl> control,
         const DerivedShape &startingShape,
         const PointsDouble &points)
@@ -342,7 +354,7 @@ template
 std::unique_ptr<Drag> ProcessMouseDown(
     std::shared_ptr<ShapeControl> shapeControl,
     DerivedShape &shape,
-    const tau::Point2d<int> &click,
+    const tau::Point2d<double> &click,
     const wxpex::Modifier &modifier,
     CursorControl cursor)
 {
@@ -392,7 +404,7 @@ std::unique_ptr<Drag> ProcessMouseDown(
     if constexpr (!std::is_same_v<DragLine, IgnoreMouse>)
     {
         auto lines = PolygonLines(points);
-        auto lineIndex = lines.Find(click.template Cast<double>(), 10.0);
+        auto lineIndex = lines.Find(click, 10.0);
 
         if (lineIndex)
         {
@@ -465,7 +477,7 @@ auto GetValueBase(List &list, size_t unordered)
 
 
 template<typename Create>
-class ShapeEditor: public SelectionBrain<ShapesControl>
+class ShapeEditor: public MouseSelectionBrain<ShapesControl>
 {
 public:
     static constexpr auto observerName = "ShapeEditor";
@@ -474,8 +486,9 @@ public:
         const std::vector<ShapesControl> &shapeLists,
         CanvasControl canvasControl)
         :
-        SelectionBrain(shapeLists),
+        MouseSelectionBrain(shapeLists),
         isEnabled_(true),
+        isProcessingAction_(false),
 
         canvasControl_(canvasControl),
 
@@ -563,7 +576,7 @@ public:
         }
     }
 
-    void OnLogicalPosition_(const tau::Point2d<int> &position)
+    void OnLogicalPosition_(const tau::Point2d<double> &position)
     {
         if (!this->isEnabled_)
         {
@@ -603,7 +616,7 @@ protected:
         auto click = this->canvasControl_.logicalPosition.Get();
         auto wasSelected = this->FindSelected();
 
-        auto found = this->FindClicked(click.template Cast<double>());
+        auto found = this->FindClicked(click);
 
         if (found)
         {
@@ -697,7 +710,7 @@ protected:
         if constexpr (HasRightClickMenu<Create>)
         {
             auto click = this->canvasControl_.logicalPosition.Get();
-            auto found = this->FindClicked(click.template Cast<double>());
+            auto found = this->FindClicked(click);
 
             bool foundHasValue = found.has_value();
 
@@ -707,6 +720,8 @@ protected:
                 {
                     // Toggle to the new selection.
                     GetNode(found->item).toggleSelect.Trigger();
+                    auto checkFound = this->FindSelected();
+                    assert(checkFound->unordered == found->unordered);
                 }
                 // else
                 // The user has right-clicked on an already selected shape.
@@ -732,6 +747,8 @@ protected:
 
             if (action)
             {
+                jive::ScopeFlag processingAction(this->isProcessingAction_);
+
                 auto found = this->FindSelected();
 
                 if (!found)
@@ -755,6 +772,11 @@ protected:
 
     void UpdateCursor_()
     {
+        if (this->isProcessingAction_)
+        {
+            return;
+        }
+
         if (this->IsDragging_())
         {
             return;
@@ -762,7 +784,7 @@ protected:
 
         auto modifier = this->canvasControl_.modifier.Get();
         auto click = this->canvasControl_.logicalPosition.Get();
-        auto found = this->FindClicked(click.template Cast<double>());
+        auto found = this->FindClicked(click);
 
         if (!found)
         {
@@ -822,7 +844,7 @@ protected:
         if (shape->HandlesEditLine())
         {
             auto lineIndex =
-                PolygonLines(points).Find(click.template Cast<double>(), 10.0);
+                PolygonLines(points).Find(click, 10.0);
 
             if (lineIndex)
             {
@@ -841,6 +863,7 @@ protected:
 
 
     bool isEnabled_;
+    bool isProcessingAction_;
 
     CanvasControl canvasControl_;
 

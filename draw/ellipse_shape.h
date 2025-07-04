@@ -21,9 +21,9 @@ public:
 
 protected:
     std::shared_ptr<Shape> MakeShape_(
-        const tau::Point2d<int> &end) const override
+        const tau::Point2d<double> &end) const override
     {
-        if (end == this->start_)
+        if (IsSamePoint(end, this->start_))
         {
             return std::make_shared<DerivedShape>(this->startingShape_);
         }
@@ -46,9 +46,9 @@ public:
 
 protected:
     std::shared_ptr<Shape> MakeShape_(
-        const tau::Point2d<int> &end) const override
+        const tau::Point2d<double> &end) const override
     {
-        if (end == this->start_)
+        if (IsSamePoint(end, this->start_))
         {
             return std::make_shared<DerivedShape>(this->startingShape_);
         }
@@ -58,7 +58,7 @@ protected:
         RotatePoint(
             adjusted,
             this->points_[this->index_],
-            end.template Cast<double>());
+            end);
 
         return std::make_shared<DerivedShape>(adjusted);
     }
@@ -94,7 +94,7 @@ struct EllipseShapeTemplates: public ShapeCommon<EllipseGroup, EllipseView>
 
         std::unique_ptr<Drag> ProcessMouseDown(
             std::shared_ptr<ShapeControl> control,
-            const tau::Point2d<int> &click,
+            const tau::Point2d<double> &click,
             const wxpex::Modifier &modifier,
             CursorControl cursor) override
         {
@@ -123,7 +123,7 @@ struct CreateEllipse
 {
     std::optional<ShapeValue> operator()(
         const Drag &drag,
-        const tau::Point2d<int> position)
+        const tau::Point2d<double> position)
     {
         auto size = drag.GetSize(position);
 

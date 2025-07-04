@@ -220,14 +220,14 @@ protected:
         event.Skip();
 
         this->control_.mousePosition.Set(
-            wxpex::ToPoint<int>(event.GetPosition()));
+            wxpex::ToPoint<double>(event.GetPosition()));
     }
 
     void OnLeftDown_(wxMouseEvent &event)
     {
         event.Skip();
         auto defer = pex::MakeDefer(this->control_);
-        defer.mousePosition.Set(wxpex::ToPoint<int>(event.GetPosition()));
+        defer.mousePosition.Set(wxpex::ToPoint<double>(event.GetPosition()));
         defer.mouseDown.Set(true);
     }
 
@@ -241,7 +241,7 @@ protected:
     {
         event.Skip();
         auto defer = pex::MakeDefer(this->control_);
-        defer.mousePosition.Set( wxpex::ToPoint<int>(event.GetPosition()));
+        defer.mousePosition.Set(wxpex::ToPoint<double>(event.GetPosition()));
         defer.rightMouseDown.Set(true);
     }
 
@@ -339,7 +339,7 @@ protected:
 #endif
     }
 
-    void OnViewPosition_(const Point &viewPosition)
+    void OnViewPosition_(const IntPoint &viewPosition)
     {
         // The view position has been set from the model.
         if (this->ignoreViewPosition_)
@@ -391,10 +391,10 @@ protected:
     jive::CountFlag<uint8_t> skipUpdateViewPosition_;
 
     using SizeEndpoint = pex::Endpoint<Canvas, SizeControl>;
-    using PositionEndpoint = pex::Endpoint<Canvas, PointControl>;
+    using PositionEndpoint = pex::Endpoint<Canvas, IntPointControl>;
     using ScaleEndpoint = pex::Endpoint<Canvas, ScaleControl>;
 
-    static_assert(pex::IsGroupNode<PointControl>);
+    static_assert(pex::IsGroupNode<IntPointControl>);
 
     SizeEndpoint virtualSizeEndpoint_;
     PositionEndpoint viewPositionEndpoint_;

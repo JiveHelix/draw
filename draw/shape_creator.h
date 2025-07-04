@@ -106,6 +106,38 @@ struct Actions
 std::ostream & operator<<(std::ostream &, Action);
 
 
+struct CrossActions
+{
+    using Type = Action;
+    static std::vector<Action> GetChoices();
+
+    using Converter = ActionConverter;
+
+    static std::string ToString(Action action)
+    {
+        return Converter::ToString(action);
+    }
+
+    static bool ProcessAction(Action action, ListedShape &)
+    {
+        switch (action)
+        {
+            case (Action::remove):
+                return true;
+                break;
+
+            case (Action::cancel):
+                break;
+
+            default:
+                throw std::logic_error("Not an action");
+        }
+
+        return false;
+    }
+};
+
+
 template<typename ShapeChoices, typename Actions>
 class SelectedMenu
 {
@@ -247,7 +279,7 @@ struct SelectedCrossChoices
 };
 
 
-using SelectedCrossMenu = SelectedMenu<SelectedCrossChoices, Actions>;
+using SelectedCrossMenu = SelectedMenu<SelectedCrossChoices, CrossActions>;
 
 
 
@@ -261,7 +293,7 @@ public:
 
     DragCreateSelected(
         const RightClickMenu &rightClickMenu,
-        const tau::Point2d<int> &start,
+        const tau::Point2d<double> &start,
         const ShapesControl &shapeList)
         :
         Drag(start, start),
@@ -285,14 +317,14 @@ public:
         }
     }
 
-    void ReportLogicalPosition(const tau::Point2d<int> &position) override
+    void ReportLogicalPosition(const tau::Point2d<double> &position) override
     {
         this->position_ = position;
     }
 
 protected:
     std::optional<ShapeValue> Create_(
-        const tau::Point2d<int> position)
+        const tau::Point2d<double> position)
     {
         switch (this->selectedShape_)
         {
@@ -327,13 +359,14 @@ protected:
             return;
         }
 
-        this->shapeList_.Prepend(*shape);
+        // this->shapeList_.Prepend(*shape);
+        this->shapeList_.Append(*shape);
     }
 
 protected:
     SelectedShape selectedShape_;
     ShapesControl shapeList_;
-    tau::Point2d<int> position_;
+    tau::Point2d<double> position_;
 };
 
 
@@ -358,8 +391,18 @@ using CrossCreatorBrain = draw::ShapeEditor<DragCreateSelectedCross>;
 } // end namespace draw
 
 
-extern template class draw::SelectedMenu<draw::SelectedShapeChoices, draw::Actions>;
+extern template class draw::SelectedMenu
+<
+    draw::SelectedShapeChoices,
+    draw::Actions
+>;
+
 extern template class draw::DragCreateSelected<draw::SelectedShapesMenu>;
 
-extern template class draw::SelectedMenu<draw::SelectedCrossChoices, draw::Actions>;
+extern template class draw::SelectedMenu
+<
+    draw::SelectedCrossChoices,
+    draw::CrossActions
+>;
+
 extern template class draw::DragCreateSelected<draw::SelectedCrossMenu>;

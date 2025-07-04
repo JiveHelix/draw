@@ -62,22 +62,35 @@ private:
 
         if (view.HasArea())
         {
-#ifdef CORRECT_PIXEL_CANVAS
-            correction = this->CorrectCenterPixel_(view);
+            if (!this->pixelData_)
+            {
+                // Clear the view
+                // On MSW, it has already been cleared.
+#ifndef __WXMSW__
+                context.SetBrush(wxBrush(*wxBLACK));
+                context.Clear();
 #endif
-            auto bitmap = wxBitmap(this->image_);
-            auto source = wxMemoryDC(bitmap);
+            }
+            else
+            {
 
-            context.StretchBlit(
-                view.target.topLeft.x,
-                view.target.topLeft.y,
-                view.target.size.width,
-                view.target.size.height,
-                &source,
-                view.source.topLeft.x,
-                view.source.topLeft.y,
-                view.source.size.width,
-                view.source.size.height);
+#ifdef CORRECT_PIXEL_CANVAS
+                correction = this->CorrectCenterPixel_(view);
+#endif
+                auto bitmap = wxBitmap(this->image_);
+                auto source = wxMemoryDC(bitmap);
+
+                context.StretchBlit(
+                    view.target.topLeft.x,
+                    view.target.topLeft.y,
+                    view.target.size.width,
+                    view.target.size.height,
+                    &source,
+                    view.source.topLeft.x,
+                    view.source.topLeft.y,
+                    view.source.size.width,
+                    view.source.size.height);
+            }
         }
 
         if (!hasShapes)

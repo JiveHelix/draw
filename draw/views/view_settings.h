@@ -39,13 +39,13 @@ struct ViewFields
 template<template<typename> typename T>
 struct ViewTemplate
 {
-    T<PointGroup> screenPosition;
+    T<IntPointGroup> screenPosition;
     T<SizeGroup> imageSize;
     T<SizeGroup> viewSize;
     T<SizeGroup> windowSize;
     T<SizeGroup> virtualSize;
-    T<PointGroup> viewPosition;
-    T<tau::Point2dGroup<double>> imageCenterPixel;
+    T<IntPointGroup> viewPosition;
+    T<PointGroup> imageCenterPixel;
     T<ScaleGroup> scale;
     T<bool> linkZoom;
     T<pex::MakeSignal> resetZoom;
@@ -60,7 +60,7 @@ struct ViewTemplate
 };
 
 
-Point GetMaximumViewPosition(const Size &viewSize, const Size &virtualSize);
+IntPoint GetMaximumViewPosition(const Size &viewSize, const Size &virtualSize);
 
 
 
@@ -75,12 +75,12 @@ struct ViewGroupTemplates_
         Plain()
             :
             GroupBase{
-                Point{0, 0},
+                IntPoint{0, 0},
                 Size{defaultWidth, defaultHeight},
                 Size{defaultWidth, defaultHeight},
                 Size{defaultWidth, defaultHeight},
                 Size{defaultWidth, defaultHeight},
-                Point{0, 0},
+                IntPoint{0, 0},
                 {double(defaultWidth) / 2.0, double(defaultHeight) / 2.0},
                 Scale(1.0, 1.0),
                 true,
@@ -97,7 +97,8 @@ struct ViewGroupTemplates_
         // Compute the coordinates of an unscaled point using current zoom.
         Point GetLogicalPosition(const Point &point) const
         {
-            return (point + this->viewPosition) / this->scale;
+            return (point + this->viewPosition.template Cast<double>())
+                / this->scale;
         }
     };
 
@@ -116,7 +117,7 @@ struct ViewGroupTemplates_
             pex::Endpoint<Model, decltype(SizeControl::width)>;
 
         using CoordinateEndpoint =
-            pex::Endpoint<Model, decltype(PointControl::x)>;
+            pex::Endpoint<Model, decltype(IntPointControl::x)>;
 
         CoordinateEndpoint viewPositionX_;
         CoordinateEndpoint viewPositionY_;
@@ -146,17 +147,18 @@ struct ViewGroupTemplates_
 
             viewPositionX_(
                 this,
-                PointControl(this->viewPosition).x,
+                IntPointControl(this->viewPosition).x,
                 &Model::OnViewPositionX_),
 
             viewPositionY_(
                 this,
-                PointControl(this->viewPosition).y,
+                IntPointControl(this->viewPosition).y,
                 &Model::OnViewPositionY_),
 
             scaleEndpoint_(
                 this,
                 ScaleControl(this->scale)),
+
             imageSizeEndpoint_(this, this->imageSize, &Model::OnImageSize_),
 
             viewSizeWidth_(
@@ -249,7 +251,7 @@ struct ViewGroupTemplates_
             pex::AccessReference(this->scale).DoNotify();
         }
 
-        Point GetCenteredViewPosition_(const Size &viewSize_)
+        IntPoint GetCenteredViewPosition_(const Size &viewSize_)
         {
             auto scaledCenterPixel =
                 this->imageCenterPixel.Get() * this->scale.Get();

@@ -20,7 +20,7 @@ public:
 
 protected:
     std::shared_ptr<Shape> MakeShape_(
-        const tau::Point2d<int> &end) const override
+        const tau::Point2d<double> &end) const override
     {
         if (end == this->start_)
         {
@@ -49,7 +49,7 @@ public:
 
 protected:
     std::shared_ptr<Shape> MakeShape_(
-        const tau::Point2d<int> &end) const override
+        const tau::Point2d<double> &end) const override
     {
         if (end == this->start_)
         {
@@ -76,7 +76,7 @@ public:
 
     DragPolygonLine(
         size_t index,
-        const tau::Point2d<int> &start,
+        const tau::Point2d<double> &start,
         const PolygonLines &lines,
         std::shared_ptr<ShapeControl> control,
         const DerivedShape &startingShape)
@@ -94,7 +94,7 @@ public:
 
 protected:
     std::shared_ptr<Shape> MakeShape_(
-        const tau::Point2d<int> &end) const override
+        const tau::Point2d<double> &end) const override
     {
         if (end == this->start_)
         {

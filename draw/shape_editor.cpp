@@ -6,7 +6,7 @@ namespace draw
 
 
 std::optional<PointsIterator> FindPoint(
-    const tau::Point2d<int> &click,
+    const tau::Point2d<double> &click,
     const PointsDouble &points)
 {
     auto found = std::find_if(

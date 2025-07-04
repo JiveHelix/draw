@@ -33,7 +33,7 @@ public:
 
     std::string GetAppName() const
     {
-        return "Polygon Demo";
+        return "Poly Demo";
     }
 
     // Assign a random color to each shape as it is created.

@@ -25,7 +25,7 @@ struct FoundItem
 
 
 template<typename ListControl>
-class SelectionBrain
+class SelectionBrain: Separator
 {
 public:
     using ListItem = typename ListControl::ListItem;
@@ -35,9 +35,11 @@ public:
     SelectionBrain(const std::vector<ListControl> &lists)
         :
         lists_(lists),
+        ignoreSelected_(false),
         countWillChangeEndpoints_(),
         countEndpoints_(),
         memberAddedEndpoints_(),
+        selectedEndpoints_(),
         selectConnections_(lists.size()),
         itemCreatedEndpoints_(lists.size())
     {
@@ -73,6 +75,12 @@ public:
                 this,
                 list.memberAdded,
                 &SelectionBrain::OnMemberAdded_,
+                i);
+
+            this->selectedEndpoints_.emplace_back(
+                this,
+                list.selected,
+                &SelectionBrain::OnSelected_,
                 i);
 
             this->OnCount_(list.count.Get(), i);
@@ -116,45 +124,6 @@ public:
         return {};
     }
 
-    std::optional<Found> FindClicked(
-        const tau::Point2d<int> &position)
-    {
-        auto listCount = this->lists_.size();
-
-        for (size_t listIndex = 0; listIndex < listCount; ++listIndex)
-        {
-            auto &list = this->lists_[listIndex];
-            auto count = list.count.Get();
-
-            for (size_t index = 0; index < count; ++index)
-            {
-                auto &shapeControl = list[index];
-                auto value = shapeControl.Get();
-                auto shape = value.GetValueBase();
-
-                if (shape->Contains(position, 10.0))
-                {
-                    if constexpr (pex::HasIndices<ListControl>)
-                    {
-                        return Found{
-                            listIndex,
-                            list.indices.at(index).Get(),
-                            shapeControl};
-                    }
-                    else
-                    {
-                        return Found{
-                            listIndex,
-                            index,
-                            shapeControl};
-                    }
-                }
-            }
-        }
-
-        return {};
-    }
-
     void DeleteSelected()
     {
         size_t listIndex;
@@ -182,6 +151,8 @@ public:
 private:
     void ToggleSelect_(size_t unordered, size_t listIndex)
     {
+        jive::ScopeFlag ignoreSelected(this->ignoreSelected_);
+
         for (size_t i = 0; i < this->lists_.size(); ++i)
         {
             auto wasSelected = this->lists_[i].selected.Get();
@@ -218,6 +189,8 @@ private:
 
     void DeselectAll_()
     {
+        jive::ScopeFlag ignoreSelected(this->ignoreSelected_);
+
         for (auto &list: this->lists_)
         {
             auto selectedIndex = list.selected.Get();
@@ -235,6 +208,8 @@ private:
     void Select_(size_t listIndex, size_t unorderedMemberIndex)
     {
         this->DeselectAll_();
+
+        jive::ScopeFlag ignoreSelected(this->ignoreSelected_);
 
         auto &list = this->lists_.at(listIndex);
         list.selected.Set(unorderedMemberIndex);
@@ -339,6 +314,34 @@ private:
         }
     }
 
+    void OnSelected_(std::optional<size_t> memberIndex, size_t listIndex)
+    {
+        if (this->ignoreSelected_)
+        {
+            return;
+        }
+
+        auto &list = this->lists_.at(listIndex);
+
+        if (memberIndex)
+        {
+            ::draw::GetNode(list, *memberIndex).isSelected.Set(true);
+        }
+        else
+        {
+            // Find the node that has isSelected set, and clear it.
+            for (size_t index = 0; index < list.size(); ++index)
+            {
+                auto &node = ::draw::GetNode(list, index);
+
+                if (node.isSelected.Get())
+                {
+                    node.isSelected.Set(false);
+                }
+            }
+        }
+    }
+
 protected:
     std::vector<ListControl> lists_;
 
@@ -364,9 +367,18 @@ private:
             decltype(&SelectionBrain::OnMemberAdded_)
         >;
 
+    using SelectedEndpoint =
+        pex::BoundEndpoint
+        <
+            typename pex::control::ListOptionalIndex,
+            decltype(&SelectionBrain::OnSelected_)
+        >;
+
+    bool ignoreSelected_;
     std::vector<CountWillChangeEndpoint> countWillChangeEndpoints_;
     std::vector<CountEndpoint> countEndpoints_;
     std::vector<MemberAddedEndpoint> memberAddedEndpoints_;
+    std::vector<SelectedEndpoint> selectedEndpoints_;
 
     using BoundSelection =
         pex::BoundEndpoint
@@ -387,6 +399,67 @@ private:
     std::vector<std::vector<ItemCreatedEndpoint>> itemCreatedEndpoints_;
 };
 
+
+template<typename ListControl>
+class MouseSelectionBrain: public SelectionBrain<ListControl>
+{
+public:
+    using Base = SelectionBrain<ListControl>;
+    using Found = typename Base::Found;
+
+    MouseSelectionBrain(const std::vector<ListControl> &lists)
+        :
+        Base(lists)
+    {
+
+    }
+
+    MouseSelectionBrain(ListControl list)
+        :
+        Base(std::vector<ListControl>({list}))
+    {
+
+    }
+
+    std::optional<Found> FindClicked(
+        const tau::Point2d<int> &position)
+    {
+        auto listCount = this->lists_.size();
+
+        for (size_t listIndex = 0; listIndex < listCount; ++listIndex)
+        {
+            auto &list = this->lists_[listIndex];
+            auto count = list.count.Get();
+
+            for (size_t index = 0; index < count; ++index)
+            {
+                auto &shapeControl = list[index];
+                auto value = shapeControl.Get();
+                auto shape = value.GetValueBase();
+
+                if (shape->Contains(position, 10.0))
+                {
+                    if constexpr (pex::HasIndices<ListControl>)
+                    {
+                        return Found{
+                            listIndex,
+                            list.indices.at(index).Get(),
+                            shapeControl};
+                    }
+                    else
+                    {
+                        return Found{
+                            listIndex,
+                            index,
+                            shapeControl};
+                    }
+                }
+            }
+        }
+
+        return {};
+    }
+};
 
 
 } // end namespace draw

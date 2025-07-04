@@ -46,7 +46,7 @@ struct CrossShapeTemplates: public ShapeCommon<CrossGroup, CrossView>
 
         std::unique_ptr<Drag> ProcessMouseDown(
             std::shared_ptr<ShapeControl> control,
-            const tau::Point2d<int> &click,
+            const tau::Point2d<double> &click,
             const wxpex::Modifier &modifier,
             CursorControl cursor) override
         {
@@ -75,7 +75,7 @@ struct CreateCross
 {
     std::optional<ShapeValue> operator()(
         const Drag &,
-        const tau::Point2d<int> position)
+        const tau::Point2d<double> position)
     {
         auto cross = Cross{};
         cross.center = position;

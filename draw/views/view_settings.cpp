@@ -13,9 +13,9 @@ namespace draw
 {
 
 
-Point GetMaximumViewPosition(const Size &viewSize, const Size &virtualSize)
+IntPoint GetMaximumViewPosition(const Size &viewSize, const Size &virtualSize)
 {
-    Point maximumPosition = (virtualSize - viewSize).ToPoint2d();
+    IntPoint maximumPosition = (virtualSize - viewSize).ToPoint2d();
     maximumPosition.x = std::max(0, maximumPosition.x);
     maximumPosition.y = std::max(0, maximumPosition.y);
 

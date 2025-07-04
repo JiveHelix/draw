@@ -30,7 +30,7 @@ public:
 
 protected:
     std::shared_ptr<Shape> MakeShape_(
-        const tau::Point2d<int> &end) const override
+        const tau::Point2d<double> &end) const override
     {
         if (end == this->start_)
         {
@@ -70,7 +70,7 @@ public:
 
 protected:
     std::shared_ptr<Shape> MakeShape_(
-        const tau::Point2d<int> &end) const override
+        const tau::Point2d<double> &end) const override
     {
         if (end == this->start_)
         {
@@ -106,7 +106,7 @@ public:
 
     DragRegularPolygonLine(
         size_t index,
-        const tau::Point2d<int> &start,
+        const tau::Point2d<double> &start,
         const PolygonLines &lines,
         std::shared_ptr<ShapeControl> control,
         const DerivedShape &startingShape)
@@ -124,7 +124,7 @@ public:
 
 protected:
     std::shared_ptr<Shape> MakeShape_(
-        const tau::Point2d<int> &end) const override
+        const tau::Point2d<double> &end) const override
     {
         if (end == this->start_)
         {
@@ -200,7 +200,7 @@ struct RegularPolygonShapeTemplates
 
         std::unique_ptr<Drag> ProcessMouseDown(
             std::shared_ptr<ShapeControl> control,
-            const tau::Point2d<int> &click,
+            const tau::Point2d<double> &click,
             const wxpex::Modifier &modifier,
             CursorControl cursor) override
         {
@@ -229,7 +229,7 @@ struct CreateRegularPolygon
 {
     std::optional<ShapeValue> operator()(
         const Drag &drag,
-        const tau::Point2d<int> position)
+        const tau::Point2d<double> position)
     {
         auto magnitude = drag.GetMagnitude(position);
 
