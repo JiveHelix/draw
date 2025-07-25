@@ -120,19 +120,12 @@ struct RegularPolygonCustom
             ignore_(false),
 
             sideLengthEndpoint_(
-                this,
-                this->sideLength,
+                USE_REGISTER_PEX_NAME(this, "RegularPolygonModel"),
+                *USE_REGISTER_PEX_PARENT(sideLength),
                 &Model::OnSideLength_),
 
-            radiusEndpoint_(
-                this,
-                this->radius,
-                &Model::OnRadius_),
-
-            sidesEndpoint_(
-                this,
-                this->sides,
-                &Model::OnSides_)
+            radiusEndpoint_(this, this->radius, &Model::OnRadius_),
+            sidesEndpoint_(this, this->sides, &Model::OnSides_)
         {
             jive::ScopeFlag ignore(this->ignore_);
 
@@ -188,6 +181,8 @@ struct RegularPolygonCustom
     template<typename Base>
     struct Control: public Base
     {
+        using Base::Base;
+
         Control()
             :
             Base(),
@@ -248,5 +243,5 @@ extern template struct pex::Group
     <
         draw::RegularPolygonFields,
         draw::RegularPolygonTemplate,
-        pex::PlainT<draw::RegularPolygon>
+        draw::RegularPolygonCustom
     >;

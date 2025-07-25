@@ -80,11 +80,7 @@ public:
         }
 
         REGISTER_PEX_NAME(this, "DragShape");
-
-        REGISTER_PEX_NAME_WITH_PARENT(
-            this->startingShape_.get(),
-            this,
-            "startingShape_");
+        REGISTER_PEX_PARENT(startingShape_);
     }
 
     DragShape(
@@ -98,11 +94,7 @@ public:
         startingShape_(startingShape)
     {
         REGISTER_PEX_NAME(this, "DragShape");
-
-        REGISTER_PEX_NAME_WITH_PARENT(
-            &this->startingShape_,
-            this,
-            "startingShape_");
+        REGISTER_PEX_PARENT(startingShape_);
     }
 
     void ReportLogicalPosition(const tau::Point2d<double> &position) override
@@ -150,10 +142,7 @@ public:
             this,
             "control_");
 
-        REGISTER_PEX_NAME_WITH_PARENT(
-            &this->startingShape_,
-            this,
-            "startingShape_");
+        REGISTER_PEX_PARENT(startingShape_);
     }
 
     DragEditShape(
@@ -173,10 +162,7 @@ public:
             this,
             "control_");
 
-        REGISTER_PEX_NAME_WITH_PARENT(
-            &this->startingShape_,
-            this,
-            "startingShape_");
+        REGISTER_PEX_PARENT(startingShape_);
     }
 
     void ReportLogicalPosition(const tau::Point2d<double> &position) override
@@ -207,11 +193,7 @@ public:
         position_(start)
     {
         REGISTER_PEX_NAME(this, "DragCreateShape");
-
-        REGISTER_PEX_NAME_WITH_PARENT(
-            &this->shapeList_,
-            this,
-            "shapeList_");
+        REGISTER_PEX_PARENT(shapeList_);
     }
 
     virtual ~DragCreateShape()
@@ -265,11 +247,7 @@ public:
         position_(start)
     {
         REGISTER_PEX_NAME(this, "DragReplaceShape");
-
-        REGISTER_PEX_NAME_WITH_PARENT(
-            &this->shapeList_,
-            this,
-            "shapeList_");
+        REGISTER_PEX_PARENT(shapeList_);
     }
 
     virtual ~DragReplaceShape()
@@ -482,6 +460,8 @@ class ShapeEditor: public MouseSelectionBrain<ShapesControl>
 public:
     static constexpr auto observerName = "ShapeEditor";
 
+    static_assert(pex::HasIndices<ShapesControl>);
+
     ShapeEditor(
         const std::vector<ShapesControl> &shapeLists,
         CanvasControl canvasControl)
@@ -629,7 +609,7 @@ protected:
             }
 
             // else
-            // The user has right-clicked on an already selected shape.
+            // The user has left-clicked on an already selected shape.
             // Leave it selected.
 
             this->drag_ = found->item.Get().GetValueBase()->ProcessMouseDown(
@@ -739,11 +719,11 @@ protected:
         }
     }
 
-    void OnMenuId_(wxWindowID id)
+    void OnMenuId_(wxWindowID windowId)
     {
         if constexpr (HasRightClickMenu<Create>)
         {
-            auto action = this->rightClickMenu_.GetAction(id);
+            auto action = this->rightClickMenu_.GetAction(windowId);
 
             if (action)
             {
@@ -765,7 +745,7 @@ protected:
             }
             else
             {
-                this->rightClickMenu_.ReportId(id);
+                this->rightClickMenu_.ReportId(windowId);
             }
         }
     }

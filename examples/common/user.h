@@ -42,7 +42,22 @@ struct UserTemplate
 };
 
 
-using UserGroup = pex::Group<UserFields, UserTemplate>;
+struct UserCustom
+{
+    template<typename Base>
+    struct Model: public Base
+    {
+        Model()
+            :
+            Base{}
+        {
+            REGISTER_PEX_NAME(this, "UserModel");
+        }
+    };
+};
+
+
+using UserGroup = pex::Group<UserFields, UserTemplate, UserCustom>;
 using UserControl = typename UserGroup::Control;
 using UserModel = typename UserGroup::Model;
 

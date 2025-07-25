@@ -119,13 +119,13 @@ struct QuadGroupTemplates_
         QuadPoints GetPoints_(double scale_) const;
     };
 
-    template<typename GroupBase>
-    struct Model: public GroupBase
+    template<typename Base>
+    struct Model: public Base
     {
     public:
         Model()
             :
-            GroupBase(),
+            Base(),
             resetEndpoint_(this, this->reset, &Model::OnReset_)
         {
 
@@ -138,11 +138,11 @@ struct QuadGroupTemplates_
         }
 
     private:
-        using ResetControl = decltype(GroupBase::ControlType::reset);
+        using ResetControl = decltype(Base::ControlType::reset);
         pex::Endpoint<Model, ResetControl> resetEndpoint_;
     };
-
 };
+
 
 using QuadGroup = pex::Group
 <

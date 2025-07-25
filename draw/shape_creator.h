@@ -3,6 +3,7 @@
 
 #include <draw/ellipse_shape.h>
 #include <draw/polygon_shape.h>
+#include <draw/regular_polygon_shape.h>
 #include <draw/quad_shape.h>
 #include <draw/cross_shape.h>
 #include <draw/shape_editor.h>
@@ -17,6 +18,7 @@ enum class SelectedShape
 {
     ellipse,
     polygon,
+    regularPolygon,
     quad,
     cross,
     none
@@ -50,8 +52,10 @@ std::ostream & operator<<(std::ostream &, SelectedShape);
 
 enum class Action
 {
+    moveToTop,
     moveUp,
     moveDown,
+    moveToBottom,
     remove,
     cancel
 };
@@ -79,12 +83,20 @@ struct Actions
     {
         switch (action)
         {
+            case (Action::moveToTop):
+                pex::GetOrder(shapeControl).moveToTop.Trigger();
+                break;
+
             case (Action::moveUp):
                 pex::GetOrder(shapeControl).moveUp.Trigger();
                 break;
 
             case (Action::moveDown):
                 pex::GetOrder(shapeControl).moveDown.Trigger();
+                break;
+
+            case (Action::moveToBottom):
+                pex::GetOrder(shapeControl).moveToBottom.Trigger();
                 break;
 
             case (Action::remove):
@@ -207,24 +219,24 @@ public:
         return Actions::ProcessAction(action, shapeControl);
     }
 
-    bool IsActionId(wxWindowID id) const
+    bool IsActionId(wxWindowID windowId) const
     {
-        return this->actionsById_.count(id);
+        return this->actionsById_.count(windowId);
     }
 
-    std::optional<ActionType> GetAction(wxWindowID id) const
+    std::optional<ActionType> GetAction(wxWindowID windowId) const
     {
-        if (this->IsActionId(id))
+        if (this->IsActionId(windowId))
         {
-            return this->actionsById_.at(id);
+            return this->actionsById_.at(windowId);
         }
 
         return {};
     }
 
-    void ReportId(wxWindowID id)
+    void ReportId(wxWindowID windowId)
     {
-        if (this->IsActionId(id) || id == wxID_NONE)
+        if (this->IsActionId(windowId) || windowId == wxID_NONE)
         {
             return;
         }
@@ -238,14 +250,14 @@ public:
 
         menuItem->Check(false);
 
-        menuItem = this->creationMenu_.FindItem(id);
+        menuItem = this->creationMenu_.FindItem(windowId);
 
         if (menuItem == NULL)
         {
             throw std::logic_error("Selected menu item not found");
         }
 
-        this->selectedId_ = id;
+        this->selectedId_ = windowId;
         menuItem->Check(true);
     }
 
@@ -283,8 +295,6 @@ using SelectedCrossMenu = SelectedMenu<SelectedCrossChoices, CrossActions>;
 
 
 
-
-
 template<typename RightClickMenu_>
 class DragCreateSelected: public Drag
 {
@@ -302,7 +312,7 @@ public:
         position_(start)
     {
         REGISTER_PEX_NAME(this, "DragCreateSelected");
-        REGISTER_PEX_NAME_WITH_PARENT(&this->shapeList_, this, "shapeList_");
+        REGISTER_PEX_PARENT(shapeList_);
     }
 
     virtual ~DragCreateSelected()
@@ -333,6 +343,9 @@ protected:
 
             case (SelectedShape::polygon):
                 return CreatePolygon{}(*this, position);
+
+            case (SelectedShape::regularPolygon):
+                return CreateRegularPolygon{}(*this, position);
 
             case (SelectedShape::quad):
                 return CreateQuad{}(*this, position);

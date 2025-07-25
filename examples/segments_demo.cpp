@@ -293,12 +293,6 @@ struct DemoCustom
 
         void CreateFunctions_()
         {
-            // using Period = std::chrono::duration<double, std::micro>;
-            // using Clock = std::chrono::steady_clock;
-            // using TimePoint = std::chrono::time_point<Clock, Period>;
-
-            // TimePoint start = Clock::now();
-
             if (this->settings.isLogarithmic.Get())
             {
                 this->CreateLogarithmicFunctions_();
@@ -307,11 +301,6 @@ struct DemoCustom
             {
                 this->CreateLinearFunctions_();
             }
-
-            // TimePoint end = Clock::now();
-
-            // std::cout << "Created functions: "
-            //    << (end - start).count() << " us\n";
         }
 
         void OnFunctionFrequency_(double frequency, size_t index)
@@ -441,6 +430,8 @@ using DemoModel = typename DemoGroup::Model;
 using DemoControl = typename DemoGroup::Control;
 
 using FunctionsControl = decltype(DemoControl::functions);
+using FunctionAddedControl = typename FunctionsControl::MemberAdded;
+using FunctionWillRemoveControl = typename FunctionsControl::MemberWillRemove;
 
 
 class SettingsView: public wxPanel
@@ -656,15 +647,15 @@ public:
             this->userControl_.pixelView.canvas.viewSettings.imageSize,
             &DemoBrain::OnImageSize_),
 
-        countWillChangeEndpoint_(
+        functionWillRemoveEndpoint_(
             this,
-            this->demoModel_.functions.countWillChange,
-            &DemoBrain::OnCountWillChange_),
+            this->demoModel_.functions.memberWillRemove,
+            &DemoBrain::OnFunctionWillRemove_),
 
-        countEndpoint_(
+        functionAddedEndpoint_(
             this,
-            this->demoModel_.functions.count,
-            &DemoBrain::OnCount_),
+            this->demoModel_.functions.memberAdded,
+            &DemoBrain::OnFunctionAdded_),
 
         pointCountEndpoint_(
             this,
@@ -679,7 +670,9 @@ public:
             &DemoBrain::OnFunctionList_)
 
     {
-        this->OnCount_(this->demoModel_.functions.count.Get());
+        auto count = this->demoModel_.functions.count.Get();
+        this->functionPoints_.resize(count);
+        this->CreateFunctionEndpoints_(count);
     }
 
     std::string GetAppName() const
@@ -702,14 +695,6 @@ public:
 
     void Display()
     {
-        // std::cout << "Display..." << std::endl;
-
-        // using Period = std::chrono::duration<double, std::micro>;
-        // using Clock = std::chrono::steady_clock;
-        // using TimePoint = std::chrono::time_point<Clock, Period>;
-
-        // TimePoint start = Clock::now();
-
         auto shapes = draw::Shapes(this->shapesId_.Get());
 
         size_t i = 0;
@@ -727,11 +712,6 @@ public:
         }
 
         this->userControl_.pixelView.asyncShapes.Set(shapes);
-
-        // TimePoint end = Clock::now();
-
-        // std::cout << "Created shapes: "
-        //    << (end - start).count() << " us\n";
     }
 
     void Shutdown()
@@ -805,7 +785,6 @@ private:
 
     void OnFunctionList_()
     {
-        // std::cout << "OnFunctionList_ Display" << std::endl;
         this->Display();
     }
 
@@ -833,21 +812,34 @@ private:
 
         for (auto &function: this->demoControl_.functions)
         {
-            // std::cout << "ComputeFunctions " << index << std::endl;
             this->OnFunction_(function.Get(), index++);
         }
     }
 
-    void OnCountWillChange_()
+    void OnFunctionWillRemove_(const std::optional<size_t> &index)
     {
-        this->functionEndpoints_.clear();
+        if (!index)
+        {
+            return;
+        }
+
+        this->functionEndpoints_.erase(
+            jive::SafeEraseIterator(this->functionEndpoints_, *index));
     }
 
-    void OnCount_(size_t count)
+    void OnFunctionAdded_(const std::optional<size_t> &index)
     {
-        // std::cout << "OnCount_ " << count << std::endl;
-        this->functionPoints_.resize(count);
-        this->CreateFunctionEndpoints_(count);
+        if (!index)
+        {
+            return;
+        }
+
+        this->functionEndpoints_.emplace(
+            jive::SafeInsertIterator(this->functionEndpoints_, *index),
+            this,
+            this->demoModel_.functions[*index],
+            &DemoBrain::OnFunction_,
+            *index);
     }
 
     void OnPointCount_(size_t)
@@ -864,15 +856,15 @@ private:
 
     using ImageSizeEndpoint = pex::Endpoint<DemoBrain, draw::SizeControl>;
 
-    using CountWillChangeEndpoint =
-        pex::Endpoint<DemoBrain, pex::control::Signal<>>;
+    using FunctionWillRemoveEndpoint =
+        pex::Endpoint<DemoBrain, FunctionWillRemoveControl>;
 
-    using CountEndpoint =
-        pex::Endpoint<DemoBrain, pex::control::ListCount>;
+    using FunctionAddedEndpoint =
+        pex::Endpoint<DemoBrain, FunctionAddedControl>;
 
     ImageSizeEndpoint imageSizeEndpoint_;
-    CountWillChangeEndpoint countWillChangeEndpoint_;
-    CountEndpoint countEndpoint_;
+    FunctionWillRemoveEndpoint functionWillRemoveEndpoint_;
+    FunctionAddedEndpoint functionAddedEndpoint_;
 
     using PointCountEndpoint =
         pex::Endpoint<DemoBrain, decltype(SettingsControl::pointCount)>;

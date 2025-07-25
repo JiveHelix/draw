@@ -24,7 +24,21 @@ NodeSettingsView::NodeSettingsView(
     control_(control),
     highlightEndpoint_()
 {
+    REGISTER_PEX_NAME(this, "NodeSettingsView");
+
+    if (this->control_)
+    {
+        REGISTER_PEX_NAME_WITH_PARENT(&(*this->control_), this, "control_");
+    }
+
     this->InitializeHighlight_();
+}
+
+
+void NodeSettingsView::WindowWillBeDestroyed()
+{
+    this->highlightEndpoint_.Disconnect();
+    this->control_.reset();
 }
 
 
@@ -56,9 +70,11 @@ void NodeSettingsView::InitializeHighlight_()
 void NodeSettingsView::OnLeftDown_(wxMouseEvent &event)
 {
     event.Skip();
-    assert(this->control_);
 
-    this->control_->toggleSelect.Trigger();
+    if (this->control_)
+    {
+        this->control_->toggleSelect.Trigger();
+    }
 }
 
 
@@ -93,6 +109,14 @@ CollapsibleNodeSettingsView::CollapsibleNodeSettingsView(
 }
 
 
+bool CollapsibleNodeSettingsView::Destroy()
+{
+    this->nodeSettingsView_.WindowWillBeDestroyed();
+
+    return this->wxpex::Collapsible::Destroy();
+}
+
+
 CollapsibleNodeSettingsView::CollapsibleNodeSettingsView(
     wxWindow *parent,
     const std::string &nodeName,
@@ -114,6 +138,14 @@ BoxedNodeSettingsView::BoxedNodeSettingsView(
     nodeSettingsView_(this, control)
 {
 
+}
+
+
+bool BoxedNodeSettingsView::Destroy()
+{
+    this->nodeSettingsView_.WindowWillBeDestroyed();
+
+    return this->wxpex::StaticBox::Destroy();
 }
 
 

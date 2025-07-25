@@ -103,7 +103,6 @@ public:
 
     void LoadPng(const draw::GrayPng<PngPixel> &png)
     {
-        std::cout << "LoadPng" << std::endl;
         this->pngIsLoaded_ = false;
         this->pngData_ = png.GetValues().template cast<int32_t>();
 

@@ -57,11 +57,17 @@ struct Ellipse: public EllipseTemplate<pex::Identity>
 };
 
 
+struct EllipseCustom
+{
+    using Plain = Ellipse;
+};
+
+
 using EllipseGroup = pex::Group
 <
     EllipseFields,
     EllipseTemplate,
-    pex::PlainT<Ellipse>
+    EllipseCustom
 >;
 
 using EllipseModel = typename EllipseGroup::Model;
@@ -80,5 +86,5 @@ extern template struct pex::Group
 <
     draw::EllipseFields,
     draw::EllipseTemplate,
-    pex::PlainT<draw::Ellipse>
+    draw::EllipseCustom
 >;

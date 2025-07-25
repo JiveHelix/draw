@@ -50,22 +50,44 @@ struct ShapeListCustom
         Model()
             :
             Base(),
-            countEndpoint_(this, this->shapes.count, &Model::OnShapesCount_),
+
+            shapeAddedEndpoint_(
+                this,
+                this->shapes.memberAdded,
+                &Model::OnShapeAdded_),
+
+            shapeRemovedEndpoint_(
+                this,
+                this->shapes.memberRemoved,
+                &Model::OnShapeRemoved_),
 
             indicesEndpoint_(
                 this,
                 this->shapes.indices,
                 &Model::OnShapesIndices_)
         {
-            // REGISTER_PEX_NAME(this, "ShapeListModel");
-            // REGISTER_PEX_NAME_WITH_PARENT(&this->shapes, this, "shapes");
-            this->OnShapesCount_(this->shapes.count.Get());
+            this->shapesDisplay.count.Set(this->shapes.count.Get());
         }
 
     private:
-        void OnShapesCount_(size_t value)
+        void OnShapeAdded_(const std::optional<size_t> &index)
         {
-            this->shapesDisplay.count.Set(value);
+            if (!index)
+            {
+                return;
+            }
+
+            this->shapesDisplay.Insert(*index, ShapeDisplay{});
+        }
+
+        void OnShapeRemoved_(const std::optional<size_t> &index)
+        {
+            if (!index)
+            {
+                return;
+            }
+
+            this->shapesDisplay.Erase(*index);
         }
 
         void OnShapesIndices_(const std::vector<size_t> &indices)
@@ -76,6 +98,15 @@ struct ShapeListCustom
     private:
         using CountEndpoint = pex::Endpoint<Model, pex::model::ListCount>;
 
+        using ShapesModel = decltype(Base::shapes);
+        using MemberAdded = typename ShapesModel::MemberAdded;
+        using MemberRemoved = typename ShapesModel::MemberRemoved;
+        using ShapeAddedEndpoint = pex::Endpoint<Model, MemberAdded>;
+        using ShapeRemovedEndpoint = pex::Endpoint<Model, MemberRemoved>;
+
+        ShapeAddedEndpoint shapeAddedEndpoint_;
+        ShapeRemovedEndpoint shapeRemovedEndpoint_;
+
         using IndicesEndpoint =
             pex::Endpoint
             <
@@ -83,7 +114,6 @@ struct ShapeListCustom
                 decltype(OrderedShapesControl::indices)
             >;
 
-        CountEndpoint countEndpoint_;
         IndicesEndpoint indicesEndpoint_;
     };
 };

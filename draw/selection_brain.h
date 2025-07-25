@@ -1,6 +1,7 @@
 #pragma once
 
 #include <pex/ordered_list.h>
+#include <pex/indexed_map.h>
 #include "draw/node_settings.h"
 
 
@@ -9,7 +10,7 @@ namespace draw
 
 
 template<typename List>
-NodeSettingsControl & GetNode(List &list, size_t unordered)
+auto & GetNode(List &list, size_t unordered)
 {
     return GetNode(pex::GetUnordered(list, unordered));
 }
@@ -36,54 +37,49 @@ public:
         :
         lists_(lists),
         ignoreSelected_(false),
-        countWillChangeEndpoints_(),
-        countEndpoints_(),
+        memberWillRemoveEndpoints_(),
         memberAddedEndpoints_(),
         selectedEndpoints_(),
         selectConnections_(lists.size()),
         itemCreatedEndpoints_(lists.size())
     {
         REGISTER_PEX_NAME(this, "SelectionBrain");
+        REGISTER_PEX_PARENT(lists_);
 
-        REGISTER_PEX_NAME_WITH_PARENT(
-            &this->lists_,
-            this,
-            "lists_");
-
-        for (size_t i = 0; i < this->lists_.size(); ++i)
+        for (size_t listIndex = 0; listIndex < this->lists_.size(); ++listIndex)
         {
-            auto &list = this->lists_[i];
+            auto &list = this->lists_[listIndex];
 
             REGISTER_PEX_NAME_WITH_PARENT(
                 &list,
                 &this->lists_,
-                fmt::format("list {}", i));
+                fmt::format("list {}", listIndex));
 
-            this->countWillChangeEndpoints_.emplace_back(
+            this->memberWillRemoveEndpoints_.emplace_back(
                 this,
-                list.countWillChange,
-                &SelectionBrain::OnCountWillChange_,
-                i);
+                list.memberWillRemove,
+                &SelectionBrain::OnMemberWillRemove_,
+                listIndex);
 
-            this->countEndpoints_.emplace_back(
+            this->memberRemovedEndpoints_.emplace_back(
                 this,
-                list.count,
-                &SelectionBrain::OnCount_,
-                i);
+                list.memberRemoved,
+                &SelectionBrain::OnMemberRemoved_,
+                listIndex);
 
             this->memberAddedEndpoints_.emplace_back(
                 this,
                 list.memberAdded,
                 &SelectionBrain::OnMemberAdded_,
-                i);
+                listIndex);
 
             this->selectedEndpoints_.emplace_back(
                 this,
                 list.selected,
                 &SelectionBrain::OnSelected_,
-                i);
+                listIndex);
 
-            this->OnCount_(list.count.Get(), i);
+            this->InitializeConnections_(list.count.Get(), listIndex);
         }
     }
 
@@ -92,11 +88,6 @@ public:
         SelectionBrain(std::vector<ListControl>({list}))
     {
 
-    }
-
-    ~SelectionBrain()
-    {
-        UNREGISTER_PEX_NAME(this, "SelectionBrain");
     }
 
     ListControl & GetListControl()
@@ -115,9 +106,9 @@ public:
                 auto unordered = *list.selected.Get();
 
                 return Found{
-                        i,
-                        unordered,
-                        pex::GetUnordered(list, unordered)};
+                    i,
+                    unordered,
+                    pex::GetUnordered(list, unordered)};
             }
         }
 
@@ -155,7 +146,8 @@ private:
 
         for (size_t i = 0; i < this->lists_.size(); ++i)
         {
-            auto wasSelected = this->lists_[i].selected.Get();
+            auto &list = this->lists_[i];
+            auto wasSelected = list.selected.Get();
 
             bool sameSelection =
                 wasSelected
@@ -165,26 +157,21 @@ private:
             if (wasSelected)
             {
                 // Unselect the previous selection.
-                this->GetNode_(i, *wasSelected).isSelected.Set(false);
-                this->lists_[i].selected.Set({});
+                draw::GetNode(list, *wasSelected).isSelected.Set(false);
+                list.selected.Set({});
             }
 
             if (sameSelection)
             {
                 // Leave the selection set to none.
+
                 return;
             }
         }
 
         auto &list = this->lists_.at(listIndex);
         list.selected.Set(unordered);
-        this->GetNode_(listIndex, unordered).isSelected.Set(true);
-    }
-
-
-    NodeSettingsControl & GetNode_(size_t listIndex, size_t nodeIndex)
-    {
-        return ::draw::GetNode(this->lists_.at(listIndex), nodeIndex);
+        ::draw::GetNode(list, unordered).isSelected.Set(true);
     }
 
     void DeselectAll_()
@@ -217,99 +204,191 @@ private:
         ::draw::GetNode(list, unorderedMemberIndex).isSelected.Set(true);
     }
 
-    void ClearListConnections_(size_t listIndex)
+    void OnMemberWillRemove_(
+        const std::optional<size_t> &index,
+        size_t listIndex)
     {
-        this->selectConnections_.at(listIndex).clear();
-        this->itemCreatedEndpoints_.at(listIndex).clear();
+        if (!index)
+        {
+            return;
+        }
+
+        this->ClearConnections_(*index, listIndex);
     }
 
-    void OnCountWillChange_(size_t listIndex)
+    void ClearConnections_(
+        size_t firstToClear,
+        size_t listIndex)
     {
-        this->ClearListConnections_(listIndex);
+        auto &selectConnections = this->selectConnections_.at(listIndex);
+        auto &itemCreatedEndpoints = this->itemCreatedEndpoints_.at(listIndex);
+
+        pex::ClearInvalidated(firstToClear, selectConnections);
+        pex::ClearInvalidated(firstToClear, itemCreatedEndpoints);
+    }
+
+    void RestoreConnections_(size_t firstToRestore, size_t listIndex)
+    {
+        auto &list = this->lists_.at(listIndex);
+        auto &connections = this->selectConnections_.at(listIndex);
+        auto &itemCreated = this->itemCreatedEndpoints_.at(listIndex);
+
+        for (
+            size_t createIndex = firstToRestore;
+            createIndex < list.count.Get();
+            ++createIndex)
+        {
+            this->CreateConnection_(
+                createIndex,
+                listIndex,
+                connections,
+                list,
+                itemCreated);
+        }
+    }
+
+    void OnMemberRemoved_(
+        const std::optional<size_t> &index,
+        size_t listIndex)
+    {
+        if (!index)
+        {
+            return;
+        }
+
+        this->RestoreConnections_(*index, listIndex);
     }
 
     void OnItemCreated_(size_t index, size_t listIndex)
     {
-        this->selectConnections_.at(listIndex).emplace_back(
+        auto &list = this->lists_.at(listIndex);
+
+        [[maybe_unused]] auto result = this->selectConnections_.at(listIndex).try_emplace(
+            index,
             this,
-            this->GetNode_(listIndex, index).toggleSelect,
+            ::draw::GetNode(list, index).toggleSelect,
             &SelectionBrain::ToggleSelect_,
             index,
             listIndex);
+
+        // We expect the key 'index' to not already be in the map.
+        assert(result.second);
     }
 
-    void OnCount_(size_t count_, size_t listIndex)
+    void CreateConnection_(
+        size_t index,
+        size_t listIndex,
+        auto &selectConnections,
+        auto &list,
+        [[maybe_unused]] auto &itemCreatedEndpoints)
     {
-        auto &connections = this->selectConnections_.at(listIndex);
-
-        if (connections.size() == count_)
-        {
-            // This does not represent a change in size.
-            return;
-        }
-
-        if (!this->selectConnections_.at(listIndex).empty())
-        {
-            // Any change in size must be preceded by a call to
-            // countWillChange.
-            throw std::logic_error("Unexpected change in count");
-        }
-
-        this->selectConnections_.at(listIndex).reserve(count_);
-
-        auto &itemCreatedEndpoints =
-            this->itemCreatedEndpoints_.at(listIndex);
-
         if constexpr (pex::HasGetVirtual<ListItem>)
         {
-            itemCreatedEndpoints.reserve(count_);
-
             // Connect any list items that exist.
-            auto &list = this->lists_.at(listIndex);
+            auto itemBase = pex::GetUnordered(list, index).GetVirtual();
 
-            for (size_t i = 0; i < count_; ++i)
+            if (itemBase)
             {
-                auto itemBase = pex::GetUnordered(list, i).GetVirtual();
+                // The derived type exists.
+                // Connect to toggleSelect.
+                [[maybe_unused]] auto result = selectConnections.try_emplace(
+                    index,
+                    this,
+                    itemBase->GetNode().toggleSelect,
+                    &SelectionBrain::ToggleSelect_,
+                    index,
+                    listIndex);
 
-                if (itemBase)
-                {
-                    this->selectConnections_.at(listIndex).emplace_back(
+                assert(result.second);
+            }
+            else
+            {
+                // The item has been created,
+                // but the derived object does not exist yet.
+                // Register for the item created notification so we can
+                // connect to toggleSelect later.
+                [[maybe_unused]] auto result =
+                    itemCreatedEndpoints.try_emplace(
+                        index,
                         this,
-                        itemBase->GetNode().toggleSelect,
-                        &SelectionBrain::ToggleSelect_,
-                        i,
-                        listIndex);
-
-                }
-                else
-                {
-                    itemCreatedEndpoints.emplace_back(
-                        this,
-                        pex::GetUnordered(list, i).baseCreated,
+                        pex::GetUnordered(list, index).baseCreated,
                         &SelectionBrain::OnItemCreated_,
-                        i,
+                        index,
                         listIndex);
-                }
+
+                assert(result.second);
             }
         }
         else
         {
-            for (size_t i = 0; i < count_; ++i)
-            {
-                this->selectConnections_.at(listIndex).emplace_back(
-                    this,
-                    this->GetNode_(listIndex, i).toggleSelect,
-                    &SelectionBrain::ToggleSelect_,
-                    i,
-                    listIndex);
-            }
+            // Items in list are not virtual.
+            // They already exist.
+            [[maybe_unused]] auto result = selectConnections.try_emplace(
+                index,
+                this,
+                ::draw::GetNode(list, index).toggleSelect,
+                &SelectionBrain::ToggleSelect_,
+                index,
+                listIndex);
+
+            assert(result.second);
+        }
+    }
+
+    void InitializeConnections_(size_t count_, size_t listIndex)
+    {
+        auto &selectConnections = this->selectConnections_.at(listIndex);
+        auto &list = this->lists_.at(listIndex);
+
+        auto &itemCreatedEndpoints =
+            this->itemCreatedEndpoints_.at(listIndex);
+
+        for (size_t i = 0; i < count_; ++i)
+        {
+            this->CreateConnection_(
+                i,
+                listIndex,
+                selectConnections,
+                list,
+                itemCreatedEndpoints);
         }
     }
 
     void OnMemberAdded_(std::optional<size_t> memberIndex, size_t listIndex)
     {
-        if (memberIndex)
+        if (!memberIndex)
         {
+            return;
+        }
+
+        // size of the list was just increased.
+        // ClearConnections up to the last list size.
+        size_t newCount = this->lists_.at(listIndex).count.Get();
+
+        if (newCount > 1)
+        {
+            this->ClearConnections_(*memberIndex, listIndex);
+        }
+
+        this->RestoreConnections_(*memberIndex, listIndex);
+
+        if constexpr (pex::HasGetVirtual<ListItem>)
+        {
+            auto itemBase =
+                pex::GetUnordered(this->lists_.at(listIndex), *memberIndex)
+                    .GetVirtual();
+
+            if (itemBase)
+            {
+                // The derived type exists.
+                // Select it.
+                this->Select_(listIndex, *memberIndex);
+            }
+        }
+        else
+        {
+            // Items in list are not virtual.
+            // They already exist.
             this->Select_(listIndex, *memberIndex);
         }
     }
@@ -346,18 +425,18 @@ protected:
     std::vector<ListControl> lists_;
 
 private:
-    using CountWillChangeEndpoint =
+    using MemberWillRemoveEndpoint =
         pex::BoundEndpoint
         <
-            typename pex::control::ListCountWillChange,
-            decltype(&SelectionBrain::OnCountWillChange_)
+            typename pex::control::ListOptionalIndex,
+            decltype(&SelectionBrain::OnMemberWillRemove_)
         >;
 
-    using CountEndpoint =
+    using MemberRemovedEndpoint =
         pex::BoundEndpoint
         <
-            typename pex::control::ListCount,
-            decltype(&SelectionBrain::OnCount_)
+            typename pex::control::ListOptionalIndex,
+            decltype(&SelectionBrain::OnMemberRemoved_)
         >;
 
     using MemberAddedEndpoint =
@@ -375,8 +454,8 @@ private:
         >;
 
     bool ignoreSelected_;
-    std::vector<CountWillChangeEndpoint> countWillChangeEndpoints_;
-    std::vector<CountEndpoint> countEndpoints_;
+    std::vector<MemberWillRemoveEndpoint> memberWillRemoveEndpoints_;
+    std::vector<MemberRemovedEndpoint> memberRemovedEndpoints_;
     std::vector<MemberAddedEndpoint> memberAddedEndpoints_;
     std::vector<SelectedEndpoint> selectedEndpoints_;
 
@@ -387,7 +466,7 @@ private:
             decltype(&SelectionBrain::ToggleSelect_)
         >;
 
-    std::vector<std::vector<BoundSelection>> selectConnections_;
+    std::vector<std::map<size_t, BoundSelection>> selectConnections_;
 
     using ItemCreatedEndpoint =
         pex::BoundEndpoint
@@ -396,7 +475,7 @@ private:
             decltype(&SelectionBrain::OnItemCreated_)
         >;
 
-    std::vector<std::vector<ItemCreatedEndpoint>> itemCreatedEndpoints_;
+    std::vector<std::map<size_t, ItemCreatedEndpoint>> itemCreatedEndpoints_;
 };
 
 
@@ -443,7 +522,7 @@ public:
                     {
                         return Found{
                             listIndex,
-                            list.indices.at(index).Get(),
+                            list.indices.at(index),
                             shapeControl};
                     }
                     else

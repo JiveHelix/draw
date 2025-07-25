@@ -50,15 +50,15 @@ struct CanvasTemplate
 
 struct CanvasCustom
 {
-    template<typename GroupBase>
-    struct Model: public GroupBase
+    template<typename Base>
+    struct Model: public Base
     {
         Model()
             :
-            GroupBase(),
+            Base(),
 
             viewSettings_(
-                this,
+                USE_REGISTER_PEX_NAME(this, "CanvasModel"),
                 this->viewSettings,
                 &Model::OnViewSettings_),
 
@@ -67,6 +67,9 @@ struct CanvasCustom
                 this->mousePosition,
                 &Model::OnMousePosition_)
         {
+            REGISTER_PEX_PARENT(viewSettings_);
+            REGISTER_PEX_PARENT(mousePosition_);
+
             this->OnViewSettings_(this->viewSettings.Get());
         }
 
@@ -85,6 +88,30 @@ struct CanvasCustom
     private:
         pex::Endpoint<Model, ViewSettingsControl> viewSettings_;
         pex::Endpoint<Model, PointControl> mousePosition_;
+    };
+
+    template<typename Base>
+    struct Control: public Base
+    {
+        using Base::Base;
+
+        Control()
+            :
+            Base()
+        {
+            REGISTER_PEX_NAME(
+                this,
+                "CanvasControl");
+        }
+
+        Control(typename Base::Upstream &upstream)
+            :
+            Base(upstream)
+        {
+            REGISTER_PEX_NAME(
+                this,
+                "CanvasControl");
+        }
     };
 };
 

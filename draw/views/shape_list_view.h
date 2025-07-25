@@ -131,7 +131,7 @@ public:
         return new ShapeView(
             this,
             ShapeAdaptor(listItem),
-            this->control_.shapesDisplay[index]);
+            this->control_.shapesDisplay.at(index));
     }
 
 private:

@@ -67,6 +67,7 @@ public:
             controls,
             pixelView);
 
+        splitter->Layout();
         auto sizer = std::make_unique<wxBoxSizer>(wxVERTICAL);
         sizer->Add(splitter, 1, wxEXPAND);
         this->applicationFrame_.Get()->SetSizerAndFit(sizer.release());
@@ -75,6 +76,7 @@ public:
             this->GetDerived()->GetAppName());
 
         this->applicationFrame_.Get()->Maximize();
+        this->applicationFrame_.Get()->Layout();
         this->GetDerived()->Display();
     }
 

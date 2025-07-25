@@ -46,15 +46,8 @@ public:
     {
         REGISTER_PEX_NAME(this, "ShapeDemoBrain");
 
-        REGISTER_PEX_NAME_WITH_PARENT(
-            &this->demoModel_,
-            this,
-            "demoModel_");
-
-        REGISTER_PEX_NAME_WITH_PARENT(
-            &this->demoControl_,
-            this,
-            "demoControl_");
+        REGISTER_PEX_PARENT(demoModel_);
+        REGISTER_PEX_PARENT(demoControl_);
     }
 
     wxWindow * CreateControls(wxWindow *parent)

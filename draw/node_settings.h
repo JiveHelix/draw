@@ -22,7 +22,6 @@ struct NodeSettingsFields
 };
 
 
-
 template<template<typename> typename T>
 struct NodeSettingsTemplate
 {
@@ -37,26 +36,24 @@ struct NodeSettingsTemplate
 };
 
 
-struct NodeSettings: public NodeSettingsTemplate<pex::Identity>
+struct NodeSettingsCustom
 {
-    static constexpr auto darkGreen = tau::Hsv<double>{{136.0, 0.57, 0.36}};
-
-    using Base = NodeSettingsTemplate<pex::Identity>;
-
-    NodeSettings()
-        :
-        Base{
-            {},
-            false,
-            darkGreen}
+    template<typename Base>
+    struct Plain: public Base
     {
+        static constexpr auto darkGreen = tau::Hsv<double>{{136.0, 0.57, 0.36}};
 
-    }
+        Plain()
+            :
+            Base{
+                {},
+                false,
+                darkGreen}
+        {
+
+        }
+    };
 };
-
-
-DECLARE_EQUALITY_OPERATORS(NodeSettings)
-DECLARE_OUTPUT_STREAM_OPERATOR(NodeSettings)
 
 
 using NodeSettingsGroup =
@@ -64,12 +61,18 @@ using NodeSettingsGroup =
     <
         NodeSettingsFields,
         NodeSettingsTemplate,
-        pex::PlainT<NodeSettings>
+        NodeSettingsCustom
     >;
 
 using NodeSettingsModel = typename NodeSettingsGroup::Model;
 using NodeSettingsControl = typename NodeSettingsGroup::Control;
+using NodeSettings = typename NodeSettingsGroup::Plain;
 using NodeToggleSelectSignal = decltype(NodeSettingsControl::toggleSelect);
+
+
+DECLARE_EQUALITY_OPERATORS(NodeSettings)
+DECLARE_OUTPUT_STREAM_OPERATOR(NodeSettings)
+
 
 using OptionalNodeSettings = std::optional<NodeSettingsControl>;
 

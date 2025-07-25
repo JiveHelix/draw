@@ -66,15 +66,15 @@ IntPoint GetMaximumViewPosition(const Size &viewSize, const Size &virtualSize);
 
 struct ViewGroupTemplates_
 {
-    template<typename GroupBase>
-    struct Plain: public GroupBase
+    template<typename Base>
+    struct Plain: public Base
     {
         static constexpr int defaultWidth = 1920;
         static constexpr int defaultHeight = 1080;
 
         Plain()
             :
-            GroupBase{
+            Base{
                 IntPoint{0, 0},
                 Size{defaultWidth, defaultHeight},
                 Size{defaultWidth, defaultHeight},
@@ -103,8 +103,8 @@ struct ViewGroupTemplates_
     };
 
 
-    template<typename GroupBase>
-    struct Model: public GroupBase
+    template<typename Base>
+    struct Model: public Base
     {
     public:
         static constexpr auto observerName = "ViewSettingsModel";
@@ -143,10 +143,10 @@ struct ViewGroupTemplates_
     public:
         Model()
             :
-            GroupBase(),
+            Base(),
 
             viewPositionX_(
-                this,
+                USE_REGISTER_PEX_NAME(this, "ViewSettingsModel"),
                 IntPointControl(this->viewPosition).x,
                 &Model::OnViewPositionX_),
 
@@ -171,10 +171,25 @@ struct ViewGroupTemplates_
                 this->viewSize.height,
                 &Model::OnViewSizeHeight_),
 
-            linkZoomEndpoint_(this, this->linkZoom, &Model::OnLinkZoom_),
-            resetZoomEndpoint_(this, this->resetZoom, &Model::ResetZoom),
-            fitZoomEndpoint_(this, this->fitZoom, &Model::FitZoom),
-            recenterEndpoint_(this, this->recenter, &Model::Recenter),
+            linkZoomEndpoint_(
+                this,
+                this->linkZoom,
+                &Model::OnLinkZoom_),
+
+            resetZoomEndpoint_(
+                this,
+                this->resetZoom,
+                &Model::ResetZoom),
+
+            fitZoomEndpoint_(
+                this,
+                this->fitZoom,
+                &Model::FitZoom),
+
+            recenterEndpoint_(
+                this,
+                this->recenter,
+                &Model::Recenter),
 
             recenterHorizontalEndpoint_(
                 this,
@@ -190,6 +205,8 @@ struct ViewGroupTemplates_
             ignoreViewPosition_(false),
             ignoreSize_(false)
         {
+            REGISTER_PEX_PARENT(scaleEndpoint_);
+
             this->scaleEndpoint_.horizontal.Connect(
                 &Model::OnHorizontalZoom_);
 
@@ -541,6 +558,19 @@ struct ViewGroupTemplates_
                 imageSize_.ToPoint2d().template Cast<double>() / 2.0);
 
             this->RecenterView(viewSize_);
+        }
+    };
+
+    template<typename Base>
+    struct Control: public Base
+    {
+        using Base::Base;
+
+        Control(typename Base::Upstream &upstream)
+            :
+            Base(upstream)
+        {
+            REGISTER_PEX_NAME(this, "ViewSettingsControl");
         }
     };
 };

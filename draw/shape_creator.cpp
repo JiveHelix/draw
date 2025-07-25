@@ -10,6 +10,7 @@ std::vector<SelectedShape> SelectedShapeChoices::GetChoices()
     return {
         SelectedShape::ellipse,
         SelectedShape::polygon,
+        SelectedShape::regularPolygon,
         SelectedShape::quad,
         SelectedShape::cross,
         SelectedShape::none};
@@ -26,6 +27,9 @@ std::string SelectedShapeConverter::ToString(
 
         case (SelectedShape::polygon):
             return "polygon";
+
+        case (SelectedShape::regularPolygon):
+            return "regularPolygon";
 
         case (SelectedShape::quad):
             return "quad";
@@ -51,8 +55,10 @@ std::ostream & operator<<(std::ostream &output, SelectedShape value)
 std::vector<Action> Actions::GetChoices()
 {
     return {
+        Action::moveToTop,
         Action::moveUp,
         Action::moveDown,
+        Action::moveToBottom,
         Action::remove,
         Action::cancel};
 }
@@ -71,11 +77,17 @@ std::string ActionConverter::ToString(
 {
     switch (selectedShape)
     {
+        case (Action::moveToTop):
+            return "Move to top";
+
         case (Action::moveUp):
             return "Move up";
 
         case (Action::moveDown):
             return "Move down";
+
+        case (Action::moveToBottom):
+            return "Move to bottom";
 
         case (Action::remove):
             return "Remove";

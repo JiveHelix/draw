@@ -42,27 +42,42 @@ struct PixelViewTemplate
 
 struct PixelViewTemplates
 {
-    template<typename GroupBase>
-    struct Control: public GroupBase
+    template<typename Base>
+    struct Model: public Base
+    {
+        using Base::Base;
+
+        Model()
+            :
+            Base{}
+        {
+            REGISTER_PEX_NAME(this, "PixelViewModel");
+        }
+    };
+
+    template<typename Base>
+    struct Control: public Base
     {
         using AsyncPixelsControl =
-            typename GroupBase::AsyncPixels::Control;
+            typename Base::AsyncPixels::Control;
 
         using AsyncShapesControl =
-            typename GroupBase::AsyncShapes::Control;
+            typename Base::AsyncShapes::Control;
 
         AsyncPixelsControl asyncPixels;
         AsyncShapesControl asyncShapes;
 
-        Control() = default;
+        using Base::Base;
 
-        Control(typename GroupBase::Upstream &upstream)
+        Control(typename Base::Upstream &upstream)
             :
-            GroupBase(upstream),
+            Base(upstream),
             asyncPixels(upstream.pixels.GetWorkerControl()),
             asyncShapes(upstream.shapes.GetWorkerControl())
         {
-
+            REGISTER_PEX_NAME(this, "PixelViewControl");
+            REGISTER_PEX_PARENT(asyncPixels);
+            REGISTER_PEX_PARENT(asyncShapes);
         }
     };
 };

@@ -35,7 +35,7 @@ public:
     Observer(Actor *actor, UserControl control)
         :
         actor_(actor),
-        endpoints_(this, control),
+        endpoints_(USE_REGISTER_PEX_NAME(this, "Observer"), control),
         doOpenFile_()
     {
         if constexpr (HasOpenFile<Actor>)

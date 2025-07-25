@@ -5,5 +5,5 @@ template struct pex::Group
     <
         draw::CrossFields,
         draw::CrossTemplate,
-        pex::PlainU<draw::Cross_>
+        draw::CrossCustom
     >;

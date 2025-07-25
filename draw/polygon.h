@@ -91,11 +91,16 @@ private:
 };
 
 
+struct PolygonCustom
+{
+    using Plain = Polygon;
+};
+
 using PolygonGroup = pex::Group
 <
     PolygonFields,
     PolygonTemplate,
-    pex::PlainT<Polygon>
+    PolygonCustom
 >;
 
 using PolygonControl = typename PolygonGroup::Control;
@@ -127,5 +132,5 @@ extern template struct pex::Group
     <
         draw::PolygonFields,
         draw::PolygonTemplate,
-        pex::PlainT<draw::Polygon>
+        draw::PolygonCustom
     >;

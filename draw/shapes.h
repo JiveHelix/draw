@@ -65,6 +65,7 @@ public:
     virtual ~ShapeModelUserBase() {}
 
     virtual pex::OrderControl GetOrder() = 0;
+    virtual NodeSettingsModel & GetNode() = 0;
 };
 
 
@@ -184,6 +185,11 @@ struct ShapeCommon
         pex::OrderControl GetOrder() override
         {
             return this->order;
+        }
+
+        NodeSettingsModel & GetNode() override
+        {
+            return this->node;
         }
 
     private:

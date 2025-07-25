@@ -66,8 +66,15 @@ struct Cross_: public Base
 };
 
 
+struct CrossCustom
+{
+    template<typename Base>
+    using Plain = Cross_<Base>;
+};
 
-using CrossGroup = pex::Group<CrossFields, CrossTemplate, pex::PlainU<Cross_>>;
+
+
+using CrossGroup = pex::Group<CrossFields, CrossTemplate, CrossCustom>;
 using CrossControl = typename CrossGroup::Control;
 using Cross = typename CrossGroup::Plain;
 
@@ -85,5 +92,5 @@ extern template struct pex::Group
     <
         draw::CrossFields,
         draw::CrossTemplate,
-        pex::PlainU<draw::Cross_>
+        draw::CrossCustom
     >;

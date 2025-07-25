@@ -228,5 +228,5 @@ template struct pex::Group
     <
         draw::PolygonFields,
         draw::PolygonTemplate,
-        pex::PlainT<draw::Polygon>
+        draw::PolygonCustom
     >;

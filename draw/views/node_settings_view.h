@@ -34,6 +34,8 @@ public:
         wxWindow *window,
         std::optional<NodeSettingsControl> control);
 
+    void WindowWillBeDestroyed();
+
 private:
     void InitializeHighlight_();
 
@@ -68,6 +70,8 @@ public:
         const std::string &nodeName,
         std::optional<NodeSettingsControl> control);
 
+    bool Destroy() override;
+
 private:
     NodeSettingsView nodeSettingsView_;
 };
@@ -80,6 +84,8 @@ public:
         wxWindow *parent,
         const std::string &nodeName,
         std::optional<NodeSettingsControl> control);
+
+    bool Destroy() override;
 
 private:
     NodeSettingsView nodeSettingsView_;
