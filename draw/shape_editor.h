@@ -79,8 +79,8 @@ public:
             }
         }
 
-        REGISTER_PEX_NAME(this, "DragShape");
-        REGISTER_PEX_PARENT(startingShape_);
+        PEX_NAME("DragShape");
+        PEX_MEMBER(startingShape_);
     }
 
     DragShape(
@@ -93,8 +93,8 @@ public:
         control_(control),
         startingShape_(startingShape)
     {
-        REGISTER_PEX_NAME(this, "DragShape");
-        REGISTER_PEX_PARENT(startingShape_);
+        PEX_NAME("DragShape");
+        PEX_MEMBER(startingShape_);
     }
 
     void ReportLogicalPosition(const tau::Point2d<double> &position) override
@@ -135,14 +135,9 @@ public:
             }
         }
 
-        REGISTER_PEX_NAME(this, "DragEditShape");
-
-        REGISTER_PEX_NAME_WITH_PARENT(
-            this->control_.get(),
-            this,
-            "control_");
-
-        REGISTER_PEX_PARENT(startingShape_);
+        PEX_NAME("DragEditShape");
+        PEX_MEMBER_ADDRESS(this->control_.get(), "control_");
+        PEX_MEMBER(startingShape_);
     }
 
     DragEditShape(
@@ -155,14 +150,9 @@ public:
         control_(control),
         startingShape_(startingShape)
     {
-        REGISTER_PEX_NAME(this, "DragEditShape");
-
-        REGISTER_PEX_NAME_WITH_PARENT(
-            this->control_.get(),
-            this,
-            "control_");
-
-        REGISTER_PEX_PARENT(startingShape_);
+        PEX_NAME("DragEditShape");
+        PEX_MEMBER_ADDRESS(this->control_.get(), "control_");
+        PEX_MEMBER(startingShape_);
     }
 
     void ReportLogicalPosition(const tau::Point2d<double> &position) override
@@ -192,8 +182,8 @@ public:
         shapeList_(shapeList),
         position_(start)
     {
-        REGISTER_PEX_NAME(this, "DragCreateShape");
-        REGISTER_PEX_PARENT(shapeList_);
+        PEX_NAME("DragCreateShape");
+        PEX_MEMBER(shapeList_);
     }
 
     virtual ~DragCreateShape()
@@ -246,8 +236,8 @@ public:
         shapeList_(shapeList),
         position_(start)
     {
-        REGISTER_PEX_NAME(this, "DragReplaceShape");
-        REGISTER_PEX_PARENT(shapeList_);
+        PEX_NAME("DragReplaceShape");
+        PEX_MEMBER(shapeList_);
     }
 
     virtual ~DragReplaceShape()
@@ -463,17 +453,17 @@ public:
     static_assert(pex::HasIndices<ShapesControl>);
 
     ShapeEditor(
-        const std::vector<ShapesControl> &shapeLists,
+        ShapesControl shapeList,
         CanvasControl canvasControl)
         :
-        MouseSelectionBrain(shapeLists),
+        MouseSelectionBrain(shapeList),
         isEnabled_(true),
         isProcessingAction_(false),
 
         canvasControl_(canvasControl),
 
         mouseDownEndpoint_(
-            this,
+            PEX_THIS("ShapeEditor"),
             canvasControl.mouseDown,
             &ShapeEditor::OnMouseDown_),
 
@@ -510,15 +500,6 @@ public:
 
             this->menuIdEndpoint_.Connect(&ShapeEditor::OnMenuId_);
         }
-    }
-
-    ShapeEditor(
-        ShapesControl shapeList,
-        CanvasControl canvasControl)
-        :
-        ShapeEditor(std::vector<ShapesControl>({shapeList}), canvasControl)
-    {
-        REGISTER_PEX_NAME(this, "ShapeEditor");
     }
 
     ~ShapeEditor()

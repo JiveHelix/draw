@@ -44,10 +44,9 @@ public:
             this->demoControl_.shapes,
             &ShapeDemoBrain::OnShapes_)
     {
-        REGISTER_PEX_NAME(this, "ShapeDemoBrain");
-
-        REGISTER_PEX_PARENT(demoModel_);
-        REGISTER_PEX_PARENT(demoControl_);
+        PEX_NAME("ShapeDemoBrain");
+        PEX_MEMBER(demoModel_);
+        PEX_MEMBER(demoControl_);
     }
 
     wxWindow * CreateControls(wxWindow *parent)

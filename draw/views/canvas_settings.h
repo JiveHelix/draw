@@ -58,7 +58,7 @@ struct CanvasCustom
             Base(),
 
             viewSettings_(
-                USE_REGISTER_PEX_NAME(this, "CanvasModel"),
+                PEX_THIS("CanvasModel"),
                 this->viewSettings,
                 &Model::OnViewSettings_),
 
@@ -67,8 +67,8 @@ struct CanvasCustom
                 this->mousePosition,
                 &Model::OnMousePosition_)
         {
-            REGISTER_PEX_PARENT(viewSettings_);
-            REGISTER_PEX_PARENT(mousePosition_);
+            PEX_MEMBER(viewSettings_);
+            PEX_MEMBER(mousePosition_);
 
             this->OnViewSettings_(this->viewSettings.Get());
         }
@@ -99,18 +99,14 @@ struct CanvasCustom
             :
             Base()
         {
-            REGISTER_PEX_NAME(
-                this,
-                "CanvasControl");
+            PEX_NAME("CanvasControl");
         }
 
         Control(typename Base::Upstream &upstream)
             :
             Base(upstream)
         {
-            REGISTER_PEX_NAME(
-                this,
-                "CanvasControl");
+            PEX_NAME("CanvasControl");
         }
     };
 };

@@ -24,11 +24,11 @@ NodeSettingsView::NodeSettingsView(
     control_(control),
     highlightEndpoint_()
 {
-    REGISTER_PEX_NAME(this, "NodeSettingsView");
+    PEX_NAME("NodeSettingsView");
 
     if (this->control_)
     {
-        REGISTER_PEX_NAME_WITH_PARENT(&(*this->control_), this, "control_");
+        PEX_MEMBER_ADDRESS(&(*this->control_), "control_");
     }
 
     this->InitializeHighlight_();

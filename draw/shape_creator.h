@@ -311,8 +311,8 @@ public:
         shapeList_(shapeList),
         position_(start)
     {
-        REGISTER_PEX_NAME(this, "DragCreateSelected");
-        REGISTER_PEX_PARENT(shapeList_);
+        PEX_NAME("DragCreateSelected");
+        PEX_MEMBER(shapeList_);
     }
 
     virtual ~DragCreateSelected()

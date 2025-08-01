@@ -146,7 +146,7 @@ struct ViewGroupTemplates_
             Base(),
 
             viewPositionX_(
-                USE_REGISTER_PEX_NAME(this, "ViewSettingsModel"),
+                PEX_THIS("ViewSettingsModel"),
                 IntPointControl(this->viewPosition).x,
                 &Model::OnViewPositionX_),
 
@@ -205,7 +205,7 @@ struct ViewGroupTemplates_
             ignoreViewPosition_(false),
             ignoreSize_(false)
         {
-            REGISTER_PEX_PARENT(scaleEndpoint_);
+            PEX_MEMBER(scaleEndpoint_);
 
             this->scaleEndpoint_.horizontal.Connect(
                 &Model::OnHorizontalZoom_);
@@ -570,7 +570,7 @@ struct ViewGroupTemplates_
             :
             Base(upstream)
         {
-            REGISTER_PEX_NAME(this, "ViewSettingsControl");
+            PEX_NAME("ViewSettingsControl");
         }
     };
 };

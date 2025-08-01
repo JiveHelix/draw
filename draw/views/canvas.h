@@ -48,7 +48,7 @@ public:
         skipUpdateViewPosition_(),
 
         virtualSizeEndpoint_(
-            USE_REGISTER_PEX_NAME(this, "Canvas"),
+            PEX_THIS("Canvas"),
             control.viewSettings.virtualSize,
             &Canvas::OnVirtualSize_),
 

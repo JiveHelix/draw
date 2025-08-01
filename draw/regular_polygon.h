@@ -120,8 +120,8 @@ struct RegularPolygonCustom
             ignore_(false),
 
             sideLengthEndpoint_(
-                USE_REGISTER_PEX_NAME(this, "RegularPolygonModel"),
-                *USE_REGISTER_PEX_PARENT(sideLength),
+                PEX_THIS("RegularPolygonModel"),
+                PEX_MEMBER_PASS(sideLength),
                 &Model::OnSideLength_),
 
             radiusEndpoint_(this, this->radius, &Model::OnRadius_),

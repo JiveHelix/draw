@@ -51,7 +51,7 @@ struct UserCustom
             :
             Base{}
         {
-            REGISTER_PEX_NAME(this, "UserModel");
+            PEX_NAME("UserModel");
         }
     };
 };

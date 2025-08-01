@@ -51,7 +51,7 @@ struct PixelViewTemplates
             :
             Base{}
         {
-            REGISTER_PEX_NAME(this, "PixelViewModel");
+            PEX_NAME("PixelViewModel");
         }
     };
 
@@ -75,9 +75,9 @@ struct PixelViewTemplates
             asyncPixels(upstream.pixels.GetWorkerControl()),
             asyncShapes(upstream.shapes.GetWorkerControl())
         {
-            REGISTER_PEX_NAME(this, "PixelViewControl");
-            REGISTER_PEX_PARENT(asyncPixels);
-            REGISTER_PEX_PARENT(asyncShapes);
+            PEX_NAME("PixelViewControl");
+            PEX_MEMBER(asyncPixels);
+            PEX_MEMBER(asyncShapes);
         }
     };
 };
