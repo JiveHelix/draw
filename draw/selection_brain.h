@@ -52,13 +52,22 @@ public:
             this->list_.memberAdded,
             &SelectionBrain::OnMemberAdded_),
 
+        memberWillReplaceEndpoint_(
+            PEX_THIS("SelectionBrain"),
+            this->list_.memberWillReplace,
+            &SelectionBrain::OnMemberWillReplace_),
+
+        memberReplacedEndpoint_(
+            this,
+            this->list_.memberReplaced,
+            &SelectionBrain::OnMemberReplaced_),
+
         selectedEndpoint_(
             this,
             this->list_.selected,
             &SelectionBrain::OnSelected_),
 
-        selectConnections_(),
-        itemCreatedEndpoints_()
+        selectConnections_()
     {
         PEX_MEMBER(list_);
         this->InitializeConnections_(this->list_.count.Get());
@@ -142,7 +151,6 @@ private:
     void ClearConnections_(size_t firstToClear)
     {
         pex::ClearInvalidated(firstToClear, this->selectConnections_);
-        pex::ClearInvalidated(firstToClear, this->itemCreatedEndpoints_);
     }
 
     void RestoreConnections_(size_t firstToRestore)
@@ -154,19 +162,6 @@ private:
         {
             this->CreateConnection_(createIndex);
         }
-    }
-
-    void OnItemCreated_(size_t index)
-    {
-        [[maybe_unused]] auto result = this->selectConnections_.try_emplace(
-            index,
-            this,
-            ::draw::GetNode(this->list_, index).toggleSelect,
-            &SelectionBrain::ToggleSelect_,
-            index);
-
-        // We expect the key 'index' to not already be in the map.
-        assert(result.second);
     }
 
     void CreateConnection_(size_t index)
@@ -186,22 +181,6 @@ private:
                         this,
                         itemBase->GetNode().toggleSelect,
                         &SelectionBrain::ToggleSelect_,
-                        index);
-
-                assert(result.second);
-            }
-            else
-            {
-                // The item has been created,
-                // but the derived object does not exist yet.
-                // Register for the item created notification so we can
-                // connect to toggleSelect later.
-                [[maybe_unused]] auto result =
-                    this->itemCreatedEndpoints_.try_emplace(
-                        index,
-                        this,
-                        pex::GetUnordered(this->list_, index).baseCreated,
-                        &SelectionBrain::OnItemCreated_,
                         index);
 
                 assert(result.second);
@@ -289,6 +268,26 @@ private:
         this->RestoreConnections_(*index);
     }
 
+    void OnMemberWillReplace_(const std::optional<size_t> &index)
+    {
+        if (!index)
+        {
+            return;
+        }
+
+        this->selectConnections_.erase(*index);
+    }
+
+    void OnMemberReplaced_(const std::optional<size_t> &index)
+    {
+        if (!index)
+        {
+            return;
+        }
+
+        this->CreateConnection_(*index);
+    }
+
     void OnSelected_(const std::optional<size_t> &memberIndex)
     {
         if (this->ignoreSelected_)
@@ -326,6 +325,8 @@ private:
     IndexEndpoint memberWillRemoveEndpoint_;
     IndexEndpoint memberRemovedEndpoint_;
     IndexEndpoint memberAddedEndpoint_;
+    IndexEndpoint memberWillReplaceEndpoint_;
+    IndexEndpoint memberReplacedEndpoint_;
     IndexEndpoint selectedEndpoint_;
 
     using BoundSelection =
@@ -336,15 +337,6 @@ private:
         >;
 
     std::map<size_t, BoundSelection> selectConnections_;
-
-    using ItemCreatedEndpoint =
-        pex::BoundEndpoint
-        <
-            pex::control::Signal<>,
-            decltype(&SelectionBrain::OnItemCreated_)
-        >;
-
-    std::map<size_t, ItemCreatedEndpoint> itemCreatedEndpoints_;
 };
 
 

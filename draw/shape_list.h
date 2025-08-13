@@ -14,6 +14,7 @@ using ShapeListMaker = pex::List<pex::MakePoly<ShapeSupers>>;
 
 static_assert(pex::IsList<ShapeListMaker>);
 static_assert(pex::ListHasOrder<ShapeListMaker>);
+static_assert(pex::ListHasVirtualGetOrder<ShapeListMaker>);
 
 template<typename T>
 struct ShapeListFields
@@ -25,6 +26,7 @@ struct ShapeListFields
 
 
 using OrderedShapes = pex::OrderedListGroup<ShapeListMaker>;
+
 
 
 template<template<typename> typename T>
