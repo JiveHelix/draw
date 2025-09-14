@@ -16,7 +16,7 @@ class PointView: public wxControl
 public:
     using LayoutOptions = wxpex::LayoutOptions;
 
-    using Control = typename tau::Point2dGroup<Value>::Control;
+    using Control = typename tau::Point2dGroup<Value>::DefaultControl;
     using ValueControl = decltype(Control::x);
     using Converter = wxpex::PrecisionConverter<ValueControl, 1>;
     using ValueField = wxpex::Field<ValueControl, Converter>;

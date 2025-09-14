@@ -32,7 +32,7 @@ struct ShapeDisplayTemplate
 
 
 using ShapeDisplayGroup = pex::Group<ShapeDisplayFields, ShapeDisplayTemplate>;
-using ShapeDisplayControl = typename ShapeDisplayGroup::Control;
+using ShapeDisplayControl = typename ShapeDisplayGroup::DefaultControl;
 using ShapeDisplay = typename ShapeDisplayGroup::Plain;
 using ShapeExpandControl = decltype(ShapeDisplayControl::shapeExpand);
 

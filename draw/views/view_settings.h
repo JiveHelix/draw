@@ -265,7 +265,7 @@ struct ViewGroupTemplates_
             this->ResetView_(this->imageSize.Get(), this->windowSize.Get());
 
             jive::ScopeFlag ignoreZoom(this->ignoreZoom_);
-            pex::AccessReference(this->scale).DoNotify();
+            pex::AccessReference(this->scale).Notify();
         }
 
         IntPoint GetCenteredViewPosition_(const Size &viewSize_)
@@ -582,7 +582,7 @@ using ViewSettingsGroup =
 
 using ViewSettings = typename ViewSettingsGroup::Plain;
 using ViewSettingsModel = typename ViewSettingsGroup::Model;
-using ViewSettingsControl = typename ViewSettingsGroup::Control;
+using ViewSettingsControl = typename ViewSettingsGroup::DefaultControl;
 
 template<typename Observer>
 using ViewSettingsEndpoint = pex::EndpointGroup<Observer, ViewSettingsControl>;

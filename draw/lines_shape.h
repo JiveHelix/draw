@@ -72,7 +72,7 @@ using LinesShapeGroup = pex::Group
 >;
 
 using LinesShapeModel = typename LinesShapeGroup::Model;
-using LinesShapeControl = typename LinesShapeGroup::Control;
+using LinesShapeControl = typename LinesShapeGroup::DefaultControl;
 
 
 } // end namespace draw

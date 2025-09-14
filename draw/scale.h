@@ -49,7 +49,7 @@ using ScaleGroup =
     >;
 
 using ScaleModel = typename ScaleGroup::Model;
-using ScaleControl = typename ScaleGroup::Control;
+using ScaleControl = typename ScaleGroup::DefaultControl;
 
 template<typename Observer>
 using ScaleEndpoint = pex::EndpointGroup<Observer, ScaleControl>;

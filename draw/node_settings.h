@@ -65,7 +65,7 @@ using NodeSettingsGroup =
     >;
 
 using NodeSettingsModel = typename NodeSettingsGroup::Model;
-using NodeSettingsControl = typename NodeSettingsGroup::Control;
+using NodeSettingsControl = typename NodeSettingsGroup::DefaultControl;
 using NodeSettings = typename NodeSettingsGroup::Plain;
 using NodeToggleSelectSignal = decltype(NodeSettingsControl::toggleSelect);
 

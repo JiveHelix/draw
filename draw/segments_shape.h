@@ -42,7 +42,7 @@ using SegmentsSettingsGroup = pex::Group
 
 using SegmentsSettings = typename SegmentsSettingsGroup::Plain;
 using SegmentsSettingsModel = typename SegmentsSettingsGroup::Model;
-using SegmentsSettingsControl = typename SegmentsSettingsGroup::Control;
+using SegmentsSettingsControl = typename SegmentsSettingsGroup::DefaultControl;
 
 
 DECLARE_EQUALITY_OPERATORS(SegmentsSettings)

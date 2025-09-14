@@ -15,7 +15,7 @@ public:
             this->userControl_.pixelView.canvas)
     {
         this->demoControl_.shapes.Append(
-            draw::ShapeValue::Default<draw::RegularPolygonShape>());
+            draw::ShapeValueWrapper::Default<draw::RegularPolygonShape>());
     }
 
     std::string GetAppName() const

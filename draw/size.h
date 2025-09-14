@@ -13,7 +13,7 @@ using SizeGroup = tau::SizeGroup<SizeType>;
 using Size = typename SizeGroup::Plain;
 
 using SizeModel = typename SizeGroup::Model;
-using SizeControl = typename SizeGroup::Control;
+using SizeControl = typename SizeGroup::DefaultControl;
 
 
 template<typename Observer>

@@ -39,7 +39,7 @@ using ShearGroup = pex::Group
 
 using Shear = typename ShearGroup::Plain;
 using ShearModel = typename ShearGroup::Model;
-using ShearControl = typename ShearGroup::Control;
+using ShearControl = typename ShearGroup::DefaultControl;
 
 DECLARE_OUTPUT_STREAM_OPERATOR(Shear)
 DECLARE_EQUALITY_OPERATORS(Shear)
@@ -138,7 +138,7 @@ struct QuadGroupTemplates_
         }
 
     private:
-        using ResetControl = decltype(Base::ControlType::reset);
+        using ResetControl = ::pex::control::DefaultSignal;
         pex::Endpoint<Model, ResetControl> resetEndpoint_;
     };
 };
@@ -153,7 +153,7 @@ using QuadGroup = pex::Group
 
 using Quad = typename QuadGroup::Plain;
 using QuadModel = typename QuadGroup::Model;
-using QuadControl = typename QuadGroup::Control;
+using QuadControl = typename QuadGroup::DefaultControl;
 
 
 DECLARE_OUTPUT_STREAM_OPERATOR(Quad)

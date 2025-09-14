@@ -3,7 +3,8 @@
 
 #include <nlohmann/json.hpp>
 #include <pex/endpoint.h>
-#include <pex/poly.h>
+#include <pex/derived_group.h>
+#include <pex/value_wrapper.h>
 #include <memory>
 #include <vector>
 #include <pex/ordered_list.h>
@@ -294,7 +295,7 @@ public:
 };
 
 
-using ShapeValue = pex::poly::Value<Shape>;
+using ShapeValueWrapper = pex::poly::ValueWrapperTemplate<Shape>;
 using ShapeControl = typename Shape::ControlBase;
 
 
@@ -354,7 +355,9 @@ private:
 
 
 using AsyncShapes = wxpex::MakeAsync<Shapes>;
-using AsyncShapesControl = typename AsyncShapes::Control;
+
+using AsyncShapesControl =
+    typename AsyncShapes::Control<typename AsyncShapes::Model>;
 
 template<typename Observer>
 using AsyncShapesEndpoint = pex::Endpoint<Observer, AsyncShapesControl>;

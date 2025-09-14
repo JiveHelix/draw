@@ -60,7 +60,7 @@ using FontLookGroup =
     pex::Group<FontLookFields, FontLookTemplate, pex::PlainT<FontLook>>;
 
 using FontLookModel = typename FontLookGroup::Model;
-using FontLookControl = typename FontLookGroup::Control;
+using FontLookControl = typename FontLookGroup::DefaultControl;
 
 
 void ConfigureFontLook(

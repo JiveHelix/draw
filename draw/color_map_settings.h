@@ -102,6 +102,8 @@ struct ColorMapSettingsCustom
     struct Model: public Base
     {
     public:
+        using Base::operator=;
+
         Model()
             :
             Base(),
@@ -144,7 +146,8 @@ template<typename Value>
 using ColorMapSettingsModel = typename ColorMapSettingsGroup<Value>::Model;
 
 template<typename Value>
-using ColorMapSettingsControl = typename ColorMapSettingsGroup<Value>::Control;
+using ColorMapSettingsControl =
+    typename ColorMapSettingsGroup<Value>::DefaultControl;
 
 
 } // end namespace draw

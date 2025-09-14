@@ -27,7 +27,7 @@ public:
             this->userControl_.pixelView.canvas)
     {
         this->demoControl_.shapes.Append(
-            draw::ShapeValue::Default<draw::QuadShape>());
+            draw::ShapeValueWrapper::Default<draw::QuadShape>());
     }
 
     std::string GetAppName() const

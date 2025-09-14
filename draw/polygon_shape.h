@@ -2,7 +2,7 @@
 
 
 #include <pex/group.h>
-#include <pex/poly.h>
+#include <pex/derived_group.h>
 #include <wxpex/modifier.h>
 
 #include "draw/polygon.h"
@@ -26,10 +26,10 @@ namespace draw
 struct PolygonShapeTemplates: public ShapeCommon<PolygonGroup, PolygonView>
 {
     template<typename Base>
-    class Derived: public ShapeDerived<Base, Derived<Base>>
+    class DerivedValue: public ShapeDerived<Base, DerivedValue<Base>>
     {
     public:
-        using Super = ShapeDerived<Base, Derived<Base>>;
+        using Super = ShapeDerived<Base, DerivedValue<Base>>;
         using Super::Super;
 
         bool HandlesAltClick() const override { return true; }
@@ -65,11 +65,11 @@ struct PolygonShapeTemplates: public ShapeCommon<PolygonGroup, PolygonView>
         {
             return ::draw::ProcessMouseDown
                 <
-                    DragRotatePolygonPoint<Derived>,
-                    DragPolygonPoint<Derived>,
-                    DragPolygonLine<Derived>,
-                    DragShape<Derived>,
-                    Derived
+                    DragRotatePolygonPoint<DerivedValue>,
+                    DragPolygonPoint<DerivedValue>,
+                    DragPolygonLine<DerivedValue>,
+                    DragShape<DerivedValue>,
+                    DerivedValue
                 >(control, *this, click, modifier, cursor);
         }
 
@@ -101,17 +101,17 @@ struct PolygonShapeTemplates: public ShapeCommon<PolygonGroup, PolygonView>
 };
 
 
-using PolygonShapePoly =
-    pex::poly::Poly<ShapeFields, PolygonShapeTemplates>;
+using PolygonShapeDerivedGroup =
+    pex::poly::DerivedGroup<ShapeFields, PolygonShapeTemplates>;
 
-using PolygonShape = typename PolygonShapePoly::Derived;
-using PolygonShapeModel = typename PolygonShapePoly::Model;
-using PolygonShapeControl = typename PolygonShapePoly::Control;
+using PolygonShape = typename PolygonShapeDerivedGroup::DerivedValue;
+using PolygonShapeModel = typename PolygonShapeDerivedGroup::Model;
+using PolygonShapeControl = typename PolygonShapeDerivedGroup::Control;
 
 
 struct CreatePolygon
 {
-    std::optional<ShapeValue> operator()(
+    std::optional<ShapeValueWrapper> operator()(
         const Drag &drag,
         const tau::Point2d<double> position)
     {
@@ -126,7 +126,7 @@ struct CreatePolygon
         auto polygon = Polygon(lines.GetPoints());
         polygon.center = drag.GetDragCenter(position);
 
-        return ShapeValue::Create<PolygonShape>(
+        return ShapeValueWrapper::Create<PolygonShape>(
             0,
             pex::Order{},
             polygon,

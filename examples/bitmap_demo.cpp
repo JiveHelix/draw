@@ -47,7 +47,7 @@ struct DrawingTemplate
 
 using DrawingGroup = pex::Group<DrawingFields, DrawingTemplate>;
 using DrawingModel = typename DrawingGroup::Model;
-using DrawingControl = typename DrawingGroup::Control;
+using DrawingControl = typename DrawingGroup::DefaultControl;
 using DrawingSettings = typename DrawingGroup::Plain;
 
 
@@ -135,7 +135,7 @@ struct DemoCustom
 
 using DemoGroup = pex::Group<DemoFields, DemoTemplate, DemoCustom>;
 using DemoModel = typename DemoGroup::Model;
-using DemoControl = typename DemoGroup::Control;
+using DemoControl = typename DemoGroup::DefaultControl;
 using DemoSettings = typename DemoGroup::Plain;
 
 
@@ -352,7 +352,7 @@ private:
     ColorMapSettingsEndpoint colorMapSettingsEndpoint_;
 
     using RequestDrawingEndpoint =
-        pex::Endpoint<DemoBrain, pex::control::Signal<>>;
+        pex::Endpoint<DemoBrain, pex::control::DefaultSignal>;
 
     RequestDrawingEndpoint requestDrawingEndpoint_;
 };

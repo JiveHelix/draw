@@ -12,7 +12,7 @@ public:
             this->userControl_.pixelView.canvas)
     {
         this->demoControl_.shapes.Append(
-            draw::ShapeValue::Default<draw::EllipseShape>());
+            draw::ShapeValueWrapper::Default<draw::EllipseShape>());
     }
 
     std::string GetAppName() const

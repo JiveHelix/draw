@@ -24,10 +24,10 @@ public:
             &DemoBrain::OnShapeAdded_)
     {
         this->demoControl_.shapes.Append(
-            draw::ShapeValue::Default<draw::QuadShape>());
+            draw::ShapeValueWrapper::Default<draw::QuadShape>());
 
         this->demoControl_.shapes.Append(
-            draw::ShapeValue::Default<draw::EllipseShape>());
+            draw::ShapeValueWrapper::Default<draw::EllipseShape>());
     }
 
 

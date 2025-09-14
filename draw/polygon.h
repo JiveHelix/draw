@@ -103,7 +103,7 @@ using PolygonGroup = pex::Group
     PolygonCustom
 >;
 
-using PolygonControl = typename PolygonGroup::Control;
+using PolygonControl = typename PolygonGroup::DefaultControl;
 
 
 inline

@@ -39,7 +39,7 @@ using EdgeSettingsGroup = pex::Group
 
 using EdgeSettings = typename EdgeSettingsGroup::Plain;
 using EdgeShapeModel = typename EdgeSettingsGroup::Model;
-using EdgeShapeControl = typename EdgeSettingsGroup::Control;
+using EdgeShapeControl = typename EdgeSettingsGroup::DefaultControl;
 
 
 DECLARE_EQUALITY_OPERATORS(EdgeSettings)

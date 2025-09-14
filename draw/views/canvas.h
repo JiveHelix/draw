@@ -409,7 +409,9 @@ protected:
 
     CursorEndpoint cursorEndpoint_;
 
-    using ImageCenterControl = typename tau::Point2dGroup<double>::Control;
+    using ImageCenterControl =
+        typename tau::Point2dGroup<double>::DefaultControl;
+
     ImageCenterControl imageCenter_;
 
     CanvasControl control_;

@@ -2,7 +2,7 @@
 
 
 #include <pex/group.h>
-#include <pex/poly.h>
+#include <pex/derived_group.h>
 #include <wxpex/modifier.h>
 
 #include "draw/regular_polygon.h"
@@ -167,10 +167,10 @@ struct RegularPolygonShapeTemplates
     public ShapeCommon<RegularPolygonGroup, RegularPolygonView>
 {
     template<typename Base>
-    class Derived: public ShapeDerived<Base, Derived<Base>>
+    class DerivedValue: public ShapeDerived<Base, DerivedValue<Base>>
     {
     public:
-        using Super = ShapeDerived<Base, Derived<Base>>;
+        using Super = ShapeDerived<Base, DerivedValue<Base>>;
         using Super::Super;
 
         bool HandlesAltClick() const override { return false; }
@@ -206,28 +206,33 @@ struct RegularPolygonShapeTemplates
         {
             return ::draw::ProcessMouseDown
                 <
-                    DragRotateRegularPolygonPoint<Derived>,
-                    DragRegularPolygonPoint<Derived>,
-                    DragRegularPolygonLine<Derived>,
-                    DragShape<Derived>,
-                    Derived
+                    DragRotateRegularPolygonPoint<DerivedValue>,
+                    DragRegularPolygonPoint<DerivedValue>,
+                    DragRegularPolygonLine<DerivedValue>,
+                    DragShape<DerivedValue>,
+                    DerivedValue
                 >(control, *this, click, modifier, cursor);
         }
     };
 };
 
 
-using RegularPolygonShapePoly =
-    pex::poly::Poly<ShapeFields, RegularPolygonShapeTemplates>;
+using RegularPolygonShapeDerivedGroup =
+    pex::poly::DerivedGroup<ShapeFields, RegularPolygonShapeTemplates>;
 
-using RegularPolygonShape = typename RegularPolygonShapePoly::Derived;
-using RegularPolygonShapeModel = typename RegularPolygonShapePoly::Model;
-using RegularPolygonShapeControl = typename RegularPolygonShapePoly::Control;
+using RegularPolygonShape =
+    typename RegularPolygonShapeDerivedGroup::DerivedValue;
+
+using RegularPolygonShapeModel =
+    typename RegularPolygonShapeDerivedGroup::Model;
+
+using RegularPolygonShapeControl =
+    typename RegularPolygonShapeDerivedGroup::Control;
 
 
 struct CreateRegularPolygon
 {
-    std::optional<ShapeValue> operator()(
+    std::optional<ShapeValueWrapper> operator()(
         const Drag &drag,
         const tau::Point2d<double> position)
     {
@@ -248,7 +253,7 @@ struct CreateRegularPolygon
 
         shape.SetRadius(magnitude);
 
-        return ShapeValue::Create<RegularPolygonShape>(
+        return ShapeValueWrapper::Create<RegularPolygonShape>(
             0,
             pex::Order{},
             shape,

@@ -117,7 +117,7 @@ using CanvasGroup =
 
 using CanvasSettings = typename CanvasGroup::Plain;
 using CanvasModel = typename CanvasGroup::Model;
-using CanvasControl = typename CanvasGroup::Control;
+using CanvasControl = typename CanvasGroup::DefaultControl;
 
 
 } // end namespace draw

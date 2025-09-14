@@ -16,7 +16,7 @@ class SizeView: public wxControl
 public:
     using LayoutOptions = wxpex::LayoutOptions;
 
-    using Control = typename tau::SizeGroup<Value>::Control;
+    using Control = typename tau::SizeGroup<Value>::DefaultControl;
     using ValueControl = decltype(Control::width);
     using Converter = wxpex::PrecisionConverter<ValueControl, precision>;
     using ValueField = wxpex::Field<ValueControl, Converter>;

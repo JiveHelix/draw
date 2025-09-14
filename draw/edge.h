@@ -84,7 +84,7 @@ struct EdgeCustom
 
 
 using EdgeGroup = pex::Group<EdgeFields, EdgeTemplate, EdgeCustom>;
-using EdgeControl = typename EdgeGroup::Control;
+using EdgeControl = typename EdgeGroup::DefaultControl;
 using Edge = typename EdgeGroup::Plain;
 
 

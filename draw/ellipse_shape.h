@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include <pex/poly.h>
+#include <pex/derived_group.h>
 #include "draw/ellipse.h"
 #include "draw/views/ellipse_view.h"
 #include "draw/look.h"
@@ -68,10 +68,10 @@ protected:
 struct EllipseShapeTemplates: public ShapeCommon<EllipseGroup, EllipseView>
 {
     template<typename Base>
-    class Derived: public ShapeDerived<Base, Derived<Base>>
+    class DerivedValue: public ShapeDerived<Base, DerivedValue<Base>>
     {
     public:
-        using Super = ShapeDerived<Base, Derived<Base>>;
+        using Super = ShapeDerived<Base, DerivedValue<Base>>;
         using Super::Super;
 
         bool HandlesAltClick() const override { return false; }
@@ -100,28 +100,28 @@ struct EllipseShapeTemplates: public ShapeCommon<EllipseGroup, EllipseView>
         {
             return ::draw::ProcessMouseDown
                 <
-                    DragRotateEllipsePoint<Derived>,
-                    DragEllipsePoint<Derived>,
+                    DragRotateEllipsePoint<DerivedValue>,
+                    DragEllipsePoint<DerivedValue>,
                     IgnoreMouse,
-                    DragShape<Derived>,
-                    Derived
+                    DragShape<DerivedValue>,
+                    DerivedValue
                 >(control, *this, click, modifier, cursor);
         }
     };
 };
 
 
-using EllipseShapePoly =
-    pex::poly::Poly<ShapeFields, EllipseShapeTemplates>;
+using EllipseShapeDerivedGroup =
+    pex::poly::DerivedGroup<ShapeFields, EllipseShapeTemplates>;
 
-using EllipseShape = typename EllipseShapePoly::Derived;
-using EllipseShapeModel = typename EllipseShapePoly::Model;
-using EllipseShapeControl = typename EllipseShapePoly::Control;
+using EllipseShape = typename EllipseShapeDerivedGroup::DerivedValue;
+using EllipseShapeModel = typename EllipseShapeDerivedGroup::Model;
+using EllipseShapeControl = typename EllipseShapeDerivedGroup::Control;
 
 
 struct CreateEllipse
 {
-    std::optional<ShapeValue> operator()(
+    std::optional<ShapeValueWrapper> operator()(
         const Drag &drag,
         const tau::Point2d<double> position)
     {
@@ -139,7 +139,7 @@ struct CreateEllipse
         ellipse.rotation = 0.0;
         ellipse.scale = 1.0;
 
-        return ShapeValue::Create<EllipseShape>(
+        return ShapeValueWrapper::Create<EllipseShape>(
             0,
             pex::Order{},
             ellipse,

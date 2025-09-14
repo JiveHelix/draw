@@ -36,7 +36,7 @@ struct LookDisplayTemplate
 
 
 using LookDisplayGroup = pex::Group<LookDisplayFields, LookDisplayTemplate>;
-using LookDisplayControl = typename LookDisplayGroup::Control;
+using LookDisplayControl = typename LookDisplayGroup::DefaultControl;
 
 
 class StrokeView: public wxpex::Collapsible

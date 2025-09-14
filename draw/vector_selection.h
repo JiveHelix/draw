@@ -442,7 +442,7 @@ private:
     using ItemCreatedEndpoint =
         pex::BoundEndpoint
         <
-            pex::control::Signal<>,
+            pex::control::DefaultSignal,
             decltype(&VectorSelectionBrain::OnItemCreated_)
         >;
 

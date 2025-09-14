@@ -125,7 +125,7 @@ using ShapeListGroup =
     pex::Group<ShapeListFields, ShapeListTemplate, ShapeListCustom>;
 
 using ShapeListModel = typename ShapeListGroup::Model;
-using ShapeListControl = typename ShapeListGroup::Control;
+using ShapeListControl = typename ShapeListGroup::DefaultControl;
 using ShapesControl = decltype(ShapeListControl::shapes);
 using ListedShape = typename ShapesControl::ListItem;
 

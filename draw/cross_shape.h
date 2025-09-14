@@ -20,10 +20,10 @@ void DrawCross(
 struct CrossShapeTemplates: public ShapeCommon<CrossGroup, CrossView>
 {
     template<typename Base>
-    class Derived: public ShapeDerived<Base, Derived<Base>>
+    class DerivedValue: public ShapeDerived<Base, DerivedValue<Base>>
     {
     public:
-        using Super = ShapeDerived<Base, Derived<Base>>;
+        using Super = ShapeDerived<Base, DerivedValue<Base>>;
         using Super::Super;
 
         void Draw(DrawContext &context) override
@@ -55,25 +55,25 @@ struct CrossShapeTemplates: public ShapeCommon<CrossGroup, CrossView>
                     IgnoreMouse,
                     IgnoreMouse,
                     IgnoreMouse,
-                    DragShape<Derived>,
-                    Derived
+                    DragShape<DerivedValue>,
+                    DerivedValue
                 >(control, *this, click, modifier, cursor);
         }
     };
 };
 
 
-using CrossShapePoly =
-    pex::poly::Poly<ShapeFields, CrossShapeTemplates>;
+using CrossShapeDerivedGroup =
+    pex::poly::DerivedGroup<ShapeFields, CrossShapeTemplates>;
 
-using CrossShape = typename CrossShapePoly::Derived;
-using CrossShapeModel = typename CrossShapePoly::Model;
-using CrossShapeControl = typename CrossShapePoly::Control;
+using CrossShape = typename CrossShapeDerivedGroup::DerivedValue;
+using CrossShapeModel = typename CrossShapeDerivedGroup::Model;
+using CrossShapeControl = typename CrossShapeDerivedGroup::Control;
 
 
 struct CreateCross
 {
-    std::optional<ShapeValue> operator()(
+    std::optional<ShapeValueWrapper> operator()(
         const Drag &,
         const tau::Point2d<double> position)
     {
@@ -90,7 +90,7 @@ struct CreateCross
         T<NodeSettingsGroup> node;
         */
 
-        return ShapeValue::Create<CrossShape>(
+        return ShapeValueWrapper::Create<CrossShape>(
             0,
             pex::Order{},
             cross,

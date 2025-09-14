@@ -87,7 +87,7 @@ using SettingsGroup =
     pex::Group<SettingsFields, SettingsTemplate, pex::PlainT<Settings>>;
 
 using SettingsModel = typename SettingsGroup::Model;
-using SettingsControl = typename SettingsGroup::Control;
+using SettingsControl = typename SettingsGroup::DefaultControl;
 
 
 template<typename T>
@@ -133,7 +133,7 @@ using TrigGroup =
     pex::Group<TrigFields, TrigTemplate, pex::PlainT<TrigSettings>>;
 
 using TrigModel = typename TrigGroup::Model;
-using TrigControl = typename TrigGroup::Control;
+using TrigControl = typename TrigGroup::DefaultControl;
 
 
 template<typename T>
@@ -160,7 +160,7 @@ using FunctionCountControl = decltype(SettingsControl::functionCount);
 using FrequencyControl = decltype(SettingsControl::startFrequency);
 using AmplitudeControl = decltype(SettingsControl::amplitude);
 using BooleanControl = decltype(SettingsControl::isLogarithmic);
-using SignalControl = pex::control::Signal<>;
+using SignalControl = pex::control::DefaultSignal;
 
 
 struct DemoCustom
@@ -427,7 +427,7 @@ struct DemoCustom
 
 using DemoGroup = pex::Group<DemoFields, DemoTemplate, DemoCustom>;
 using DemoModel = typename DemoGroup::Model;
-using DemoControl = typename DemoGroup::Control;
+using DemoControl = typename DemoGroup::DefaultControl;
 
 using FunctionsControl = decltype(DemoControl::functions);
 using FunctionAddedControl = typename FunctionsControl::MemberAdded;

@@ -69,7 +69,7 @@ using PointsShapeGroup = pex::Group
 using PointsShapeModel = typename PointsShapeGroup::Model;
 
 using PointsShapeControl =
-    typename PointsShapeGroup::Control;
+    typename PointsShapeGroup::DefaultControl;
 
 
 class ValuePointsShape: public DrawnShape

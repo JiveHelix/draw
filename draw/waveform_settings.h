@@ -84,7 +84,7 @@ using WaveformColorGroup =
         pex::PlainT<WaveformColor>
     >;
 
-using WaveformColorControl = typename WaveformColorGroup::Control;
+using WaveformColorControl = typename WaveformColorGroup::DefaultControl;
 
 
 template<typename T>
@@ -145,7 +145,7 @@ using WaveformGroup =
     pex::Group<WaveformFields, WaveformTemplate, pex::PlainT<WaveformSettings>>;
 
 using WaveformModel = typename WaveformGroup::Model;
-using WaveformControl = typename WaveformGroup::Control;
+using WaveformControl = typename WaveformGroup::DefaultControl;
 
 
 } // end namespace draw

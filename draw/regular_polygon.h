@@ -227,7 +227,7 @@ using RegularPolygonGroup = pex::Group
     RegularPolygonCustom
 >;
 
-using RegularPolygonControl = typename RegularPolygonGroup::Control;
+using RegularPolygonControl = typename RegularPolygonGroup::DefaultControl;
 
 
 DECLARE_OUTPUT_STREAM_OPERATOR(RegularPolygon)

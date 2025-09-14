@@ -75,7 +75,7 @@ struct CrossCustom
 
 
 using CrossGroup = pex::Group<CrossFields, CrossTemplate, CrossCustom>;
-using CrossControl = typename CrossGroup::Control;
+using CrossControl = typename CrossGroup::DefaultControl;
 using Cross = typename CrossGroup::Plain;
 
 

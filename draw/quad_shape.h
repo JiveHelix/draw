@@ -2,7 +2,7 @@
 
 
 #include <pex/group.h>
-#include <pex/poly.h>
+#include <pex/derived_group.h>
 #include <wxpex/modifier.h>
 
 #include "draw/quad.h"
@@ -26,10 +26,10 @@ namespace draw
 struct QuadShapeTemplates: public ShapeCommon<QuadGroup, QuadView>
 {
     template<typename Base>
-    class Derived: public ShapeDerived<Base, Derived<Base>>
+    class DerivedValue: public ShapeDerived<Base, DerivedValue<Base>>
     {
     public:
-        using Super = ShapeDerived<Base, Derived<Base>>;
+        using Super = ShapeDerived<Base, DerivedValue<Base>>;
         using Super::Super;
 
         void Draw(DrawContext &context) override
@@ -63,28 +63,28 @@ struct QuadShapeTemplates: public ShapeCommon<QuadGroup, QuadView>
         {
             return ::draw::ProcessMouseDown
                 <
-                    DragRotateQuadPoint<Derived>,
-                    DragQuadPoint<Derived, ControlMembers>,
-                    DragQuadLine<Derived, ControlMembers>,
-                    DragShape<Derived>,
-                    Derived
+                    DragRotateQuadPoint<DerivedValue>,
+                    DragQuadPoint<DerivedValue, ControlMembers>,
+                    DragQuadLine<DerivedValue, ControlMembers>,
+                    DragShape<DerivedValue>,
+                    DerivedValue
                 >(control, *this, click, modifier, cursor);
         }
     };
 };
 
 
-using QuadShapePoly =
-    pex::poly::Poly<ShapeFields, QuadShapeTemplates>;
+using QuadShapeDerivedGroup =
+    pex::poly::DerivedGroup<ShapeFields, QuadShapeTemplates>;
 
-using QuadShape = typename QuadShapePoly::Derived;
-using QuadShapeModel = typename QuadShapePoly::Model;
-using QuadShapeControl = typename QuadShapePoly::Control;
+using QuadShape = typename QuadShapeDerivedGroup::DerivedValue;
+using QuadShapeModel = typename QuadShapeDerivedGroup::Model;
+using QuadShapeControl = typename QuadShapeDerivedGroup::Control;
 
 
 struct CreateQuad
 {
-    std::optional<ShapeValue> operator()(
+    std::optional<ShapeValueWrapper> operator()(
         const Drag &drag,
         const tau::Point2d<double> position)
     {
@@ -99,7 +99,7 @@ struct CreateQuad
         quad.center = drag.GetDragCenter(position);
         quad.size = drag.GetSize(position);
 
-        return ShapeValue::Create<QuadShape>(
+        return ShapeValueWrapper::Create<QuadShape>(
             0,
             pex::Order{},
             quad,

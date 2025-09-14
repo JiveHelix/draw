@@ -211,7 +211,7 @@ public:
         return this->creationMenu_;
     }
 
-    using ShapeControl = pex::poly::Control<ShapeSupers>;
+    // using ShapeControl = pex::poly::ControlWrapperTemplate<ShapeSupers>;
 
     // Returns true if the shape should be deleted
     bool ProcessAction(ActionType action, ListedShape &shapeControl)
@@ -333,7 +333,7 @@ public:
     }
 
 protected:
-    std::optional<ShapeValue> Create_(
+    std::optional<ShapeValueWrapper> Create_(
         const tau::Point2d<double> position)
     {
         switch (this->selectedShape_)

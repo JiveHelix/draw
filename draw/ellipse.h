@@ -72,7 +72,7 @@ using EllipseGroup = pex::Group
 
 using EllipseModel = typename EllipseGroup::Model;
 
-using EllipseControl = typename EllipseGroup::Control;
+using EllipseControl = typename EllipseGroup::DefaultControl;
 
 
 
