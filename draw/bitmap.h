@@ -3,7 +3,7 @@
 
 #include <wxpex/wxshim.h>
 #include <tau/color.h>
-#include "draw/mono_image.h"
+#include <tau/mono_image.h>
 
 
 WXSHIM_PUSH_IGNORES
@@ -17,7 +17,9 @@ namespace draw
 
 tau::RgbPixels<uint8_t> GetRgbPixels(const wxBitmap &bitmap);
 
-MonoImage<int32_t> GetMonoImage(const wxBitmap &bitmap, int32_t maximumValue);
+tau::MonoImage<int32_t> GetMonoImage(
+    const wxBitmap &bitmap,
+    int32_t maximumValue);
 
 wxBitmap GetBitmap(const tau::RgbPixels<uint8_t> &pixels);
 

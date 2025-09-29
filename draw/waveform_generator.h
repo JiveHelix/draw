@@ -38,7 +38,7 @@ using Highlights = Eigen::RowVector<bool, Eigen::Dynamic>;
 class WaveformColormap
 {
 public:
-    using ColorMap = tau::ColorMap<PixelMatrix>;
+    using ColorMap = tau::BasicColorMap<PixelMatrix>;
     using Rescale = tau::Rescale<size_t>;
 
     WaveformColormap(const WaveformColor &waveformColor);

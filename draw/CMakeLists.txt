@@ -32,8 +32,6 @@ target_sources(
     draw
     PRIVATE
     bitmap.h
-    color_map.h
-    color_map_settings.h
     cross.h
     cross_shape.h
     drag.h
@@ -49,7 +47,6 @@ target_sources(
     font_look.h
     lines_shape.h
     look.h
-    mono_image.h
     oddeven.h
     pixels.h
     planar.h
@@ -106,8 +103,6 @@ target_sources(
     views/waveform_settings_view.h
     views/waveform_view.h
     bitmap.cpp
-    color_map.cpp
-    color_map_settings.cpp
     cross.cpp
     cross_shape.cpp
     draw_context.cpp

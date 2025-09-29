@@ -7,7 +7,7 @@
 #include <draw/size.h>
 #include <draw/bitmap.h>
 #include <draw/regular_polygon.h>
-#include <draw/color_map.h>
+#include <tau/color_map.h>
 
 #include <draw/views/bitmap_view.h>
 #include <draw/views/pixel_view.h>
@@ -38,7 +38,7 @@ struct DrawingTemplate
 {
     T<draw::RegularPolygonGroup> regularPolygon;
     T<draw::LookGroup> look;
-    T<draw::ColorMapSettingsGroup<MonoValue>> colorMapSettings;
+    T<tau::ColorMapSettingsGroup<MonoValue>> colorMapSettings;
 
     static constexpr auto fields = DrawingFields<DrawingTemplate>::fields;
     static constexpr auto fieldsTypeName = "DrawingSettings";
@@ -331,9 +331,9 @@ private:
     }
 
     void OnColorMapSettings_(
-        const draw::ColorMapSettings<MonoValue> &colorMapSettings)
+        const tau::ColorMapSettings<MonoValue> &colorMapSettings)
     {
-        this->colorMap_ = draw::ColorMap<MonoValue>(colorMapSettings);
+        this->colorMap_ = tau::ColorMap<MonoValue>(colorMapSettings);
     }
 
 private:
@@ -341,13 +341,13 @@ private:
     DemoControl control_;
     bool ignore_;
     DemoPixelViews *demoPixelViews_;
-    draw::ColorMap<MonoValue> colorMap_;
+    tau::ColorMap<MonoValue> colorMap_;
 
     using DrawingSettingsEndpoint = pex::Endpoint<DemoBrain, DrawingControl>;
     DrawingSettingsEndpoint drawingSettingsEndpoint_;
 
     using ColorMapSettingsEndpoint =
-        pex::Endpoint<DemoBrain, draw::ColorMapSettingsControl<MonoValue>>;
+        pex::Endpoint<DemoBrain, tau::ColorMapSettingsControl<MonoValue>>;
 
     ColorMapSettingsEndpoint colorMapSettingsEndpoint_;
 

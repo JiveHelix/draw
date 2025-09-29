@@ -20,7 +20,9 @@ tau::RgbPixels<uint8_t> GetRgbPixels(const wxBitmap &bitmap)
 }
 
 
-MonoImage<int32_t> GetMonoImage(const wxBitmap &bitmap, int32_t maximumValue)
+tau::MonoImage<int32_t> GetMonoImage(
+    const wxBitmap &bitmap,
+    int32_t maximumValue)
 {
     auto rgbPixels = GetRgbPixels(bitmap);     
     auto planarRgb = rgbPixels.GetPlanar();

@@ -7,7 +7,7 @@
 #include <wxpex/check_box.h>
 
 #include "draw/views/node_settings_view.h"
-#include "draw/color_map_settings.h"
+#include <tau/color_map_settings.h>
 
 
 namespace draw
@@ -22,7 +22,7 @@ public:
 
     ColorMapSettingsView(
         wxWindow *parent,
-        ColorMapSettingsControl<Value> control,
+        tau::ColorMapSettingsControl<Value> control,
         std::optional<draw::NodeSettingsControl> nodeSettingsControl,
         const LayoutOptions &layoutOptions = LayoutOptions{})
         :
