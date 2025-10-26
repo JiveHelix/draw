@@ -86,6 +86,7 @@ target_sources(
     views/ellipse_shape_view.h
     views/ellipse_view.h
     views/font_look_view.h
+    views/keep_center.h
     views/lines_shape_view.h
     views/look_view.h
     views/node_settings_view.h
@@ -99,6 +100,7 @@ target_sources(
     views/regular_polygon_view.h
     views/quad_view.h
     views/size_view.h
+    views/view_link.h
     views/view_settings.h
     views/waveform_settings_view.h
     views/waveform_view.h
@@ -132,12 +134,14 @@ target_sources(
     detail/poly_shape_id.cpp
     views/bitmap_canvas.cpp
     views/bitmap_view.cpp
+    views/canvas.cpp
     views/canvas_settings.cpp
     views/cross_shape_view.cpp
     views/cross_view.cpp
     views/ellipse_shape_view.cpp
     views/ellipse_view.cpp
     views/font_look_view.cpp
+    views/keep_center.cpp
     views/lines_shape_view.cpp
     views/look_view.cpp
     views/node_settings_view.cpp
@@ -149,6 +153,7 @@ target_sources(
     views/polygon_view.cpp
     views/regular_polygon_view.cpp
     views/quad_view.cpp
+    views/view_link.cpp
     views/view_settings.cpp
     views/waveform_settings_view.cpp
     views/waveform_view.cpp)

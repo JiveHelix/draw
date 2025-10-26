@@ -5,10 +5,10 @@
 #include <wxpex/async.h>
 #include <wxpex/modifier.h>
 #include <wxpex/cursor.h>
-#include "draw/pixels.h"
-#include "draw/shapes.h"
-#include "draw/views/canvas_settings.h"
-#include "draw/pixels.h"
+#include <draw/pixels.h>
+#include <draw/shapes.h>
+#include <draw/views/canvas_settings.h>
+#include <draw/pixels.h>
 
 
 namespace draw
