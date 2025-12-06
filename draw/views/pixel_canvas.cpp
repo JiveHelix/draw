@@ -17,7 +17,7 @@ namespace draw
 
 PixelCanvas::PixelCanvas(
     wxWindow *parent,
-    PixelViewControl control)
+    const PixelViewControl &control)
     :
     Canvas(parent, control.canvas),
 

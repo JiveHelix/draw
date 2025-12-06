@@ -32,7 +32,7 @@ public:
 
     NodeSettingsView(
         wxWindow *window,
-        std::optional<NodeSettingsControl> control);
+        const NodeSettingsControl *control);
 
     void WindowWillBeDestroyed();
 
@@ -62,13 +62,13 @@ public:
     CollapsibleNodeSettingsView(
         wxWindow *parent,
         const std::string &nodeName,
-        ShapeExpandControl expandControl,
-        std::optional<NodeSettingsControl> control);
+        const ShapeExpandControl &expandControl,
+        const NodeSettingsControl *control = nullptr);
 
     CollapsibleNodeSettingsView(
         wxWindow *parent,
         const std::string &nodeName,
-        std::optional<NodeSettingsControl> control);
+        const NodeSettingsControl *control = nullptr);
 
     bool Destroy() override;
 
@@ -83,7 +83,7 @@ public:
     BoxedNodeSettingsView(
         wxWindow *parent,
         const std::string &nodeName,
-        std::optional<NodeSettingsControl> control);
+        const NodeSettingsControl *control = nullptr);
 
     bool Destroy() override;
 

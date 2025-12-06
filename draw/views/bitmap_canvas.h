@@ -16,7 +16,7 @@ public:
 
     BitmapCanvas(
         wxWindow *parent,
-        CanvasControl control);
+        const CanvasControl &control);
 
     wxBitmap & GetBitmap();
     const wxBitmap & GetBitmap() const;

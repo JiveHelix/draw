@@ -21,7 +21,7 @@ namespace draw
 
 StrokeView::StrokeView(
     wxWindow *parent,
-    StrokeControl control,
+    const StrokeControl &control,
     const wxpex::LayoutOptions &layoutOptions)
     :
     wxpex::Collapsible(parent, "Stroke", borderStyle)
@@ -32,8 +32,8 @@ StrokeView::StrokeView(
 
 StrokeView::StrokeView(
     wxWindow *parent,
-    StrokeControl control,
-    wxpex::Collapsible::StateControl expandControl,
+    const StrokeControl &control,
+    const wxpex::Collapsible::StateControl &expandControl,
     const wxpex::LayoutOptions &layoutOptions)
     :
     wxpex::Collapsible(parent, "Stroke", expandControl, borderStyle)
@@ -42,7 +42,7 @@ StrokeView::StrokeView(
 }
 
 
-void StrokeView::Initialize_(StrokeControl control)
+void StrokeView::Initialize_(const StrokeControl &control)
 {
     using namespace wxpex;
 
@@ -89,7 +89,7 @@ void StrokeView::Initialize_(StrokeControl control)
 
 FillView::FillView(
     wxWindow *parent,
-    FillControl control,
+    const FillControl &control,
     const wxpex::LayoutOptions &layoutOptions)
     :
     wxpex::Collapsible(parent, "Fill", borderStyle)
@@ -100,8 +100,8 @@ FillView::FillView(
 
 FillView::FillView(
     wxWindow *parent,
-    FillControl control,
-    wxpex::Collapsible::StateControl expandControl,
+    const FillControl &control,
+    const wxpex::Collapsible::StateControl &expandControl,
     const wxpex::LayoutOptions &layoutOptions)
     :
     wxpex::Collapsible(parent, "Fill", expandControl, borderStyle)
@@ -110,7 +110,7 @@ FillView::FillView(
 }
 
 
-void FillView::Initialize_(FillControl control)
+void FillView::Initialize_(const FillControl &control)
 {
     using namespace wxpex;
 
@@ -140,7 +140,7 @@ void FillView::Initialize_(FillControl control)
 LookView::LookView(
     wxWindow *parent,
     const std::string &name,
-    LookControl control,
+    const LookControl &control,
     const LayoutOptions &layoutOptions)
     :
     wxpex::Collapsible(parent, name, borderStyle)
@@ -166,7 +166,7 @@ LookView::LookView(
 
 LookView::LookView(
     wxWindow *parent,
-    LookControl control,
+    const LookControl &control,
     const LayoutOptions &layoutOptions)
     :
     LookView(parent, "Look", control, layoutOptions)
@@ -178,8 +178,8 @@ LookView::LookView(
 LookView::LookView(
     wxWindow *parent,
     const std::string &name,
-    LookControl control,
-    LookDisplayControl displayControl,
+    const LookControl &control,
+    const LookDisplayControl &displayControl,
     const LayoutOptions &layoutOptions)
     :
     wxpex::Collapsible(parent, name, displayControl.lookExpand, borderStyle)
@@ -207,8 +207,8 @@ LookView::LookView(
 
 LookView::LookView(
     wxWindow *parent,
-    LookControl control,
-    LookDisplayControl displayControl,
+    const LookControl &control,
+    const LookDisplayControl &displayControl,
     const LayoutOptions &layoutOptions)
     :
     LookView(parent, "Look", control, displayControl, layoutOptions)
@@ -220,7 +220,7 @@ LookView::LookView(
 StrokeOnlyView::StrokeOnlyView(
     wxWindow *parent,
     const std::string &name,
-    StrokeControl control,
+    const StrokeControl &control,
     const LayoutOptions &layoutOptions)
     :
     wxpex::Collapsible(parent, name, borderStyle)
@@ -240,7 +240,7 @@ StrokeOnlyView::StrokeOnlyView(
 
 StrokeOnlyView::StrokeOnlyView(
     wxWindow *parent,
-    StrokeControl control,
+    const StrokeControl &control,
     const LayoutOptions &layoutOptions)
     :
     StrokeOnlyView(parent, "Stroke", control, layoutOptions)
@@ -252,8 +252,8 @@ StrokeOnlyView::StrokeOnlyView(
 StrokeOnlyView::StrokeOnlyView(
     wxWindow *parent,
     const std::string &name,
-    StrokeControl control,
-    LookDisplayControl displayControl,
+    const StrokeControl &control,
+    const LookDisplayControl &displayControl,
     const LayoutOptions &layoutOptions)
     :
     wxpex::Collapsible(parent, name, displayControl.lookExpand, borderStyle)
@@ -274,8 +274,8 @@ StrokeOnlyView::StrokeOnlyView(
 
 StrokeOnlyView::StrokeOnlyView(
     wxWindow *parent,
-    StrokeControl control,
-    LookDisplayControl displayControl,
+    const StrokeControl &control,
+    const LookDisplayControl &displayControl,
     const LayoutOptions &layoutOptions)
     :
     StrokeOnlyView(parent, "Stroke", control, displayControl, layoutOptions)

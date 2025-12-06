@@ -75,7 +75,7 @@ public:
         }
     }
 
-    VectorSelectionBrain(ListControl list)
+    VectorSelectionBrain(const ListControl &list)
         :
         VectorSelectionBrain(std::vector<ListControl>({list}))
     {

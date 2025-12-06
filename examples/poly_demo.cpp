@@ -1,5 +1,6 @@
 
 
+#include <wxpex/wxshim_app.h>
 #include "common/shape_demo_brain.h"
 #include <draw/shape_creator.h>
 #include <draw/hue_generator.h>
@@ -87,4 +88,4 @@ private:
 
 
 // Creates the main function for us, and initializes the app's run loop.
-wxshimIMPLEMENT_APP_CONSOLE(wxpex::App<DemoBrain>)
+wxshimAPP(wxpex::App<DemoBrain>)

@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <pex/group.h>
 #include "draw/cross.h"
 #include "draw/look.h"
@@ -48,7 +47,7 @@ struct CrossShapeTemplates: public ShapeCommon<CrossGroup, CrossView>
             std::shared_ptr<ShapeControl> control,
             const tau::Point2d<double> &click,
             const wxpex::Modifier &modifier,
-            CursorControl cursor) override
+            const CursorControl &cursor) override
         {
             return ::draw::ProcessMouseDown
                 <
@@ -83,7 +82,7 @@ struct CreateCross
 
         // ShapeCommon Template:
         /*
-        T<pex::ReadOnly<ssize_t>> id;
+        T<pex::ReadOnly<int64_t>> id;
         T<pex::OrderGroup> order;
         T<ShapeGroup> shape;
         T<LookGroup> look;

@@ -21,7 +21,7 @@ public:
     using Converter = wxpex::PrecisionConverter<ValueControl, precision>;
     using ValueField = wxpex::Field<ValueControl, Converter>;
 
-    SizeView(wxWindow *parent, Control control)
+    SizeView(wxWindow *parent, const Control &control)
         :
         wxControl(parent, wxID_ANY)
     {

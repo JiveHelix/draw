@@ -295,6 +295,11 @@ struct ViewSettingsCustom
         {
             PEX_NAME("ViewSettingsControl");
         }
+
+        void Emplace(const Control &other)
+        {
+            this->StandardEmplace_(other);
+        }
     };
 };
 
@@ -306,6 +311,9 @@ using ViewSettingsGroup =
 using ViewSettings = typename ViewSettingsGroup::Plain;
 using ViewSettingsModel = typename ViewSettingsGroup::Model;
 using ViewSettingsControl = typename ViewSettingsGroup::DefaultControl;
+
+using TestViewSettingsControl = typename TypeTester<ViewSettingsControl>::Type;
+constexpr auto forceUpstreamControl = sizeof(TestViewSettingsControl);
 
 template<typename Observer>
 using ViewSettingsEndpoint = pex::EndpointGroup<Observer, ViewSettingsControl>;

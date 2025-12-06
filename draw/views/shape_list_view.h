@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include <cstdint>
 #include <pex/ordered_list.h>
 #include <wxpex/list_view.h>
 #include "draw/shape_list.h"
@@ -24,7 +25,7 @@ public:
 
     }
 
-    ssize_t GetId() const
+    int64_t GetId() const
     {
         if constexpr (pex::HasGetVirtual<Control>)
         {
@@ -48,6 +49,11 @@ public:
         }
     }
 
+    const pex::OrderControl & GetOrder() const
+    {
+        return const_cast<ShapeAdaptor *>(this)->GetOrder();
+    }
+
     pex::OrderControl & GetOrder()
     {
         if constexpr (pex::HasVirtualGetOrder<Control>)
@@ -58,6 +64,11 @@ public:
         {
             return this->control_->order;
         }
+    }
+
+    const NodeSettingsControl & GetNode() const
+    {
+        return const_cast<ShapeAdaptor *>(this)->GetNode();
     }
 
     NodeSettingsControl & GetNode()
@@ -86,7 +97,7 @@ public:
 
     wxWindow * CreateLookView(
         wxWindow *parent,
-        LookDisplayControl displayControl) const
+        const LookDisplayControl &displayControl) const
     {
         if constexpr (pex::HasGetVirtual<Control>)
         {
@@ -115,7 +126,7 @@ public:
 
     ShapeListView(
         wxWindow *parent,
-        Control control)
+        const Control &control)
         :
         Base(
             parent,

@@ -22,8 +22,8 @@ public:
 
     ColorMapSettingsView(
         wxWindow *parent,
-        tau::ColorMapSettingsControl<Value> control,
-        std::optional<draw::NodeSettingsControl> nodeSettingsControl,
+        const tau::ColorMapSettingsControl<Value> &control,
+        const draw::NodeSettingsControl *nodeSettingsControl = nullptr,
         const LayoutOptions &layoutOptions = LayoutOptions{})
         :
         draw::CollapsibleNodeSettingsView(

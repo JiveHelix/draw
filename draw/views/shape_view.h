@@ -22,14 +22,14 @@ public:
 
     ShapeView(
         wxWindow *parent,
-        Control control,
-        ShapeDisplayControl displayControl)
+        const Control &control,
+        const ShapeDisplayControl &displayControl)
         :
         CollapsibleNodeSettingsView(
             parent,
             control.GetName(),
             displayControl.shapeExpand,
-            control.GetNode())
+            &control.GetNode())
     {
         auto shape = control.CreateShapeView(this->GetPanel());
 

@@ -17,7 +17,7 @@ namespace draw
 
 BitmapCanvas::BitmapCanvas(
     wxWindow *parent,
-    CanvasControl control)
+    const CanvasControl &control)
     :
     Canvas(parent, control),
 

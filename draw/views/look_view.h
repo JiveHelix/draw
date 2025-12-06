@@ -44,17 +44,17 @@ class StrokeView: public wxpex::Collapsible
 public:
     StrokeView(
         wxWindow *parent,
-        StrokeControl control,
+        const StrokeControl &control,
         const wxpex::LayoutOptions &layoutOptions);
 
     StrokeView(
         wxWindow *parent,
-        StrokeControl control,
-        wxpex::Collapsible::StateControl expandControl,
+        const StrokeControl &control,
+        const wxpex::Collapsible::StateControl &expandControl,
         const wxpex::LayoutOptions &layoutOptions);
 
 protected:
-    void Initialize_(StrokeControl);
+    void Initialize_(const StrokeControl &);
 };
 
 
@@ -63,17 +63,17 @@ class FillView: public wxpex::Collapsible
 public:
     FillView(
         wxWindow *parent,
-        FillControl control,
+        const FillControl &control,
         const wxpex::LayoutOptions &layoutOptions);
 
     FillView(
         wxWindow *parent,
-        FillControl control,
-        wxpex::Collapsible::StateControl expandControl,
+        const FillControl &control,
+        const wxpex::Collapsible::StateControl &expandControl,
         const wxpex::LayoutOptions &layoutOptions);
 
 protected:
-    void Initialize_(FillControl);
+    void Initialize_(const FillControl &);
 };
 
 
@@ -85,25 +85,25 @@ public:
     LookView(
         wxWindow *parent,
         const std::string &name,
-        LookControl control,
-        LookDisplayControl displayControl,
+        const LookControl &control,
+        const LookDisplayControl &displayControl,
         const LayoutOptions &layoutOptions);
 
     LookView(
         wxWindow *parent,
-        LookControl control,
-        LookDisplayControl displayControl,
+        const LookControl &control,
+        const LookDisplayControl &displayControl,
         const LayoutOptions &layoutOptions);
 
     LookView(
         wxWindow *parent,
         const std::string &name,
-        LookControl control,
+        const LookControl &control,
         const LayoutOptions &layoutOptions);
 
     LookView(
         wxWindow *parent,
-        LookControl control,
+        const LookControl &control,
         const LayoutOptions &layoutOptions);
 };
 
@@ -116,25 +116,25 @@ public:
     StrokeOnlyView(
         wxWindow *parent,
         const std::string &name,
-        StrokeControl control,
+        const StrokeControl &control,
         const LayoutOptions &layoutOptions);
 
     StrokeOnlyView(
         wxWindow *parent,
-        StrokeControl control,
+        const StrokeControl &control,
         const LayoutOptions &layoutOptions);
 
     StrokeOnlyView(
         wxWindow *parent,
         const std::string &name,
-        StrokeControl control,
-        LookDisplayControl displayControl,
+        const StrokeControl &control,
+        const LookDisplayControl &displayControl,
         const LayoutOptions &layoutOptions);
 
     StrokeOnlyView(
         wxWindow *parent,
-        StrokeControl control,
-        LookDisplayControl displayControl,
+        const StrokeControl &control,
+        const LookDisplayControl &displayControl,
         const LayoutOptions &layoutOptions);
 };
 

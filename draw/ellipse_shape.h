@@ -96,7 +96,7 @@ struct EllipseShapeTemplates: public ShapeCommon<EllipseGroup, EllipseView>
             std::shared_ptr<ShapeControl> control,
             const tau::Point2d<double> &click,
             const wxpex::Modifier &modifier,
-            CursorControl cursor) override
+            const CursorControl &cursor) override
         {
             return ::draw::ProcessMouseDown
                 <

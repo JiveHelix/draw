@@ -12,7 +12,7 @@ namespace draw
 EllipseShapeView::EllipseShapeView(
     wxWindow *parent,
     const std::string &name,
-    EllipseShapeControl control,
+    const EllipseShapeControl &control,
     const LayoutOptions &layoutOptions)
     :
     wxpex::Collapsible(parent, name)

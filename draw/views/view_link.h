@@ -144,14 +144,14 @@ public:
     void SetName(const std::string &name);
 
     ViewLink(
-        ViewSettingsControl first,
-        ViewSettingsControl second,
+        const ViewSettingsControl &first,
+        const ViewSettingsControl &second,
         const std::string &name,
         LinkOptions options = LinkOptions{});
 
     ViewLink(
-        ViewSettingsControl first,
-        ViewSettingsControl second,
+        const ViewSettingsControl &first,
+        const ViewSettingsControl &second,
         LinkOptions options = LinkOptions{});
 
 private:

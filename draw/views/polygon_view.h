@@ -30,7 +30,7 @@ public:
 
     using Converter = pex::Converter<double, wxpex::ViewTraits<10, 0, 1>>;
 
-    PointsView(wxWindow *parent, Control control);
+    PointsView(wxWindow *parent, const Control &control);
 
     void OnPoints_(const PointsDouble &points);
 
@@ -46,13 +46,13 @@ public:
 
     PolygonView(
         wxWindow *parent,
-        PolygonControl control,
+        const PolygonControl &control,
         const LayoutOptions &layoutOptions);
 
     PolygonView(
         wxWindow *parent,
         const std::string &name,
-        PolygonControl control,
+        const PolygonControl &control,
         const LayoutOptions &layoutOptions);
 };
 

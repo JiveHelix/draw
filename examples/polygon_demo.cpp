@@ -1,6 +1,7 @@
 
 
 #include "common/shape_demo_brain.h"
+#include <wxpex/wxshim_app.h>
 
 
 class DemoBrain: public ShapeDemoBrain<DemoBrain>
@@ -28,4 +29,4 @@ private:
 
 
 // Creates the main function for us, and initializes the app's run loop.
-wxshimIMPLEMENT_APP_CONSOLE(wxpex::App<DemoBrain>)
+wxshimAPP(wxpex::App<DemoBrain>)

@@ -324,7 +324,7 @@ std::unique_ptr<Drag> ProcessMouseDown(
     DerivedShape &shape,
     const tau::Point2d<double> &click,
     const wxpex::Modifier &modifier,
-    CursorControl cursor)
+    const CursorControl &cursor)
 {
     auto points = shape.GetPoints();
     auto foundPoint = FindPoint(click, points);
@@ -453,8 +453,8 @@ public:
     static_assert(pex::HasIndices<ShapesControl>);
 
     ShapeEditor(
-        ShapesControl shapeList,
-        CanvasControl canvasControl)
+        const ShapesControl &shapeList,
+        const CanvasControl &canvasControl)
         :
         MouseSelectionBrain(shapeList),
         isEnabled_(true),

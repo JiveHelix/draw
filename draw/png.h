@@ -67,11 +67,10 @@ public:
 
     Png() = default;
 
-    Png(const std::string &fileName, bool high)
+    Png(const std::string &fileName)
     {
-        if (high)
+        if constexpr (sizeof(Pixel) >= 2)
         {
-            assert(sizeof(Pixel) >= 2);
             this->rgb_ = ReadPng48(fileName).template Cast<Pixel>();
         }
         else

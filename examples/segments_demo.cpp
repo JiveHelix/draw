@@ -1,3 +1,5 @@
+#include <wxpex/wxshim_app.h>
+#include <cstdint>
 #include <cmath>
 #include <iostream>
 #include <mutex>
@@ -437,7 +439,7 @@ using FunctionWillRemoveControl = typename FunctionsControl::MemberWillRemove;
 class SettingsView: public wxPanel
 {
 public:
-    SettingsView(wxWindow *parent, SettingsControl control)
+    SettingsView(wxWindow *parent, const SettingsControl &control)
         :
         wxPanel(parent, wxID_ANY)
     {
@@ -527,7 +529,7 @@ public:
     FunctionView(
         wxWindow *parent,
         const std::string &name,
-        TrigControl control)
+        const TrigControl &control)
         :
         wxpex::Collapsible(parent, name)
     {
@@ -587,7 +589,7 @@ class FunctionListView: public wxpex::ListView<FunctionsControl>
 public:
     using Base = wxpex::ListView<FunctionsControl>;
 
-    FunctionListView(wxWindow *parent, FunctionsControl control)
+    FunctionListView(wxWindow *parent, const FunctionsControl &control)
         :
         Base(parent, control)
     {
@@ -609,7 +611,7 @@ class DemoControls: public wxPanel
 public:
     DemoControls(
         wxWindow *parent,
-        DemoControl control)
+        const DemoControl &control)
         :
         wxPanel(parent, wxID_ANY)
     {
@@ -749,7 +751,7 @@ private:
 
         RowVector x =
             RowVector::LinSpaced(
-                static_cast<ssize_t>(pointCount),
+                static_cast<int64_t>(pointCount),
                 0,
                 tauRadians);
 
@@ -766,11 +768,11 @@ private:
 
         points.clear();
 
-        for (ssize_t i = 0; i < x.size(); ++i)
+        for (int64_t i = 0; i < x.size(); ++i)
         {
-            points.emplace_back(
-                static_cast<double>(i) * drawSpacing,
-                zeroLine - sine(i));
+                points.emplace_back(
+                    static_cast<double>(i) * drawSpacing,
+                    zeroLine - sine(i));
         }
     }
 
@@ -792,11 +794,11 @@ private:
     {
         for (size_t i = 0; i < functionCount; ++i)
         {
-            this->functionEndpoints_.emplace_back(
-                this,
-                this->demoModel_.functions[i],
-                &DemoBrain::OnFunction_,
-                i);
+                this->functionEndpoints_.emplace_back(
+                    this,
+                    this->demoModel_.functions[i],
+                    &DemoBrain::OnFunction_,
+                    i);
         }
     }
 
@@ -833,13 +835,14 @@ private:
         {
             return;
         }
-
+#if 0
         this->functionEndpoints_.emplace(
             jive::SafeInsertIterator(this->functionEndpoints_, *index),
             this,
             this->demoModel_.functions[*index],
             &DemoBrain::OnFunction_,
             *index);
+#endif
     }
 
     void OnPointCount_(size_t)
@@ -885,4 +888,4 @@ private:
 
 
 // Creates the main function for us, and initializes the app's run loop.
-wxshimIMPLEMENT_APP_CONSOLE(wxpex::App<DemoBrain>)
+wxshimAPP(wxpex::App<DemoBrain>)

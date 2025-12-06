@@ -7,7 +7,7 @@ namespace draw
 
 Canvas::Canvas(
     wxWindow *parent,
-    CanvasControl control)
+    const CanvasControl &control)
     :
     Scrolled(parent, wxID_ANY),
     ignoreViewPosition_(false),

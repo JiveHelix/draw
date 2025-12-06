@@ -18,9 +18,9 @@ namespace draw
 
 WaveformPixels::WaveformPixels(
     wxWindow *parent,
-    PixelViewControl mainViewControl,
-    PixelViewControl pixelViewControl,
-    WaveformControl waveformControl)
+    const PixelViewControl &mainViewControl,
+    const PixelViewControl &pixelViewControl,
+    const WaveformControl &waveformControl)
     :
     wxPanel(parent, wxID_ANY),
 
@@ -164,9 +164,9 @@ Eigen::Vector<wxCoord, Eigen::Dynamic> WaveformPixels::GetLines() const
 
 WaveformView::WaveformView(
     wxWindow *parent,
-    PixelViewControl mainViewControl,
-    PixelViewControl pixelViewControl,
-    WaveformControl waveformControl)
+    const PixelViewControl &mainViewControl,
+    const PixelViewControl &pixelViewControl,
+    const WaveformControl &waveformControl)
     :
     wxPanel(parent, wxID_ANY),
 
@@ -274,9 +274,9 @@ void WaveformView::OnPaint_(wxPaintEvent &)
 
 PixelViewAndWaveform::PixelViewAndWaveform(
     wxWindow *parent,
-    PixelViewControl pixelViewControl,
-    PixelViewControl waveformPixelViewControl,
-    WaveformControl waveformControl)
+    const PixelViewControl &pixelViewControl,
+    const PixelViewControl &waveformPixelViewControl,
+    const WaveformControl &waveformControl)
     :
     wxPanel(parent, wxID_ANY),
 

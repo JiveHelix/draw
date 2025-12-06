@@ -19,7 +19,7 @@ public:
     PointsShapeView(
         wxWindow *parent,
         const std::string &name,
-        PointsShapeControl controls,
+        const PointsShapeControl &controls,
         const LayoutOptions &layoutOptions = LayoutOptions{});
 };
 

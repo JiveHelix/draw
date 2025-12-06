@@ -74,8 +74,6 @@ DECLARE_EQUALITY_OPERATORS(NodeSettings)
 DECLARE_OUTPUT_STREAM_OPERATOR(NodeSettings)
 
 
-using OptionalNodeSettings = std::optional<NodeSettingsControl>;
-
 template<typename Observer>
 using NodeToggleSelectEndpoint =
     pex::Endpoint<Observer, NodeToggleSelectSignal>;

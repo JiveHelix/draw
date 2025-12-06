@@ -215,6 +215,12 @@ struct RegularPolygonCustom
             return *this;
         }
 
+        void Emplace(const Control &other)
+        {
+            this->StandardEmplace_(other);
+            this->sideLength.Emplace(other.sideLength);
+        }
+
         SideLengthControl sideLength;
     };
 };

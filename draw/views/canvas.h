@@ -41,7 +41,7 @@ public:
 
     Canvas(
         wxWindow *parent,
-        CanvasControl control);
+        const CanvasControl &control);
 
     Size GetVirtualSize() const;
 

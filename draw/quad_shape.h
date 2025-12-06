@@ -59,7 +59,7 @@ struct QuadShapeTemplates: public ShapeCommon<QuadGroup, QuadView>
             std::shared_ptr<ShapeControl> control,
             const tau::Point2d<double> &click,
             const wxpex::Modifier &modifier,
-            CursorControl cursor) override
+            const CursorControl &cursor) override
         {
             return ::draw::ProcessMouseDown
                 <

@@ -26,9 +26,9 @@ public:
 
     WaveformPixels(
         wxWindow *parent,
-        PixelViewControl mainViewControl,
-        PixelViewControl pixelViewControl,
-        WaveformControl waveformControl);
+        const PixelViewControl &mainViewControl,
+        const PixelViewControl &pixelViewControl,
+        const WaveformControl &waveformControl);
 
     Eigen::Vector<wxCoord, Eigen::Dynamic> GetLines() const;
 
@@ -53,9 +53,9 @@ public:
 
     WaveformView(
         wxWindow *parent,
-        PixelViewControl mainViewControl,
-        PixelViewControl pixelViewControl,
-        WaveformControl waveformControl);
+        const PixelViewControl &mainViewControl,
+        const PixelViewControl &pixelViewControl,
+        const WaveformControl &waveformControl);
 
 private:
     void OnPaint_(wxPaintEvent &);
@@ -86,9 +86,9 @@ class PixelViewAndWaveform: public wxPanel
 public:
     PixelViewAndWaveform(
         wxWindow *parent,
-        PixelViewControl mainViewControl,
-        PixelViewControl waveformPixelView,
-        WaveformControl waveformControl);
+        const PixelViewControl &mainViewControl,
+        const PixelViewControl &waveformPixelView,
+        const WaveformControl &waveformControl);
 
     void SetSashPosition(int sashPosition);
 

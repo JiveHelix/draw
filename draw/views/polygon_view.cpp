@@ -5,7 +5,7 @@ namespace draw
 {
 
 
-PointsView::PointsView(wxWindow *parent, Control control)
+PointsView::PointsView(wxWindow *parent, const Control &control)
     :
     wxListView(parent, wxID_ANY),
     endpoint_(this, control, &PointsView::OnPoints_)
@@ -40,7 +40,7 @@ void PointsView::OnPoints_(const PointsDouble &points)
 PolygonView::PolygonView(
     wxWindow *parent,
     const std::string &name,
-    PolygonControl control,
+    const PolygonControl &control,
     const LayoutOptions &layoutOptions)
     :
     wxpex::StaticBox(parent, name)
@@ -81,7 +81,7 @@ PolygonView::PolygonView(
 
 PolygonView::PolygonView(
     wxWindow *parent,
-    PolygonControl control,
+    const PolygonControl &control,
     const LayoutOptions &layoutOptions)
     :
     PolygonView(parent, "Polygon", control, layoutOptions)

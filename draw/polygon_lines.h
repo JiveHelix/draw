@@ -2,10 +2,10 @@
 
 
 #include <vector>
-#include <Eigen/Dense>
+#include <tau/eigen_shim.h>
 #include <tau/line2d.h>
 #include <tau/vector2d.h>
-#include "draw/oddeven.h"
+#include <draw/oddeven.h>
 
 
 namespace draw

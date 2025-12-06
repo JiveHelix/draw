@@ -20,7 +20,7 @@ namespace draw
 
 WaveformColorView::WaveformColorView(
     wxWindow *parent,
-    WaveformColorControl control,
+    const WaveformColorControl &control,
     const LayoutOptions &layoutOptions)
     :
     wxpex::Collapsible(parent, "Waveform Color", borderStyle)
@@ -79,7 +79,7 @@ WaveformColorView::WaveformColorView(
 
 WaveformSettingsView::WaveformSettingsView(
     wxWindow *parent,
-    WaveformControl control,
+    const WaveformControl &control,
     const LayoutOptions &layoutOptions)
     :
     wxpex::Collapsible(parent, "Waveform", wxBORDER_SIMPLE)

@@ -4,6 +4,7 @@
 #include <wxpex/labeled_widget.h>
 #include <wxpex/layout_items.h>
 #include <wxpex/app.h>
+#include <wxpex/wxshim_app.h>
 #include <draw/size.h>
 #include <draw/bitmap.h>
 #include <draw/regular_polygon.h>
@@ -142,7 +143,7 @@ using DemoSettings = typename DemoGroup::Plain;
 class DemoControlView: public wxpex::Scrolled
 {
 public:
-    DemoControlView(wxWindow *parent, DemoControl control)
+    DemoControlView(wxWindow *parent, const DemoControl &control)
         :
         wxpex::Scrolled(parent)
     {
@@ -188,7 +189,7 @@ public:
 class DemoPixelViews: public wxPanel
 {
 public:
-    DemoPixelViews(wxWindow *parent, DemoControl control)
+    DemoPixelViews(wxWindow *parent, const DemoControl &control)
         :
         wxPanel(parent, wxID_ANY),
         control_(control)
@@ -359,4 +360,4 @@ private:
 
 
 
-wxshimIMPLEMENT_APP_CONSOLE(wxpex::App<DemoBrain>)
+wxshimAPP(wxpex::App<DemoBrain>)

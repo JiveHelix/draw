@@ -5,7 +5,7 @@ namespace draw
 {
 
 
-QuadBounds::QuadBounds(QuadControl control)
+QuadBounds::QuadBounds(const QuadControl &control)
     :
     shear(Bounds2d::Make(control.shear)),
     perspective(Bounds2d::Make(control.perspective)),

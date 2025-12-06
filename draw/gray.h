@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include <Eigen/Dense>
+#include <tau/eigen_shim.h>
 
 
 namespace draw

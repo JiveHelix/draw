@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include <cstdint>
 #include <nlohmann/json.hpp>
 #include <pex/endpoint.h>
 #include <pex/derived_group.h>
@@ -46,7 +47,7 @@ class ShapeControlUserBase
 public:
     virtual ~ShapeControlUserBase() {}
 
-    virtual ssize_t GetId() const = 0;
+    virtual int64_t GetId() const = 0;
     virtual std::string GetName() const = 0;
     virtual NodeSettingsControl & GetNode() = 0;
     virtual LookControl & GetLook() = 0;
@@ -56,7 +57,7 @@ public:
 
     virtual wxWindow * CreateLookView(
         wxWindow *parent,
-        LookDisplayControl displayControl) const = 0;
+        const LookDisplayControl &displayControl) const = 0;
 };
 
 
@@ -79,7 +80,7 @@ public:
     static constexpr auto polyTypeName = "Shape";
 
     using ControlBase =
-        pex::poly::ControlSuper<Shape, ShapeControlUserBase>;
+        pex::poly::SuperControlStencil<Shape, ShapeControlUserBase>;
 
     virtual bool HandlesAltClick() const { return false; }
     virtual bool HandlesControlClick() const { return false; }
@@ -89,7 +90,7 @@ public:
     virtual bool HandlesDrag() const { return false; }
 
     virtual Look & GetLook() = 0;
-    virtual ssize_t GetId() const = 0;
+    virtual int64_t GetId() const = 0;
     virtual PointsDouble GetPoints() const = 0;
 
     virtual bool Contains(
@@ -102,7 +103,7 @@ public:
         std::shared_ptr<ControlBase> shapeControl,
         const tau::Point2d<double> &click,
         const wxpex::Modifier &modifier,
-        CursorControl cursor) = 0;
+        const CursorControl &cursor) = 0;
 
     virtual bool ProcessControlClick(
         ControlBase &,
@@ -153,7 +154,7 @@ struct ShapeCommon
     struct Template
     {
         // id is read-only to a control
-        T<pex::ReadOnly<ssize_t>> id;
+        T<pex::ReadOnly<int64_t>> id;
         T<pex::OrderGroup> order;
         T<ShapeGroup> shape;
         T<LookGroup> look;
@@ -205,7 +206,21 @@ struct ShapeCommon
 
         virtual ~Control() {}
 
-        ssize_t GetId() const override
+        template<typename ModelBase>
+        void Emplace(Model<ModelBase> &upstream)
+        {
+            static_assert(
+                std::same_as<ModelBase, typename Base::Upstream>);
+
+            this->StandardEmplace_(upstream);
+        }
+
+        void Emplace(const Control &other)
+        {
+            this->StandardEmplace_(other);
+        }
+
+        int64_t GetId() const override
         {
             return this->id.Get();
         }
@@ -248,7 +263,7 @@ struct ShapeCommon
 
         wxWindow * CreateLookView(
             wxWindow *parent,
-            LookDisplayControl displayControl) const override
+            const LookDisplayControl &displayControl) const override
         {
             return new LookView(
                 parent,
@@ -271,7 +286,7 @@ public:
 
     virtual ~ShapeDerived() {}
 
-    ssize_t GetId() const override
+    int64_t GetId() const override
     {
         return this->id;
     }
@@ -302,7 +317,7 @@ using ShapeControl = typename Shape::ControlBase;
 static_assert(pex::poly::detail::IsCompatibleBase<Shape>);
 
 
-class ShapesId: public UniqueId<ssize_t>
+class ShapesId: public UniqueId<int64_t>
 {
 public:
     ShapesId();
@@ -318,11 +333,11 @@ public:
 
     Shapes();
 
-    Shapes(ssize_t id);
+    Shapes(int64_t id);
 
     const ShapeVector & GetShapes() const;
 
-    ssize_t GetId() const;
+    int64_t GetId() const;
 
     // Shapes with the same id_ compare equal.
     bool operator==(const Shapes &other) const;
@@ -349,7 +364,7 @@ public:
     bool IsResetter() const;
 
 private:
-    ssize_t id_;
+    int64_t id_;
     ShapeVector shapes_;
 };
 

@@ -13,7 +13,7 @@ namespace draw
 RegularPolygonView::RegularPolygonView(
     wxWindow *parent,
     const std::string &name,
-    RegularPolygonControl control,
+    const RegularPolygonControl &control,
     const LayoutOptions &layoutOptions)
     :
     wxpex::StaticBox(parent, name)
@@ -70,7 +70,7 @@ RegularPolygonView::RegularPolygonView(
 
 RegularPolygonView::RegularPolygonView(
     wxWindow *parent,
-    RegularPolygonControl control,
+    const RegularPolygonControl &control,
     const LayoutOptions &layoutOptions)
     :
     RegularPolygonView(parent, "Polygon", control, layoutOptions)

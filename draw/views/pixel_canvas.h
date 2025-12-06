@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include "draw/views/canvas.h"
 #include "draw/pixels.h"
 #include "draw/views/pixel_view_settings.h"
@@ -16,7 +17,7 @@ public:
 
     PixelCanvas(
         wxWindow *parent,
-        PixelViewControl control);
+        const PixelViewControl &control);
 
 private:
     void OnImageSize_(const Size &imageSize);
@@ -133,7 +134,7 @@ private:
     std::shared_ptr<Pixels> pixelData_;
 
     AsyncShapesEndpoint<PixelCanvas> shapesEndpoint_;
-    std::map<ssize_t, Shapes> shapesById_;
+    std::map<int64_t, Shapes> shapesById_;
 };
 
 

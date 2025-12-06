@@ -10,7 +10,7 @@ namespace draw
 CrossShapeView::CrossShapeView(
     wxWindow *parent,
     const std::string &name,
-    CrossShapeControl control,
+    const CrossShapeControl &control,
     const LayoutOptions &layoutOptions)
     :
     wxpex::Collapsible(parent, name)

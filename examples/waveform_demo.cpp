@@ -1,3 +1,4 @@
+#include <wxpex/wxshim_app.h>
 #include <iostream>
 #include <mutex>
 #include <condition_variable>
@@ -24,8 +25,8 @@ class DemoControls: public wxPanel
 public:
     DemoControls(
         wxWindow *parent,
-        UserControl userControl,
-        draw::WaveformControl control)
+        const UserControl &userControl,
+        const draw::WaveformControl &control)
         :
         wxPanel(parent, wxID_ANY)
     {
@@ -88,9 +89,9 @@ public:
         pngData_(),
 
         colorMap_(
-            tau::gray::MakeRgb8(valueCount),
+            tau::gray::MakeRgb8(rgbValueCount),
             0,
-            static_cast<int32_t>(valueCount - 1))
+            static_cast<int32_t>(rgbValueCount - 1))
     {
         this->waveformPixelModel_.canvas.viewSettings.linkZoom.Set(false);
         this->waveformPixelModel_.canvas.viewSettings.scale.vertical.Set(1.0);
@@ -101,7 +102,7 @@ public:
         this->Shutdown();
     }
 
-    void LoadPng(const draw::GrayPng<PngPixel> &png)
+    void LoadGrayPng(const draw::GrayPng<PngPixel> &png)
     {
         this->pngIsLoaded_ = false;
         this->pngData_ = png.GetValues().template cast<int32_t>();
@@ -109,8 +110,8 @@ public:
         this->userControl_.pixelView.canvas.viewSettings.imageSize.Set(
             png.GetSize());
 
-        this->waveformModel_.maximumValue.Set(valueCount - 1);
-        this->waveformModel_.levelCount.SetMaximum(valueCount);
+        this->waveformModel_.maximumValue.Set(rgbValueCount - 1);
+        this->waveformModel_.levelCount.SetMaximum(rgbValueCount);
 
         this->waveformModel_.columnCount.SetMaximum(
             static_cast<size_t>(this->pngData_.cols()));
@@ -223,4 +224,4 @@ private:
 
 
 // Creates the main function for us, and initializes the app's run loop.
-wxshimIMPLEMENT_APP_CONSOLE(wxpex::App<DemoBrain>)
+wxshimAPP(wxpex::App<DemoBrain>)

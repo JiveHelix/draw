@@ -22,7 +22,7 @@ public:
     using Converter = wxpex::PrecisionConverter<ValueControl, 1>;
     using ValueField = wxpex::Field<ValueControl, Converter>;
 
-    AffineView(wxWindow *parent, Control control)
+    AffineView(wxWindow *parent, const Control &control)
         :
         wxControl(parent, wxID_ANY)
     {

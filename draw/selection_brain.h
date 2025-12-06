@@ -347,7 +347,7 @@ public:
     using Base = SelectionBrain<ListControl>;
     using Found = typename Base::Found;
 
-    MouseSelectionBrain(ListControl list)
+    MouseSelectionBrain(const ListControl &list)
         :
         Base(list)
     {

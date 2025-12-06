@@ -17,13 +17,13 @@ public:
 
     EllipseView(
         wxWindow *parent,
-        EllipseControl control,
+        const EllipseControl &control,
         const LayoutOptions &layoutOptions);
 
     EllipseView(
         wxWindow *parent,
         const std::string &name,
-        EllipseControl control,
+        const EllipseControl &control,
         const LayoutOptions &layoutOptions);
 };
 

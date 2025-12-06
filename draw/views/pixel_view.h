@@ -17,8 +17,8 @@ public:
 
     PixelView(
         wxWindow *parent,
-        PixelViewControl control,
-        CanvasViewOptions options = CanvasViewOptions{});
+        const PixelViewControl &control,
+        const CanvasViewOptions &options = CanvasViewOptions{});
 };
 
 

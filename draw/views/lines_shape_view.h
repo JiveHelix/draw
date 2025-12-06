@@ -19,7 +19,7 @@ public:
     LinesShapeView(
         wxWindow *parent,
         const std::string &name,
-        LinesShapeControl controls,
+        const LinesShapeControl &controls,
         const LayoutOptions &layoutOptions = LayoutOptions{});
 };
 

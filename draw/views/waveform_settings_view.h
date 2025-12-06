@@ -18,7 +18,7 @@ public:
 
     WaveformColorView(
         wxWindow *parent,
-        WaveformColorControl control,
+        const WaveformColorControl &control,
         const LayoutOptions &layoutOptions = LayoutOptions{});
 };
 
@@ -30,7 +30,7 @@ public:
 
     WaveformSettingsView(
         wxWindow *parent,
-        WaveformControl control,
+        const WaveformControl &control,
         const LayoutOptions &layoutOptions = LayoutOptions{});
 };
 

@@ -21,7 +21,7 @@ public:
     using Converter = wxpex::PrecisionConverter<ValueControl, 1>;
     using ValueField = wxpex::Field<ValueControl, Converter>;
 
-    PointView(wxWindow *parent, Control control)
+    PointView(wxWindow *parent, const Control &control)
         :
         wxControl(parent, wxID_ANY)
     {

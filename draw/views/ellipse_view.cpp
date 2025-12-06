@@ -14,7 +14,7 @@ namespace draw
 EllipseView::EllipseView(
     wxWindow *parent,
     const std::string &name,
-    EllipseControl control,
+    const EllipseControl &control,
     const LayoutOptions &layoutOptions)
     :
     wxpex::StaticBox(parent, name)
@@ -72,7 +72,7 @@ EllipseView::EllipseView(
 
 EllipseView::EllipseView(
     wxWindow *parent,
-    EllipseControl control,
+    const EllipseControl &control,
     const LayoutOptions &layoutOptions)
     :
     EllipseView(parent, "Ellipse", control, layoutOptions)

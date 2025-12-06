@@ -13,7 +13,7 @@ namespace draw
 PointsShapeView::PointsShapeView(
     wxWindow *parent,
     const std::string &name,
-    PointsShapeControl controls,
+    const PointsShapeControl &controls,
     const LayoutOptions &layoutOptions)
     :
     wxpex::Collapsible(parent, name)

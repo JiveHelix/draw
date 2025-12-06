@@ -7,8 +7,8 @@ namespace draw
 
 PixelView::PixelView(
     wxWindow *parent,
-    PixelViewControl control,
-    CanvasViewOptions options)
+    const PixelViewControl &control,
+    const CanvasViewOptions &options)
     :
     CanvasView<PixelCanvas>(parent, control.canvas, control, options)
 {

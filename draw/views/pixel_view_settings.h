@@ -79,6 +79,20 @@ struct PixelViewTemplates
             PEX_MEMBER(asyncPixels);
             PEX_MEMBER(asyncShapes);
         }
+
+        void Emplace(typename Base::Upstream &upstream)
+        {
+            this->StandardEmplace_(upstream);
+            this->asyncPixels.Emplace(upstream.pixels.GetWorkerControl());
+            this->asyncShapes.Emplace(upstream.shapes.GetWorkerControl());
+        }
+
+        void Emplace(const Control &other)
+        {
+            this->StandardEmplace_(other);
+            this->asyncPixels.Emplace(other.asyncPixels);
+            this->asyncShapes.Emplace(other.asyncShapes);
+        }
     };
 };
 
@@ -90,6 +104,7 @@ using PixelViewSettings = typename PixelViewGroup::Plain;
 using PixelViewModel = typename PixelViewGroup::Model;
 using PixelViewControl = typename PixelViewGroup::DefaultControl;
 
+using AsyncPixelsControl = typename PixelViewControl::AsyncPixelsControl;
 using AsyncShapesControl = typename PixelViewControl::AsyncShapesControl;
 
 

@@ -14,7 +14,7 @@ namespace draw
 FontLookView::FontLookView(
     wxWindow *parent,
     const std::string &name,
-    FontLookControl control,
+    const FontLookControl &control,
     const LayoutOptions &layoutOptions)
     :
     wxpex::StaticBox(parent, name)

@@ -1,4 +1,5 @@
 #include "draw/shapes.h"
+#include <cstdint>
 #include <set>
 
 
@@ -6,14 +7,14 @@ namespace draw
 {
 
 
-static std::set<ssize_t> shapesIds;
+static std::set<int64_t> shapesIds;
 
-static constexpr ssize_t resetId = -2;
+static constexpr int64_t resetId = -2;
 
 
 ShapesId::ShapesId()
     :
-    UniqueId<ssize_t>(shapesIds)
+    UniqueId<int64_t>(shapesIds)
 {
 
 }
@@ -27,7 +28,7 @@ Shapes::Shapes()
 }
 
 
-Shapes::Shapes(ssize_t id)
+Shapes::Shapes(int64_t id)
     :
     id_(id)
 {
@@ -51,7 +52,7 @@ const Shapes::ShapeVector & Shapes::GetShapes() const
 }
 
 
-ssize_t Shapes::GetId() const
+int64_t Shapes::GetId() const
 {
     return this->id_;
 }

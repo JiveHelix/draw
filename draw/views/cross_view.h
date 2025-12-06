@@ -24,12 +24,12 @@ public:
     CrossView(
         wxWindow *parent,
         const std::string &name,
-        CrossControl control,
+        const CrossControl &control,
         const LayoutOptions &layoutOptions);
 
     CrossView(
         wxWindow *parent,
-        CrossControl control,
+        const CrossControl &control,
         const LayoutOptions &layoutOptions);
 };
 

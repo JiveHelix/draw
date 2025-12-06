@@ -7,8 +7,8 @@ namespace draw
 
 BitmapView::BitmapView(
     wxWindow *parent,
-    CanvasControl control,
-    CanvasViewOptions options)
+    const CanvasControl &control,
+    const CanvasViewOptions &options)
     :
     CanvasView<BitmapCanvas>(parent, control, control, options)
 {

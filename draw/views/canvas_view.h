@@ -79,8 +79,8 @@ public:
     CanvasControls(
         wxWindow *window,
         wxBoxSizer *sizer,
-        CanvasControl control,
-        CanvasViewOptions options)
+        const CanvasControl &control,
+        const CanvasViewOptions &options)
         :
         options_(options),
         horizontalZoom_(nullptr),

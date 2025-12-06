@@ -66,4 +66,4 @@ template<typename Observer>
 using UserEndpoints = pex::EndpointGroup<Observer, UserControl>;
 
 
-wxpex::ShortcutGroups MakeShortcuts(UserControl userControl);
+wxpex::ShortcutGroups MakeShortcuts(const UserControl &userControl);

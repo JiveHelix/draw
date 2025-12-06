@@ -19,13 +19,13 @@ public:
 
     RegularPolygonView(
         wxWindow *parent,
-        RegularPolygonControl control,
+        const RegularPolygonControl &control,
         const LayoutOptions &layoutOptions);
 
     RegularPolygonView(
         wxWindow *parent,
         const std::string &name,
-        RegularPolygonControl control,
+        const RegularPolygonControl &control,
         const LayoutOptions &layoutOptions);
 };
 

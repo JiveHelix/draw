@@ -18,7 +18,7 @@ public:
     FontLookView(
         wxWindow *parent,
         const std::string &name,
-        FontLookControl control,
+        const FontLookControl &control,
         const LayoutOptions &layoutOptions);
 };
 

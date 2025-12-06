@@ -19,7 +19,7 @@ struct Bounds2d
     pex::Bounds<double> y;
 
     template<typename Control>
-    static Bounds2d Make(Control control)
+    static Bounds2d Make(const Control &control)
     {
         return {control.x.GetBounds(), control.y.GetBounds()};
     }
@@ -32,7 +32,7 @@ struct QuadBounds
     Bounds2d perspective;
     pex::Bounds<double> rotation;
 
-    QuadBounds(QuadControl control);
+    QuadBounds(const QuadControl &control);
 };
 
 

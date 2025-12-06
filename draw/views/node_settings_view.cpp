@@ -18,16 +18,18 @@ inline constexpr auto borderStyle = wxBORDER_SIMPLE;
 
 NodeSettingsView::NodeSettingsView(
     wxWindow *window,
-    std::optional<NodeSettingsControl> control)
+    const NodeSettingsControl *control)
     :
     window_(window),
-    control_(control),
+    control_(),
     highlightEndpoint_()
 {
     PEX_NAME("NodeSettingsView");
 
-    if (this->control_)
+    if (control)
     {
+        this->control_ = *control;
+
         PEX_MEMBER_ADDRESS(&(*this->control_), "control_");
     }
 
@@ -99,8 +101,8 @@ void NodeSettingsView::OnHighlight_(bool isHighlighted)
 CollapsibleNodeSettingsView::CollapsibleNodeSettingsView(
     wxWindow *parent,
     const std::string &nodeName,
-    ShapeExpandControl expandControl,
-    std::optional<NodeSettingsControl> control)
+    const ShapeExpandControl &expandControl,
+    const NodeSettingsControl *control)
     :
     wxpex::Collapsible(parent, nodeName, expandControl, borderStyle),
     nodeSettingsView_(this, control)
@@ -120,7 +122,7 @@ bool CollapsibleNodeSettingsView::Destroy()
 CollapsibleNodeSettingsView::CollapsibleNodeSettingsView(
     wxWindow *parent,
     const std::string &nodeName,
-    std::optional<NodeSettingsControl> control)
+    const NodeSettingsControl *control)
     :
     wxpex::Collapsible(parent, nodeName, borderStyle),
     nodeSettingsView_(this, control)
@@ -132,7 +134,7 @@ CollapsibleNodeSettingsView::CollapsibleNodeSettingsView(
 BoxedNodeSettingsView::BoxedNodeSettingsView(
     wxWindow *parent,
     const std::string &nodeName,
-    std::optional<NodeSettingsControl> control)
+    const NodeSettingsControl *control)
     :
     wxpex::StaticBox(parent, nodeName),
     nodeSettingsView_(this, control)

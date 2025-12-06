@@ -20,7 +20,7 @@ class AffineKnobView: public wxControl
 public:
     AffineKnobView(
         wxWindow *parent,
-        Control control,
+        const Control &control,
         const wxpex::LayoutOptions &layoutOptions)
         :
         wxControl(parent, wxID_ANY)
@@ -52,7 +52,7 @@ public:
 QuadView::QuadView(
     wxWindow *parent,
     const std::string &name,
-    QuadControl control,
+    const QuadControl &control,
     const wxpex::LayoutOptions &layoutOptions)
     :
     wxpex::StaticBox(parent, name)
@@ -119,7 +119,7 @@ QuadView::QuadView(
 
 QuadView::QuadView(
     wxWindow *parent,
-    QuadControl control,
+    const QuadControl &control,
     const wxpex::LayoutOptions &layoutOptions)
     :
     QuadView(parent, "Quad", control, layoutOptions)

@@ -19,7 +19,7 @@ public:
     CrossShapeView(
         wxWindow *parent,
         const std::string &name,
-        CrossShapeControl control,
+        const CrossShapeControl &control,
         const LayoutOptions &layoutOptions);
 };
 

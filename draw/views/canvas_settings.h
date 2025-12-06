@@ -108,6 +108,16 @@ struct CanvasCustom
         {
             PEX_NAME("CanvasControl");
         }
+
+        void Emplace(typename Base::Upstream &upstream)
+        {
+            this->StandardEmplace_(upstream);
+        }
+
+        void Emplace(const Control &other)
+        {
+            this->StandardEmplace_(other);
+        }
     };
 };
 

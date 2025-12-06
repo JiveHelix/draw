@@ -187,8 +187,8 @@ void ViewLink::SetName(const std::string &name)
 
 
 ViewLink::ViewLink(
-    ViewSettingsControl first,
-    ViewSettingsControl second,
+    const ViewSettingsControl &first,
+    const ViewSettingsControl &second,
     const std::string &name,
     LinkOptions options)
     :
@@ -202,8 +202,8 @@ ViewLink::ViewLink(
 
 
 ViewLink::ViewLink(
-    ViewSettingsControl first,
-    ViewSettingsControl second,
+    const ViewSettingsControl &first,
+    const ViewSettingsControl &second,
     LinkOptions options)
     :
     firstViewControl_(first),

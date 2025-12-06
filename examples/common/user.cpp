@@ -1,7 +1,7 @@
 #include "user.h"
 
 
-static wxpex::Shortcuts GetFileMenuShortcuts(UserControl userControl)
+static wxpex::Shortcuts GetFileMenuShortcuts(const UserControl &userControl)
 {
     return {
         wxpex::Shortcut(
@@ -43,7 +43,7 @@ static wxpex::Shortcuts GetFileMenuShortcuts(UserControl userControl)
 }
 
 
-wxpex::ShortcutGroups MakeShortcuts(UserControl userControl)
+wxpex::ShortcutGroups MakeShortcuts(const UserControl &userControl)
 {
     return {
         {"File", GetFileMenuShortcuts(userControl)}};

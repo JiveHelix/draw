@@ -9,7 +9,7 @@ namespace draw
 CrossView::CrossView(
     wxWindow *parent,
     const std::string &name,
-    CrossControl control,
+    const CrossControl &control,
     const LayoutOptions &layoutOptions)
     :
     wxpex::StaticBox(parent, name)
@@ -50,7 +50,7 @@ CrossView::CrossView(
 
 CrossView::CrossView(
     wxWindow *parent,
-    CrossControl control,
+    const CrossControl &control,
     const LayoutOptions &layoutOptions)
     :
     CrossView(parent, "Cross", control, layoutOptions)

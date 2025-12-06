@@ -17,8 +17,8 @@ public:
 
     BitmapView(
         wxWindow *parent,
-        CanvasControl control,
-        CanvasViewOptions options = CanvasViewOptions{});
+        const CanvasControl &control,
+        const CanvasViewOptions &options = CanvasViewOptions{});
 
     wxBitmap & GetBitmap();
     const wxBitmap & GetBitmap() const;

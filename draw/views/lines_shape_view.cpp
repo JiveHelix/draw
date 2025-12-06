@@ -14,7 +14,7 @@ namespace draw
 LinesShapeView::LinesShapeView(
     wxWindow *parent,
     const std::string &name,
-    LinesShapeControl controls,
+    const LinesShapeControl &controls,
     const LayoutOptions &layoutOptions)
     :
     wxpex::Collapsible(parent, name)

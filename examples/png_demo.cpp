@@ -1,3 +1,4 @@
+#include <wxpex/wxshim_app.h>
 #include <iostream>
 #include <tau/color_map.h>
 #include <tau/color_maps/gray.h>
@@ -35,9 +36,9 @@ public:
         pngData_(),
 
         colorMap_(
-            tau::gray::MakeRgb8(valueCount),
+            tau::gray::MakeRgb8(rgbValueCount),
             0,
-            static_cast<int32_t>(valueCount - 1))
+            static_cast<int32_t>(rgbValueCount - 1))
     {
 
     }
@@ -47,7 +48,7 @@ public:
         return "PNG Demo";
     }
 
-    void LoadPng(const draw::GrayPng<PngPixel> &png)
+    void LoadGrayPng(const draw::GrayPng<PngPixel> &png)
     {
         this->pngIsLoaded_ = false;
         this->pngData_ = png;
@@ -108,4 +109,4 @@ private:
 
 
 // Creates the main function for us, and initializes the app's run loop.
-wxshimIMPLEMENT_APP_CONSOLE(wxpex::App<DemoBrain>)
+wxshimAPP(wxpex::App<DemoBrain>)

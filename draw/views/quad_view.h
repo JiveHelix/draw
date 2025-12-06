@@ -16,12 +16,12 @@ public:
     QuadView(
         wxWindow *parent,
         const std::string &name,
-        QuadControl control,
+        const QuadControl &control,
         const wxpex::LayoutOptions &layoutOptions);
 
     QuadView(
         wxWindow *parent,
-        QuadControl control,
+        const QuadControl &control,
         const wxpex::LayoutOptions &layoutOptions);
 };
 
