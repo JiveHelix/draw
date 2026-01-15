@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include <wxpex/file_field.h>
 #include <draw/png.h>
 #include <pex/string.h>
 #include <draw/views/view_settings.h>
