@@ -317,7 +317,7 @@ private:
             this->model_.drawing.colorMapSettings.maximum.Get());
 
         auto colorMapped = this->colorMap_.Filter(image);
-        this->control_.pixelView.asyncPixels.Set(colorMapped.MakeShared());
+        this->control_.pixelView.asyncPixels.Set(colorMapped);
     }
 
     void OnDrawingSettings_(const DrawingSettings &)

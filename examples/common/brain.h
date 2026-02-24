@@ -76,9 +76,9 @@ public:
     void OpenFile()
     {
         draw::OpenPng<PngPixel>(
-            this->user_.fileName,
-            this->user_.pixelView.canvas.viewSettings,
-            this->GetDerived());
+            this->userControl_.fileName,
+            this->userControl_.pixelView.canvas.viewSettings,
+            *this->GetDerived());
     }
 
     void Shutdown()
