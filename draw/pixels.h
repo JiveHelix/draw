@@ -17,8 +17,10 @@ using PixelMatrix = typename Pixels::Data;
 
 using AsyncPixels = wxpex::MakeAsync<std::shared_ptr<Pixels>>;
 
-using PixelsControl =
-    typename AsyncPixels::Control<typename AsyncPixels::Model>;
+using AsyncPixelsModel = typename AsyncPixels::Model;
+using AsyncPixelsControl = typename AsyncPixelsModel::Unfiltered;
+
+using PixelsControl = typename AsyncPixels::Control<AsyncPixelsModel>;
 
 template<typename Observer>
 using PixelsEndpoint = pex::Endpoint<Observer, PixelsControl>;

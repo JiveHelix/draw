@@ -58,9 +58,6 @@ struct PixelViewTemplates
     template<typename Base>
     struct Control: public Base
     {
-        using AsyncPixelsControl =
-            typename Base::AsyncPixels::DefaultControl;
-
         using AsyncShapesControl =
             typename Base::AsyncShapes::DefaultControl;
 
@@ -104,7 +101,6 @@ using PixelViewSettings = typename PixelViewGroup::Plain;
 using PixelViewModel = typename PixelViewGroup::Model;
 using PixelViewControl = typename PixelViewGroup::DefaultControl;
 
-using AsyncPixelsControl = typename PixelViewControl::AsyncPixelsControl;
 using AsyncShapesControl = typename PixelViewControl::AsyncShapesControl;
 
 

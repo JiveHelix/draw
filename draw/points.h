@@ -14,4 +14,4 @@ using PointsDouble = std::vector<PointDouble>;
 using PointsIterator = typename PointsDouble::const_iterator;
 
 
-} // end namespace artis
+} // end namespace draw
