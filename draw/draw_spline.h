@@ -12,10 +12,6 @@ namespace draw
 {
 
 
-void DrawSpline(
-    wxGraphicsPath &path,
-    const std::vector<tau::Point2d<double>> &points);
-
 void DrawTangentSpline(
     wxGraphicsPath &path,
     const std::vector<tau::Point2d<double>> &points);
@@ -33,7 +29,6 @@ void DrawTangentSpline(
 
 std::vector<tau::Point2d<double>> GetDerivatives(
     std::span<const tau::Point2d<double>> points);
-
 
 
 } // end namespace draw

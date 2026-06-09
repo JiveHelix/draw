@@ -16,9 +16,8 @@ namespace draw
 enum class CurveStyle: int
 {
     line = 0,
-    smoothSpline = 1,
-    tangentSpline = 2,
-    gcdcSpline = 3
+    tangentSpline,
+    gcdcSpline
 };
 
 

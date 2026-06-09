@@ -11,7 +11,6 @@ std::vector<CurveStyle> CurveStyleChoices::GetChoices()
 {
     return {
         CurveStyle::line,
-        CurveStyle::smoothSpline,
         CurveStyle::tangentSpline,
         CurveStyle::gcdcSpline};
 }
@@ -23,9 +22,6 @@ std::string CurveStyleConverter::ToString(CurveStyle curveStyle)
     {
         case (CurveStyle::line):
             return "line";
-
-        case (CurveStyle::smoothSpline):
-            return "smoothSpline";
 
         case (CurveStyle::tangentSpline):
             return "tangentSpline";
@@ -70,12 +66,7 @@ void SegmentsShape::Draw(DrawContext &context)
     context.ConfigureLook(this->segmentsSettings_.look);
     auto path = context->CreatePath();
 
-    if (this->segmentsSettings_.curveStyle == CurveStyle::smoothSpline)
-    {
-        DrawSpline(path, this->points_);
-        context->DrawPath(path);
-    }
-    else if (this->segmentsSettings_.curveStyle == CurveStyle::tangentSpline)
+    if (this->segmentsSettings_.curveStyle == CurveStyle::tangentSpline)
     {
         auto look = this->segmentsSettings_.look;
 
