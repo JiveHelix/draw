@@ -68,7 +68,8 @@ void DrawContext::ConfigureColors(const Look &look, double value)
     }
     else
     {
-        this->context_->SetBrush(this->context_->CreateBrush(*wxTRANSPARENT_BRUSH));
+        this->context_->SetBrush(
+            this->context_->CreateBrush(*wxTRANSPARENT_BRUSH));
     }
 }
 

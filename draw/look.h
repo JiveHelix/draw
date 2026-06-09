@@ -74,7 +74,8 @@ struct Stroke: public StrokeTemplate<pex::Identity>
 
 
 
-using StrokeGroup = pex::Group<StrokeFields, StrokeTemplate, pex::PlainT<Stroke>>;
+using StrokeGroup =
+    pex::Group<StrokeFields, StrokeTemplate, pex::PlainT<Stroke>>;
 
 using StrokeModel = typename StrokeGroup::Model;
 using StrokeControl = typename StrokeGroup::DefaultControl;

@@ -45,6 +45,8 @@ struct SettingsFields
         fields::Field(&T::endFrequency, "endFrequency"),
         fields::Field(&T::amplitude, "amplitude"),
         fields::Field(&T::isLogarithmic, "isLogarithmic"),
+        fields::Field(&T::curveStyle, "curveStyle"),
+        fields::Field(&T::drawPoints, "drawPoints"),
         fields::Field(&T::resetPhase, "resetPhase"),
         fields::Field(&T::resetLook, "resetLook"));
 };
@@ -59,6 +61,8 @@ struct SettingsTemplate
     T<FrequencyRange> endFrequency;
     T<pex::MakeRange<double, pex::Limit<0>, pex::Limit<1000>>> amplitude;
     T<bool> isLogarithmic;
+    T<draw::CurveStyleSelect> curveStyle;
+    T<bool> drawPoints;
     T<pex::MakeSignal> resetPhase;
     T<pex::MakeSignal> resetLook;
 
@@ -78,6 +82,8 @@ struct Settings: public SettingsTemplate<pex::Identity>
             4.0,
             200.0,
             true,
+            draw::CurveStyle::line,
+            false,
             {},
             {}}
     {
@@ -280,7 +286,6 @@ struct DemoCustom
             double nextFrequency = theseSettings.startFrequency;
 
             jive::ScopeFlag ignore(this->ignoreFunctionEndpoints_);
-
             auto defer = pex::MakeDefer(this->functions);
 
             for (size_t i = 0; i < theseSettings.functionCount; ++i)
@@ -491,6 +496,21 @@ public:
                 "",
                 control.isLogarithmic));
 
+        auto curveStyle = wxpex::LabeledWidget(
+            this,
+            "Curve style",
+            new draw::CurveStyleComboBox(
+                this,
+                control.curveStyle));
+
+        auto drawPoints = wxpex::LabeledWidget(
+            this,
+            "Draw points",
+            new wxpex::CheckBox(
+                this,
+                "",
+                control.drawPoints));
+
         auto resetPhase = new wxpex::Button(
             this,
             "reset phase",
@@ -508,7 +528,9 @@ public:
             startFrequency,
             endFrequency,
             amplitude,
-            isLogarithmic);
+            isLogarithmic,
+            curveStyle,
+            drawPoints);
 
         auto topSizer = wxpex::LayoutItems(
             wxpex::verticalItems,
@@ -666,6 +688,16 @@ public:
 
         functionEndpoints_(),
 
+        curveStyleEndpoint_(
+            this,
+            this->demoModel_.settings.curveStyle,
+            &DemoBrain::OnCurveStyle_),
+
+        drawPointsEndpoint_(
+            this,
+            this->demoModel_.settings.drawPoints,
+            &DemoBrain::OnDrawPoints_),
+
         listChangedConnection_(
             this,
             this->demoModel_.functions,
@@ -702,7 +734,8 @@ public:
         size_t i = 0;
 
         draw::SegmentsSettings settings{};
-        settings.isSpline = true;
+        settings.curveStyle = this->demoModel_.settings.curveStyle.Get();
+        settings.drawPoints = this->demoModel_.settings.drawPoints.Get();
 
         for (auto &function: this->demoControl_.functions)
         {
@@ -786,6 +819,16 @@ private:
     }
 
     void OnFunctionList_()
+    {
+        this->Display();
+    }
+
+    void OnCurveStyle_(draw::CurveStyle)
+    {
+        this->Display();
+    }
+
+    void OnDrawPoints_(bool)
     {
         this->Display();
     }
@@ -879,6 +922,14 @@ private:
 
     std::vector<FunctionEndpoint> functionEndpoints_;
     std::vector<draw::PointsDouble> functionPoints_;
+
+    using BooleanEndpoint = pex::Endpoint<DemoBrain, BooleanControl>;
+
+    using CurveStyleEndpoint =
+        pex::Endpoint<DemoBrain, draw::CurveStyleControl>;
+
+    CurveStyleEndpoint curveStyleEndpoint_;
+    BooleanEndpoint drawPointsEndpoint_;
 
     using ListChangedConnection =
         pex::detail::ListConnect<DemoBrain, decltype(DemoModel::functions)>;

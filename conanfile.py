@@ -25,4 +25,4 @@ class DrawConan(ConanFile):
         self.requires("pex/[>=1.1 <2]", transitive_headers=False)
         self.requires("tau/[>=1.13 <2]", transitive_headers=False)
         self.requires("wxpex/[>=1.0 <2]", transitive_headers=False)
-        self.requires("libpng/[~1.6]")
+        self.requires("libpng/[~1.6]", transitive_headers=True)
