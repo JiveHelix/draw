@@ -6,7 +6,7 @@ class DrawConan(ConanFile):
     name = "draw"
     version = "0.3.0"
 
-    python_requires = "boiler/0.1"
+    python_requires = "boiler/0.2"
     python_requires_extend = "boiler.LibraryConanFile"
 
     license = "MIT"
