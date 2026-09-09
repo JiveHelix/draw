@@ -173,6 +173,7 @@ struct ShapeCommon
     {
     public:
         using Base::Base;
+        using typename Base::Defer;
 
         Model()
             :
@@ -203,6 +204,7 @@ struct ShapeCommon
     {
     public:
         using Base::Base;
+        using typename Base::Defer;
 
         virtual ~Control() {}
 

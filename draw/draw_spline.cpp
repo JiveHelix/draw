@@ -62,7 +62,7 @@ std::vector<Point> GetDerivatives(std::span<const Point> points)
 }
 
 
-void DrawTangentSpline(
+void AppendTangentSpline(
     wxGraphicsPath &path,
     std::span<const Point> points,
     std::span<const Point> derivatives)
@@ -77,8 +77,6 @@ void DrawTangentSpline(
         Point startControl = start + derivatives[i];
         Point endControl = end - derivatives[i + 1];
 
-        path.MoveToPoint(start.x, start.y);
-
         path.AddCurveToPoint(
             startControl.x,
             startControl.y,
@@ -90,24 +88,50 @@ void DrawTangentSpline(
 }
 
 
-void DrawTangentSpline(
+void AppendTangentSpline(
     wxGraphicsPath &path,
     const std::vector<Point> &points)
 {
     auto derivatives = GetDerivatives(points);
-    DrawTangentSpline(path, points, derivatives);
+    AppendTangentSpline(path, points, derivatives);
 }
 
 
-void DrawTangentSpline(
+void AppendTangentSpline(
     wxGraphicsPath &path,
     std::span<const Point> points,
     const Point &firstDerivative,
     const Point &lastDerivative)
 {
     auto derivatives = GetDerivatives(points, firstDerivative, lastDerivative);
-    DrawTangentSpline(path, points, derivatives);
+    AppendTangentSpline(path, points, derivatives);
 }
+
+
+void DrawTangentSpline(
+    wxGraphicsPath &path,
+    const std::vector<Point> &points)
+{
+    assert(!points.empty());
+
+    auto start = points.front();
+    path.MoveToPoint(start.x, start.y);
+    AppendTangentSpline(path, points);
+}
+
+
+void DrawTangentSpline(
+    wxGraphicsPath &path,
+    std::span<const Point> points,
+    std::span<const Point> derivatives)
+{
+    assert(!points.empty());
+
+    auto start = points.front();
+    path.MoveToPoint(start.x, start.y);
+    AppendTangentSpline(path, points, derivatives);
+}
+
 
 
 } // end namespace draw
