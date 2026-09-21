@@ -141,6 +141,8 @@ void ApplyViewSettings(
 class ViewLink
 {
 public:
+    static constexpr auto observerName = "ViewLink";
+
     void SetName(const std::string &name);
 
     ViewLink(

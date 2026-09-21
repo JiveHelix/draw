@@ -9,6 +9,8 @@
 class DemoBrain: public ShapeDemoBrain<DemoBrain>
 {
 public:
+    static constexpr auto observerName = "DemoBrain";
+
     DemoBrain()
         :
         ShapeDemoBrain<DemoBrain>(),

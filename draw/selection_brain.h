@@ -28,6 +28,8 @@ template<typename ListControl>
 class SelectionBrain: Separator
 {
 public:
+    static constexpr auto observerName = "SelectionBrain";
+
     using ListItem = typename ListControl::ListItem;
 
     using Found = FoundItem<ListItem>;

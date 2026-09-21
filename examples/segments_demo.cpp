@@ -659,6 +659,8 @@ public:
 class DemoBrain: public Brain<DemoBrain>
 {
 public:
+    static constexpr auto observerName = "DemoBrain";
+
     DemoBrain()
         :
         shapesId_(),
