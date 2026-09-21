@@ -89,7 +89,6 @@ void LinesShape::Draw(DrawContext &context)
 
 template struct pex::Group
 <
-    draw::LinesShapeFields,
     draw::LinesShapeTemplate,
     pex::PlainT<draw::LinesShapeSettings>
 >;

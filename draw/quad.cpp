@@ -131,16 +131,7 @@ double QuadGroupTemplates_::Plain::GetArea() const
 } // end namespace draw
 
 
-template struct pex::Group
-<
-    draw::AffineFields,
-    draw::ShearTemplate
->;
+template struct pex::Group<draw::ShearTemplate>;
 
 
-template struct pex::Group
-<
-    draw::QuadFields,
-    draw::QuadTemplate,
-    draw::QuadGroupTemplates_
->;
+template struct pex::Group<draw::QuadTemplate, draw::QuadGroupTemplates_>;

@@ -63,7 +63,7 @@ struct CrossShapeTemplates: public ShapeCommon<CrossGroup, CrossView>
 
 
 using CrossShapeDerivedGroup =
-    pex::poly::DerivedGroup<ShapeFields, CrossShapeTemplates>;
+    pex::poly::DerivedGroup<CrossShapeTemplates>;
 
 using CrossShape = typename CrossShapeDerivedGroup::DerivedValue;
 using CrossShapeModel = typename CrossShapeDerivedGroup::Model;

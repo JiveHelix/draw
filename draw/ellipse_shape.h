@@ -112,7 +112,7 @@ struct EllipseShapeTemplates: public ShapeCommon<EllipseGroup, EllipseView>
 
 
 using EllipseShapeDerivedGroup =
-    pex::poly::DerivedGroup<ShapeFields, EllipseShapeTemplates>;
+    pex::poly::DerivedGroup<EllipseShapeTemplates>;
 
 using EllipseShape = typename EllipseShapeDerivedGroup::DerivedValue;
 using EllipseShapeModel = typename EllipseShapeDerivedGroup::Model;

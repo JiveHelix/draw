@@ -43,7 +43,6 @@ using ScaleRange =
 using ScaleGroup =
     pex::Group
     <
-        tau::ScaleFields,
         tau::ScaleTemplate<ScaleRange>::template Template,
         pex::PlainT<Scale>
     >;

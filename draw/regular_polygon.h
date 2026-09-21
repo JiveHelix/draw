@@ -228,7 +228,6 @@ struct RegularPolygonCustom
 
 using RegularPolygonGroup = pex::Group
 <
-    RegularPolygonFields,
     RegularPolygonTemplate,
     RegularPolygonCustom
 >;
@@ -247,7 +246,6 @@ DECLARE_EQUALITY_OPERATORS(RegularPolygon)
 
 extern template struct pex::Group
     <
-        draw::RegularPolygonFields,
         draw::RegularPolygonTemplate,
         draw::RegularPolygonCustom
     >;

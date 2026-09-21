@@ -173,7 +173,6 @@ PointsDouble RegularPolygon::GetPoints_(double radius, double scale) const
 
 template struct pex::Group
     <
-        draw::RegularPolygonFields,
         draw::RegularPolygonTemplate,
         draw::RegularPolygonCustom
     >;

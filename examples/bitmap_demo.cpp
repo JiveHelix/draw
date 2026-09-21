@@ -46,7 +46,7 @@ struct DrawingTemplate
 };
 
 
-using DrawingGroup = pex::Group<DrawingFields, DrawingTemplate>;
+using DrawingGroup = pex::Group<DrawingTemplate>;
 using DrawingModel = typename DrawingGroup::Model;
 using DrawingControl = typename DrawingGroup::DefaultControl;
 using DrawingSettings = typename DrawingGroup::Plain;
@@ -134,7 +134,7 @@ struct DemoCustom
 };
 
 
-using DemoGroup = pex::Group<DemoFields, DemoTemplate, DemoCustom>;
+using DemoGroup = pex::Group<DemoTemplate, DemoCustom>;
 using DemoModel = typename DemoGroup::Model;
 using DemoControl = typename DemoGroup::DefaultControl;
 using DemoSettings = typename DemoGroup::Plain;

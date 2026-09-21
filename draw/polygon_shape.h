@@ -102,7 +102,7 @@ struct PolygonShapeTemplates: public ShapeCommon<PolygonGroup, PolygonView>
 
 
 using PolygonShapeDerivedGroup =
-    pex::poly::DerivedGroup<ShapeFields, PolygonShapeTemplates>;
+    pex::poly::DerivedGroup<PolygonShapeTemplates>;
 
 using PolygonShape = typename PolygonShapeDerivedGroup::DerivedValue;
 using PolygonShapeModel = typename PolygonShapeDerivedGroup::Model;

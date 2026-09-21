@@ -66,7 +66,6 @@ public:
 
 using LinesShapeGroup = pex::Group
 <
-    LinesShapeFields,
     LinesShapeTemplate,
     pex::PlainT<LinesShapeSettings>
 >;
@@ -80,7 +79,6 @@ using LinesShapeControl = typename LinesShapeGroup::DefaultControl;
 
 extern template struct pex::Group
 <
-    draw::LinesShapeFields,
     draw::LinesShapeTemplate,
     pex::PlainT<draw::LinesShapeSettings>
 >;

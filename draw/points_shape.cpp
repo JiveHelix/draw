@@ -78,7 +78,6 @@ void ValuePointsShape::Draw(DrawContext &context)
 
 template struct pex::Group
 <
-    draw::PointsShapeFields,
     draw::PointsShapeTemplate,
     pex::PlainT<draw::PointsShapeSettings>
 >;

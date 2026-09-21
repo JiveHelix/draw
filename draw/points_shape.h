@@ -61,7 +61,6 @@ public:
 
 using PointsShapeGroup = pex::Group
 <
-    PointsShapeFields,
     PointsShapeTemplate,
     pex::PlainT<PointsShapeSettings>
 >;
@@ -94,7 +93,6 @@ public:
 
 extern template struct pex::Group
 <
-    draw::PointsShapeFields,
     draw::PointsShapeTemplate,
     pex::PlainT<draw::PointsShapeSettings>
 >;

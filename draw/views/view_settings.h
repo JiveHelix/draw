@@ -305,7 +305,7 @@ struct ViewSettingsCustom
 
 
 using ViewSettingsGroup =
-    pex::Group<ViewFields, ViewTemplate, ViewSettingsCustom>;
+    pex::Group<ViewTemplate, ViewSettingsCustom>;
 
 
 using ViewSettings = typename ViewSettingsGroup::Plain;

@@ -59,7 +59,6 @@ struct NodeSettingsCustom
 using NodeSettingsGroup =
     pex::Group
     <
-        NodeSettingsFields,
         NodeSettingsTemplate,
         NodeSettingsCustom
     >;

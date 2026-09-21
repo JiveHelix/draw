@@ -79,7 +79,6 @@ DECLARE_EQUALITY_OPERATORS(WaveformColor)
 using WaveformColorGroup =
     pex::Group
     <
-        WaveformColorFields,
         WaveformColorTemplate,
         pex::PlainT<WaveformColor>
     >;
@@ -142,7 +141,7 @@ DECLARE_EQUALITY_OPERATORS(WaveformSettings)
 
 
 using WaveformGroup =
-    pex::Group<WaveformFields, WaveformTemplate, pex::PlainT<WaveformSettings>>;
+    pex::Group<WaveformTemplate, pex::PlainT<WaveformSettings>>;
 
 using WaveformModel = typename WaveformGroup::Model;
 using WaveformControl = typename WaveformGroup::DefaultControl;
@@ -153,7 +152,6 @@ using WaveformControl = typename WaveformGroup::DefaultControl;
 
 extern template struct pex::Group
     <
-        draw::WaveformColorFields,
         draw::WaveformColorTemplate,
         pex::PlainT<draw::WaveformColor>
     >;
@@ -161,7 +159,6 @@ extern template struct pex::Group
 
 extern template struct pex::Group
     <
-        draw::WaveformFields,
         draw::WaveformTemplate,
         pex::PlainT<draw::WaveformSettings>
     >;

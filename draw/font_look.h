@@ -57,7 +57,7 @@ DECLARE_OUTPUT_STREAM_OPERATOR(FontLook)
 
 
 using FontLookGroup =
-    pex::Group<FontLookFields, FontLookTemplate, pex::PlainT<FontLook>>;
+    pex::Group<FontLookTemplate, pex::PlainT<FontLook>>;
 
 using FontLookModel = typename FontLookGroup::Model;
 using FontLookControl = typename FontLookGroup::DefaultControl;
@@ -74,7 +74,6 @@ void ConfigureFontLook(
 
 extern template struct pex::Group
     <
-        draw::FontLookFields,
         draw::FontLookTemplate,
         pex::PlainT<draw::FontLook>
     >;

@@ -124,7 +124,6 @@ void Ellipse::Draw(DrawContext &context)
 
 template struct pex::Group
 <
-    draw::EllipseFields,
     draw::EllipseTemplate,
     draw::EllipseCustom
 >;

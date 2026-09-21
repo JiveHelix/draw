@@ -65,7 +65,6 @@ struct EllipseCustom
 
 using EllipseGroup = pex::Group
 <
-    EllipseFields,
     EllipseTemplate,
     EllipseCustom
 >;
@@ -84,7 +83,6 @@ DECLARE_OUTPUT_STREAM_OPERATOR(Ellipse)
 
 extern template struct pex::Group
 <
-    draw::EllipseFields,
     draw::EllipseTemplate,
     draw::EllipseCustom
 >;

@@ -35,7 +35,7 @@ struct LookDisplayTemplate
 };
 
 
-using LookDisplayGroup = pex::Group<LookDisplayFields, LookDisplayTemplate>;
+using LookDisplayGroup = pex::Group<LookDisplayTemplate>;
 using LookDisplayControl = typename LookDisplayGroup::DefaultControl;
 
 

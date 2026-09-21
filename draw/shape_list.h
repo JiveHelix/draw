@@ -121,8 +121,7 @@ struct ShapeListCustom
 };
 
 
-using ShapeListGroup =
-    pex::Group<ShapeListFields, ShapeListTemplate, ShapeListCustom>;
+using ShapeListGroup = pex::Group<ShapeListTemplate, ShapeListCustom>;
 
 using ShapeListModel = typename ShapeListGroup::Model;
 using ShapeListControl = typename ShapeListGroup::DefaultControl;

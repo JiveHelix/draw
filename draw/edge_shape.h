@@ -31,11 +31,7 @@ struct EdgeSettingsTemplate
 };
 
 
-using EdgeSettingsGroup = pex::Group
-<
-    EdgeSettingsFields,
-    EdgeSettingsTemplate
->;
+using EdgeSettingsGroup = pex::Group<EdgeSettingsTemplate>;
 
 using EdgeSettings = typename EdgeSettingsGroup::Plain;
 using EdgeShapeModel = typename EdgeSettingsGroup::Model;
@@ -70,7 +66,6 @@ public:
 
 extern template struct pex::Group
 <
-    draw::EdgeSettingsFields,
     draw::EdgeSettingsTemplate,
     pex::PlainT<draw::EdgeSettings>
 >;

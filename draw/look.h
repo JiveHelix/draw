@@ -74,8 +74,7 @@ struct Stroke: public StrokeTemplate<pex::Identity>
 
 
 
-using StrokeGroup =
-    pex::Group<StrokeFields, StrokeTemplate, pex::PlainT<Stroke>>;
+using StrokeGroup = pex::Group<StrokeTemplate, pex::PlainT<Stroke>>;
 
 using StrokeModel = typename StrokeGroup::Model;
 using StrokeControl = typename StrokeGroup::DefaultControl;
@@ -120,7 +119,7 @@ struct Fill: public FillTemplate<pex::Identity>
 
 
 
-using FillGroup = pex::Group<FillFields, FillTemplate, pex::PlainT<Fill>>;
+using FillGroup = pex::Group<FillTemplate, pex::PlainT<Fill>>;
 
 using FillModel = typename FillGroup::Model;
 using FillControl = typename FillGroup::DefaultControl;
@@ -163,7 +162,7 @@ struct Look: public LookTemplate<pex::Identity>
 
 
 
-using LookGroup = pex::Group<LookFields, LookTemplate, pex::PlainT<Look>>;
+using LookGroup = pex::Group<LookTemplate, pex::PlainT<Look>>;
 
 using LookModel = typename LookGroup::Model;
 using LookControl = typename LookGroup::DefaultControl;
@@ -176,7 +175,6 @@ DECLARE_EQUALITY_OPERATORS(Look)
 
 extern template struct pex::Group
     <
-        draw::LookFields,
         draw::LookTemplate,
         pex::PlainT<draw::Look>
     >;

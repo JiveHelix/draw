@@ -224,9 +224,4 @@ PointsDouble Polygon::GetPoints_(double scale_) const
 } // end namespace draw
 
 
-template struct pex::Group
-    <
-        draw::PolygonFields,
-        draw::PolygonTemplate,
-        draw::PolygonCustom
-    >;
+template struct pex::Group<draw::PolygonTemplate, draw::PolygonCustom>;

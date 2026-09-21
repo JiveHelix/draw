@@ -44,7 +44,6 @@ void EdgeShape::Draw(DrawContext &context)
 
 template struct pex::Group
 <
-    draw::EdgeSettingsFields,
     draw::EdgeSettingsTemplate,
     pex::PlainT<draw::EdgeSettings>
 >;

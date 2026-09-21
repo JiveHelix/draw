@@ -35,11 +35,7 @@ struct PerspectiveTemplate
 };
 
 
-using PerspectiveGroup = pex::Group
-<
-    AffineFields,
-    PerspectiveTemplate
->;
+using PerspectiveGroup = pex::Group<PerspectiveTemplate>;
 
 using Perspective = typename PerspectiveGroup::Plain;
 using PerspectiveModel = typename PerspectiveGroup::Model;
@@ -148,8 +144,4 @@ public:
 
 
 
-extern template struct pex::Group
-<
-    draw::AffineFields,
-    draw::PerspectiveTemplate
->;
+extern template struct pex::Group<draw::PerspectiveTemplate>;

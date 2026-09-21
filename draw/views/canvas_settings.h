@@ -123,7 +123,7 @@ struct CanvasCustom
 
 
 using CanvasGroup =
-    pex::Group<CanvasFields, CanvasTemplate, CanvasCustom>;
+    pex::Group<CanvasTemplate, CanvasCustom>;
 
 using CanvasSettings = typename CanvasGroup::Plain;
 using CanvasModel = typename CanvasGroup::Model;
@@ -135,7 +135,6 @@ using CanvasControl = typename CanvasGroup::DefaultControl;
 
 extern template struct pex::Group
     <
-        draw::CanvasFields,
         draw::CanvasTemplate,
         draw::CanvasCustom
     >;

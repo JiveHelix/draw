@@ -75,7 +75,7 @@ struct QuadShapeTemplates: public ShapeCommon<QuadGroup, QuadView>
 
 
 using QuadShapeDerivedGroup =
-    pex::poly::DerivedGroup<ShapeFields, QuadShapeTemplates>;
+    pex::poly::DerivedGroup<QuadShapeTemplates>;
 
 using QuadShape = typename QuadShapeDerivedGroup::DerivedValue;
 using QuadShapeModel = typename QuadShapeDerivedGroup::Model;

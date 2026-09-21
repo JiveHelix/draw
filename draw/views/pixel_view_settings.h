@@ -94,8 +94,7 @@ struct PixelViewTemplates
 };
 
 
-using PixelViewGroup =
-    pex::Group<PixelViewFields, PixelViewTemplate, PixelViewTemplates>;
+using PixelViewGroup = pex::Group<PixelViewTemplate, PixelViewTemplates>;
 
 using PixelViewSettings = typename PixelViewGroup::Plain;
 using PixelViewModel = typename PixelViewGroup::Model;
@@ -109,7 +108,6 @@ using AsyncShapesControl = typename PixelViewControl::AsyncShapesControl;
 
 extern template struct pex::Group
     <
-        draw::PixelViewFields,
         draw::PixelViewTemplate,
         draw::PixelViewTemplates
     >;

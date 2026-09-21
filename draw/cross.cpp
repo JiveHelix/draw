@@ -3,7 +3,6 @@
 
 template struct pex::Group
     <
-        draw::CrossFields,
         draw::CrossTemplate,
         draw::CrossCustom
     >;

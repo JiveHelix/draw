@@ -83,7 +83,7 @@ struct EdgeCustom
 
 
 
-using EdgeGroup = pex::Group<EdgeFields, EdgeTemplate, EdgeCustom>;
+using EdgeGroup = pex::Group<EdgeTemplate, EdgeCustom>;
 using EdgeControl = typename EdgeGroup::DefaultControl;
 using Edge = typename EdgeGroup::Plain;
 
@@ -99,7 +99,6 @@ DECLARE_EQUALITY_OPERATORS(Edge)
 
 extern template struct pex::Group
     <
-        draw::EdgeFields,
         draw::EdgeTemplate,
         draw::EdgeCustom
     >;

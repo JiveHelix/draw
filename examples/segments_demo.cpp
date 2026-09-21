@@ -92,7 +92,7 @@ struct Settings: public SettingsTemplate<pex::Identity>
 };
 
 using SettingsGroup =
-    pex::Group<SettingsFields, SettingsTemplate, pex::PlainT<Settings>>;
+    pex::Group<SettingsTemplate, pex::PlainT<Settings>>;
 
 using SettingsModel = typename SettingsGroup::Model;
 using SettingsControl = typename SettingsGroup::DefaultControl;
@@ -138,7 +138,7 @@ struct TrigSettings: public TrigTemplate<pex::Identity>
 
 
 using TrigGroup =
-    pex::Group<TrigFields, TrigTemplate, pex::PlainT<TrigSettings>>;
+    pex::Group<TrigTemplate, pex::PlainT<TrigSettings>>;
 
 using TrigModel = typename TrigGroup::Model;
 using TrigControl = typename TrigGroup::DefaultControl;
@@ -432,7 +432,7 @@ struct DemoCustom
 };
 
 
-using DemoGroup = pex::Group<DemoFields, DemoTemplate, DemoCustom>;
+using DemoGroup = pex::Group<DemoTemplate, DemoCustom>;
 using DemoModel = typename DemoGroup::Model;
 using DemoControl = typename DemoGroup::DefaultControl;
 

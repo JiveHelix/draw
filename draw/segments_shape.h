@@ -69,11 +69,7 @@ struct SegmentsSettingsTemplate
 };
 
 
-using SegmentsSettingsGroup = pex::Group
-<
-    SegmentsSettingsFields,
-    SegmentsSettingsTemplate
->;
+using SegmentsSettingsGroup = pex::Group<SegmentsSettingsTemplate>;
 
 using SegmentsSettings = typename SegmentsSettingsGroup::Plain;
 using SegmentsSettingsModel = typename SegmentsSettingsGroup::Model;

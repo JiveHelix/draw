@@ -3,7 +3,6 @@
 
 template struct pex::Group
     <
-        draw::CanvasFields,
         draw::CanvasTemplate,
         draw::CanvasCustom
     >;

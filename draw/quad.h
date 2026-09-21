@@ -31,11 +31,7 @@ struct ShearTemplate
 };
 
 
-using ShearGroup = pex::Group
-<
-    AffineFields,
-    ShearTemplate
->;
+using ShearGroup = pex::Group<ShearTemplate>;
 
 using Shear = typename ShearGroup::Plain;
 using ShearModel = typename ShearGroup::Model;
@@ -146,7 +142,6 @@ struct QuadGroupTemplates_
 
 using QuadGroup = pex::Group
 <
-    QuadFields,
     QuadTemplate,
     QuadGroupTemplates_
 >;
@@ -164,16 +159,11 @@ DECLARE_EQUALITY_OPERATORS(Quad)
 
 
 
-extern template struct pex::Group
-<
-    draw::AffineFields,
-    draw::ShearTemplate
->;
+extern template struct pex::Group<draw::ShearTemplate>;
 
 
 extern template struct pex::Group
 <
-    draw::QuadFields,
     draw::QuadTemplate,
     draw::QuadGroupTemplates_
 >;

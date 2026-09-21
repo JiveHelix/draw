@@ -218,7 +218,7 @@ struct RegularPolygonShapeTemplates
 
 
 using RegularPolygonShapeDerivedGroup =
-    pex::poly::DerivedGroup<ShapeFields, RegularPolygonShapeTemplates>;
+    pex::poly::DerivedGroup<RegularPolygonShapeTemplates>;
 
 using RegularPolygonShape =
     typename RegularPolygonShapeDerivedGroup::DerivedValue;

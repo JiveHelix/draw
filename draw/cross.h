@@ -74,7 +74,7 @@ struct CrossCustom
 
 
 
-using CrossGroup = pex::Group<CrossFields, CrossTemplate, CrossCustom>;
+using CrossGroup = pex::Group<CrossTemplate, CrossCustom>;
 using CrossControl = typename CrossGroup::DefaultControl;
 using Cross = typename CrossGroup::Plain;
 
@@ -90,7 +90,6 @@ DECLARE_EQUALITY_OPERATORS(Cross)
 
 extern template struct pex::Group
     <
-        draw::CrossFields,
         draw::CrossTemplate,
         draw::CrossCustom
     >;

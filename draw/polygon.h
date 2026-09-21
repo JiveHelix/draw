@@ -98,7 +98,6 @@ struct PolygonCustom
 
 using PolygonGroup = pex::Group
 <
-    PolygonFields,
     PolygonTemplate,
     PolygonCustom
 >;
@@ -130,7 +129,6 @@ DECLARE_EQUALITY_OPERATORS(Polygon)
 
 extern template struct pex::Group
     <
-        draw::PolygonFields,
         draw::PolygonTemplate,
         draw::PolygonCustom
     >;
