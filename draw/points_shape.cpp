@@ -64,7 +64,12 @@ void ValuePointsShape::Draw(DrawContext &context)
 
         context.ConfigureColors(this->settings_.look, point.value);
         auto rounded = point.template Cast<int>();
-        path.AddCircle(rounded.x, rounded.y, this->settings_.radius);
+
+        path.AddCircle(
+            rounded.x,
+            rounded.y,
+            this->settings_.radius);
+
         path.CloseSubpath();
 
         context->DrawPath(path);

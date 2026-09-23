@@ -166,7 +166,7 @@ struct ShapeCommon
             ShapeGroup::template Template<pex::Identity>::fieldsTypeName;
     };
 
-    using ControlMembers = pex::MakeControlMembers<Template>;
+    using ControlMembers = Template<pex::ControlSelector>;
 
     template<typename Base>
     class Model: public Base

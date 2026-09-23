@@ -30,28 +30,34 @@ using PointEndpoint = pex::EndpointGroup<Observer, PointControl>;
 template<typename T>
 struct ValuePoint: public tau::Point2d<T>
 {
+    T value;
+
+    static constexpr auto fields = std::make_tuple(
+        fields::Field(&ValuePoint::x, "x"),
+        fields::Field(&ValuePoint::y, "y"),
+        fields::Field(&ValuePoint::value, "value"));
+
     ValuePoint()
         :
-        tau::Point2d<T>(),
-        value()
+        tau::Point2d<T>{},
+        value{}
     {
 
     }
 
     ValuePoint(T column, T row, T value_)
         :
-        tau::Point2d<T>(column, row),
-        value(value_)
+        tau::Point2d<T>{column, row},
+        value{value_}
     {
 
     }
 
-    T value;
-
-    static constexpr auto fields = std::tuple_cat(
-        tau::Point2d<T>::fields,
-        std::make_tuple(
-            fields::Field(&ValuePoint::value, "value")));
+    template<typename U, typename Style = tau::Round>
+    ValuePoint<U> Cast() const
+    {
+        return tau::CastFields<ValuePoint<U>, U, Style>(*this);
+    }
 };
 
 
