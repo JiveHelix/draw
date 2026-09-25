@@ -3,13 +3,13 @@
 
 template struct pex::Group
     <
-        draw::WaveformColorTemplate,
+        draw::WaveformColorSchema,
         pex::PlainT<draw::WaveformColor>
     >;
 
 
 template struct pex::Group
     <
-        draw::WaveformTemplate,
+        draw::WaveformSchema,
         pex::PlainT<draw::WaveformSettings>
     >;

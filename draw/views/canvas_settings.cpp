@@ -3,6 +3,6 @@
 
 template struct pex::Group
     <
-        draw::CanvasTemplate,
-        draw::CanvasCustom
+        draw::CanvasSchema,
+        draw::CanvasFinisher
     >;

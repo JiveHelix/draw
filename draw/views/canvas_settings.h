@@ -12,25 +12,8 @@ namespace draw
 {
 
 
-template<typename T>
-struct CanvasFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::viewSettings, "viewSettings"),
-        fields::Field(&T::mousePosition, "mousePosition"),
-        fields::Field(&T::logicalPosition, "logicalPosition"),
-        fields::Field(&T::window, "window"),
-        fields::Field(&T::mouseDown, "mouseDown"),
-        fields::Field(&T::rightMouseDown, "rightMouseDown"),
-        fields::Field(&T::modifier, "modifier"),
-        fields::Field(&T::keyCode, "keyCode"),
-        fields::Field(&T::cursor, "cursor"),
-        fields::Field(&T::menuId, "menuId"));
-};
-
-
 template<template<typename> typename T>
-struct CanvasTemplate
+struct CanvasSchema
 {
     T<ViewSettingsGroup> viewSettings;
     T<PointGroup> mousePosition;
@@ -43,12 +26,11 @@ struct CanvasTemplate
     T<wxpex::Cursor> cursor;
     T<wxWindowID> menuId;
 
-    static constexpr auto fields = CanvasFields<CanvasTemplate>::fields;
     static constexpr auto fieldsTypeName = "CanvasSettings";
 };
 
 
-struct CanvasCustom
+struct CanvasFinisher
 {
     template<typename Base>
     struct Model: public Base
@@ -123,7 +105,7 @@ struct CanvasCustom
 
 
 using CanvasGroup =
-    pex::Group<CanvasTemplate, CanvasCustom>;
+    pex::Group<CanvasSchema, CanvasFinisher>;
 
 using CanvasSettings = typename CanvasGroup::Plain;
 using CanvasModel = typename CanvasGroup::Model;
@@ -135,6 +117,6 @@ using CanvasControl = typename CanvasGroup::DefaultControl;
 
 extern template struct pex::Group
     <
-        draw::CanvasTemplate,
-        draw::CanvasCustom
+        draw::CanvasSchema,
+        draw::CanvasFinisher
     >;

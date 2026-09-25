@@ -3,6 +3,6 @@
 
 template struct pex::Group
     <
-        draw::CrossTemplate,
-        draw::CrossCustom
+        draw::CrossSchema,
+        draw::CrossFinisher
     >;

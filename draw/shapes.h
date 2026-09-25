@@ -130,18 +130,6 @@ struct ShapeSupers
 };
 
 
-template<typename T>
-struct ShapeFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::id, "id"),
-        fields::Field(&T::order, "order"),
-        fields::Field(&T::shape, "shape"),
-        fields::Field(&T::look, "look"),
-        fields::Field(&T::node, "node"));
-};
-
-
 struct NoView {};
 
 
@@ -151,7 +139,7 @@ struct ShapeCommon
     using Supers = ShapeSupers;
 
     template<template<typename> typename T>
-    struct Template
+    struct Schema
     {
         // id is read-only to a control
         T<pex::ReadOnly<int64_t>> id;
@@ -160,13 +148,11 @@ struct ShapeCommon
         T<LookGroup> look;
         T<NodeSettingsGroup> node;
 
-        static constexpr auto fields = ShapeFields<Template>::fields;
-
         static constexpr auto fieldsTypeName =
-            ShapeGroup::template Template<pex::Identity>::fieldsTypeName;
+            ShapeGroup::template Schema<pex::Identity>::fieldsTypeName;
     };
 
-    using ControlMembers = Template<pex::ControlSelector>;
+    using ControlMembers = Schema<pex::ControlTailor>;
 
     template<typename Base>
     class Model: public Base

@@ -11,31 +11,18 @@ namespace draw
 {
 
 
-template<typename T>
-struct LookDisplayFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::lookExpand, "lookExpand"),
-        fields::Field(&T::strokeExpand, "strokeExpand"),
-        fields::Field(&T::fillExpand, "fillExpand"));
-};
-
-
 template<template<typename> typename T>
-struct LookDisplayTemplate
+struct LookDisplaySchema
 {
     T<bool> lookExpand;
     T<bool> strokeExpand;
     T<bool> fillExpand;
 
-    static constexpr auto fields =
-        LookDisplayFields<LookDisplayTemplate>::fields;
-
     static constexpr auto fieldsTypeName = "LookDisplay";
 };
 
 
-using LookDisplayGroup = pex::Group<LookDisplayTemplate>;
+using LookDisplayGroup = pex::Group<LookDisplaySchema>;
 using LookDisplayControl = typename LookDisplayGroup::DefaultControl;
 
 

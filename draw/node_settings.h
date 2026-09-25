@@ -12,31 +12,19 @@ namespace draw
 {
 
 
-template<typename T>
-struct NodeSettingsFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::toggleSelect, "toggleSelect"),
-        fields::Field(&T::isSelected, "isSelected"),
-        fields::Field(&T::highlightColor, "highlightColor"));
-};
-
-
 template<template<typename> typename T>
-struct NodeSettingsTemplate
+struct NodeSettingsSchema
 {
     T<pex::MakeSignal> toggleSelect;
     T<bool> isSelected;
     T<tau::HsvGroup<double>> highlightColor;
 
-    static constexpr auto fields =
-        NodeSettingsFields<NodeSettingsTemplate>::fields;
-
     static constexpr auto fieldsTypeName = "NodeSettings";
+    static constexpr bool fieldsHidden = true;
 };
 
 
-struct NodeSettingsCustom
+struct NodeSettingsFinisher
 {
     template<typename Base>
     struct Plain: public Base
@@ -59,8 +47,8 @@ struct NodeSettingsCustom
 using NodeSettingsGroup =
     pex::Group
     <
-        NodeSettingsTemplate,
-        NodeSettingsCustom
+        NodeSettingsSchema,
+        NodeSettingsFinisher
     >;
 
 using NodeSettingsModel = typename NodeSettingsGroup::Model;

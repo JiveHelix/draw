@@ -13,20 +13,8 @@ namespace draw
 {
 
 
-template<typename T>
-struct EllipseFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::center, "center"),
-        fields::Field(&T::major, "major"),
-        fields::Field(&T::minor, "minor"),
-        fields::Field(&T::rotation, "rotation"),
-        fields::Field(&T::scale, "scale"));
-};
-
-
 template<template<typename> typename T>
-struct EllipseTemplate
+struct EllipseSchema
 {
     using AxisRange = pex::MakeRange<double, pex::Limit<0>, pex::Limit<1000>>;
 
@@ -39,12 +27,11 @@ struct EllipseTemplate
     T<AngleRange> rotation;
     T<ScaleRange> scale;
 
-    static constexpr auto fields = EllipseFields<EllipseTemplate>::fields;
     static constexpr auto fieldsTypeName = "Ellipse";
 };
 
 
-struct Ellipse: public EllipseTemplate<pex::Identity>
+struct Ellipse: public EllipseSchema<pex::Identity>
 {
     using Point = tau::Point2d<double>;
 
@@ -57,7 +44,7 @@ struct Ellipse: public EllipseTemplate<pex::Identity>
 };
 
 
-struct EllipseCustom
+struct EllipseFinisher
 {
     using Plain = Ellipse;
 };
@@ -65,8 +52,8 @@ struct EllipseCustom
 
 using EllipseGroup = pex::Group
 <
-    EllipseTemplate,
-    EllipseCustom
+    EllipseSchema,
+    EllipseFinisher
 >;
 
 using EllipseModel = typename EllipseGroup::Model;
@@ -83,6 +70,6 @@ DECLARE_OUTPUT_STREAM_OPERATOR(Ellipse)
 
 extern template struct pex::Group
 <
-    draw::EllipseTemplate,
-    draw::EllipseCustom
+    draw::EllipseSchema,
+    draw::EllipseFinisher
 >;

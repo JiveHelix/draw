@@ -239,4 +239,4 @@ std::optional<size_t> QuadLines::Find(
 } // end namespace draw
 
 
-template struct pex::Group<draw::PerspectiveTemplate>;
+template struct pex::Group<draw::PerspectiveSchema>;

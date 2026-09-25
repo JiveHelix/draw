@@ -12,23 +12,12 @@
 namespace draw
 {
 
-template<typename T>
-struct PointsShapeFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::radius, "radius"),
-        fields::Field(&T::look, "look"));
-};
-
 
 template<template<typename> typename T>
-struct PointsShapeTemplate
+struct PointsShapeSchema
 {
     T<pex::MakeRange<double, pex::Limit<0>, pex::Limit<20>>> radius;
     T<LookGroup> look;
-
-    static constexpr auto fields =
-        PointsShapeFields<PointsShapeTemplate>::fields;
 
     static constexpr auto fieldsTypeName = "PointsShape";
 };
@@ -36,7 +25,7 @@ struct PointsShapeTemplate
 
 struct PointsShapeSettings
     :
-    public PointsShapeTemplate<pex::Identity>
+    public PointsShapeSchema<pex::Identity>
 {
     PointsShapeSettings();
 };
@@ -61,7 +50,7 @@ public:
 
 using PointsShapeGroup = pex::Group
 <
-    PointsShapeTemplate,
+    PointsShapeSchema,
     pex::PlainT<PointsShapeSettings>
 >;
 
@@ -93,6 +82,6 @@ public:
 
 extern template struct pex::Group
 <
-    draw::PointsShapeTemplate,
+    draw::PointsShapeSchema,
     pex::PlainT<draw::PointsShapeSettings>
 >;

@@ -11,27 +11,17 @@
 namespace draw
 {
 
-template<typename T>
-struct EdgeSettingsFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::look, "look"));
-};
-
 
 template<template<typename> typename T>
-struct EdgeSettingsTemplate
+struct EdgeSettingsSchema
 {
     T<LookGroup> look;
-
-    static constexpr auto fields =
-        EdgeSettingsFields<EdgeSettingsTemplate>::fields;
 
     static constexpr auto fieldsTypeName = "EdgeShape";
 };
 
 
-using EdgeSettingsGroup = pex::Group<EdgeSettingsTemplate>;
+using EdgeSettingsGroup = pex::Group<EdgeSettingsSchema>;
 
 using EdgeSettings = typename EdgeSettingsGroup::Plain;
 using EdgeShapeModel = typename EdgeSettingsGroup::Model;
@@ -66,6 +56,6 @@ public:
 
 extern template struct pex::Group
 <
-    draw::EdgeSettingsTemplate,
+    draw::EdgeSettingsSchema,
     pex::PlainT<draw::EdgeSettings>
 >;

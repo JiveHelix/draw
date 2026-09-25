@@ -31,7 +31,7 @@ protected:
         points[this->index_] = this->GetPosition(end);
 
         return std::make_shared<DerivedShape>(
-            typename DerivedShape::TemplateBase{
+            typename DerivedShape::SchemaBase{
                 this->startingShape_.id,
                 {},
                 Polygon(points),
@@ -106,7 +106,7 @@ protected:
         line.point = this->GetPosition(end);
 
         return std::make_shared<DerivedShape>(
-            typename DerivedShape::TemplateBase{
+            typename DerivedShape::SchemaBase{
                 this->startingShape_.id,
                 {},
                 Polygon(lines.GetPoints()),

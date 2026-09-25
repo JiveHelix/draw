@@ -7,7 +7,7 @@ namespace draw
 
 PointsShapeSettings::PointsShapeSettings()
     :
-    PointsShapeTemplate<pex::Identity>{
+    PointsShapeSchema<pex::Identity>{
         2.0,
         {}}
 {
@@ -83,6 +83,6 @@ void ValuePointsShape::Draw(DrawContext &context)
 
 template struct pex::Group
 <
-    draw::PointsShapeTemplate,
+    draw::PointsShapeSchema,
     pex::PlainT<draw::PointsShapeSettings>
 >;

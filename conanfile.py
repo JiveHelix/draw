@@ -4,7 +4,7 @@ from conan import ConanFile
 
 class DrawConan(ConanFile):
     name = "draw"
-    version = "0.3.0"
+    version = "0.4.0"
 
     python_requires = "boiler/0.2"
     python_requires_extend = "boiler.LibraryConanFile"
@@ -20,9 +20,9 @@ class DrawConan(ConanFile):
         self.test_requires("catch2/2.13.8")
 
     def requirements(self):
-        self.requires("jive/[>=1.4 <2]", transitive_headers=False)
-        self.requires("fields/[>=1.5 <2]", transitive_headers=False)
-        self.requires("pex/[>=1.1 <2]", transitive_headers=False)
-        self.requires("tau/[>=1.13 <2]", transitive_headers=False)
+        self.requires("jive/[>=1.7 <2]", transitive_headers=False)
+        self.requires("fields/[>=1.8 <2]", transitive_headers=False)
+        self.requires("pex/[>=1.4 <2]", transitive_headers=False)
+        self.requires("tau/[>=1.16 <2]", transitive_headers=False)
         self.requires("wxpex/[>=1.0 <2]", transitive_headers=False)
         self.requires("libpng/[~1.6]", transitive_headers=True)

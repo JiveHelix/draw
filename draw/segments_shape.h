@@ -29,8 +29,8 @@ struct CurveStyleChoices
 
 
 using CurveStyleSelect = pex::MakeSelect<CurveStyleChoices>;
-using CurveStyleModel = pex::ModelSelector<CurveStyleSelect>;
-using CurveStyleControl = pex::ControlSelector<CurveStyleSelect>;
+using CurveStyleModel = pex::ModelTailor<CurveStyleSelect>;
+using CurveStyleControl = pex::ControlTailor<CurveStyleSelect>;
 
 struct CurveStyleConverter
 {
@@ -45,31 +45,18 @@ using CurveStyleComboBox =
     wxpex::ComboBox<CurveStyleControl, CurveStyleConverter>;
 
 
-template<typename T>
-struct SegmentsSettingsFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::curveStyle, "curveStyle"),
-        fields::Field(&T::drawPoints, "drawPoints"),
-        fields::Field(&T::look, "look"));
-};
-
-
 template<template<typename> typename T>
-struct SegmentsSettingsTemplate
+struct SegmentsSettingsSchema
 {
     T<CurveStyleSelect> curveStyle;
     T<bool> drawPoints;
     T<LookGroup> look;
 
-    static constexpr auto fields =
-        SegmentsSettingsFields<SegmentsSettingsTemplate>::fields;
-
     static constexpr auto fieldsTypeName = "SegmentsSettings";
 };
 
 
-using SegmentsSettingsGroup = pex::Group<SegmentsSettingsTemplate>;
+using SegmentsSettingsGroup = pex::Group<SegmentsSettingsSchema>;
 
 using SegmentsSettings = typename SegmentsSettingsGroup::Plain;
 using SegmentsSettingsModel = typename SegmentsSettingsGroup::Model;

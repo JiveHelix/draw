@@ -4,6 +4,8 @@
 #include "common/shape_demo_brain.h"
 #include <draw/shape_creator.h>
 #include <draw/hue_generator.h>
+#include <fields/serialize.h>
+#include <fstream>
 
 
 class DemoBrain: public ShapeDemoBrain<DemoBrain>
@@ -77,6 +79,13 @@ public:
         defer.fill.color.saturation.Set(0.75);
         defer.fill.color.value.Set(0.50);
         defer.fill.color.alpha.Set(1.0);
+
+        auto shapes = this->demoControl_.shapes.Get();
+
+        std::cout << "\nShapes:" << fields::Describe(shapes, 1) << std::endl;
+
+        std::ofstream testOutput("shapes.json");
+        testOutput << fields::ToJson(shapes) << std::endl;
     }
 
 private:

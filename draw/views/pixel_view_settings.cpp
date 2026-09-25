@@ -3,6 +3,6 @@
 
 template struct pex::Group
     <
-        draw::PixelViewTemplate,
-        draw::PixelViewTemplates
+        draw::PixelViewSchema,
+        draw::PixelViewFinisher
     >;

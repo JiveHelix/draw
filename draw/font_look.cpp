@@ -36,6 +36,6 @@ void ConfigureFontLook(
 
 template struct pex::Group
     <
-        draw::FontLookTemplate,
+        draw::FontLookSchema,
         pex::PlainT<draw::FontLook>
     >;

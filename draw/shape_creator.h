@@ -211,8 +211,6 @@ public:
         return this->creationMenu_;
     }
 
-    // using ShapeControl = pex::poly::ControlWrapperTemplate<ShapeSupers>;
-
     // Returns true if the shape should be deleted
     bool ProcessAction(ActionType action, ListedShape &shapeControl)
     {

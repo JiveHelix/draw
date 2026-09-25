@@ -15,18 +15,8 @@ namespace draw
 {
 
 
-template<typename T>
-struct PixelViewFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::canvas, "canvas"),
-        fields::Field(&T::pixels, "pixels"),
-        fields::Field(&T::shapes, "shapes"));
-};
-
-
 template<template<typename> typename T>
-struct PixelViewTemplate
+struct PixelViewSchema
 {
     using AsyncPixels = wxpex::MakeAsync<std::shared_ptr<draw::Pixels>>;
     using AsyncShapes = wxpex::MakeAsync<Shapes>;
@@ -35,12 +25,11 @@ struct PixelViewTemplate
     T<AsyncPixels> pixels;
     T<AsyncShapes> shapes;
 
-    static constexpr auto fields = PixelViewFields<PixelViewTemplate>::fields;
     static constexpr auto fieldsTypeName = "PixelView";
 };
 
 
-struct PixelViewTemplates
+struct PixelViewFinisher
 {
     template<typename Base>
     struct Model: public Base
@@ -94,7 +83,7 @@ struct PixelViewTemplates
 };
 
 
-using PixelViewGroup = pex::Group<PixelViewTemplate, PixelViewTemplates>;
+using PixelViewGroup = pex::Group<PixelViewSchema, PixelViewFinisher>;
 
 using PixelViewSettings = typename PixelViewGroup::Plain;
 using PixelViewModel = typename PixelViewGroup::Model;
@@ -108,6 +97,6 @@ using AsyncShapesControl = typename PixelViewControl::AsyncShapesControl;
 
 extern template struct pex::Group
     <
-        draw::PixelViewTemplate,
-        draw::PixelViewTemplates
+        draw::PixelViewSchema,
+        draw::PixelViewFinisher
     >;

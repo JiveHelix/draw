@@ -13,17 +13,6 @@ namespace draw
 {
 
 
-template<typename T>
-struct PolygonFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::center, "center"),
-        fields::Field(&T::scale, "scale"),
-        fields::Field(&T::rotation, "rotation"),
-        fields::Field(&T::points, "points"));
-};
-
-
 using CenterGroup = tau::Point2dGroup<double>;
 
 using RotationRange =
@@ -46,25 +35,24 @@ struct CenteredPoints
 
 
 template<template<typename> typename T>
-struct PolygonTemplate
+struct PolygonSchema
 {
     T<CenterGroup> center;
     T<ScaleRange> scale;
     T<RotationRange> rotation;
     T<pex::List<tau::Point2dGroup<double>, 4>> points;
 
-    static constexpr auto fields = PolygonFields<PolygonTemplate>::fields;
     static constexpr auto fieldsTypeName = "Polygon";
 };
 
 
-struct Polygon: public PolygonTemplate<pex::Identity>
+struct Polygon: public PolygonSchema<pex::Identity>
 {
     using Point = tau::Point2d<double>;
 
     Polygon()
         :
-        PolygonTemplate<pex::Identity>{
+        PolygonSchema<pex::Identity>{
             Point(0.0, 0.0),
             1.0,
             0.0,
@@ -91,15 +79,15 @@ private:
 };
 
 
-struct PolygonCustom
+struct PolygonFinisher
 {
     using Plain = Polygon;
 };
 
 using PolygonGroup = pex::Group
 <
-    PolygonTemplate,
-    PolygonCustom
+    PolygonSchema,
+    PolygonFinisher
 >;
 
 using PolygonControl = typename PolygonGroup::DefaultControl;
@@ -129,6 +117,6 @@ DECLARE_EQUALITY_OPERATORS(Polygon)
 
 extern template struct pex::Group
     <
-        draw::PolygonTemplate,
-        draw::PolygonCustom
+        draw::PolygonSchema,
+        draw::PolygonFinisher
     >;

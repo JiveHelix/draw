@@ -21,17 +21,16 @@ using ShearRange =
 
 
 template<template<typename> typename T>
-struct ShearTemplate
+struct ShearSchema
 {
     T<ShearRange> x;
     T<ShearRange> y;
 
-    static constexpr auto fields = AffineFields<ShearTemplate>::fields;
     static constexpr auto fieldsTypeName = "Shear";
 };
 
 
-using ShearGroup = pex::Group<ShearTemplate>;
+using ShearGroup = pex::Group<ShearSchema>;
 
 using Shear = typename ShearGroup::Plain;
 using ShearModel = typename ShearGroup::Model;
@@ -41,26 +40,12 @@ DECLARE_OUTPUT_STREAM_OPERATOR(Shear)
 DECLARE_EQUALITY_OPERATORS(Shear)
 
 
-template<typename T>
-struct QuadFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::center, "center"),
-        fields::Field(&T::size, "size"),
-        fields::Field(&T::scale, "scale"),
-        fields::Field(&T::rotation, "rotation"),
-        fields::Field(&T::shear, "shear"),
-        fields::Field(&T::perspective, "perspective"),
-        fields::Field(&T::reset, "reset"));
-};
-
-
 using RotationRange =
     pex::MakeRange<double, pex::Limit<-180>, pex::Limit<180>>;
 
 
 template<template<typename> typename T>
-struct QuadTemplate
+struct QuadSchema
 {
     T<CenterGroup> center;
     T<SizeGroup> size;
@@ -70,21 +55,20 @@ struct QuadTemplate
     T<PerspectiveGroup> perspective;
     T<pex::MakeSignal> reset;
 
-    static constexpr auto fields = QuadFields<QuadTemplate>::fields;
     static constexpr auto fieldsTypeName = "Quad";
 };
 
 
-struct QuadGroupTemplates_
+struct QuadGroupFinisher
 {
-    struct Plain: public QuadTemplate<pex::Identity>
+    struct Plain: public QuadSchema<pex::Identity>
     {
         using Point = typename CenterGroup::Plain;
         using Size = typename SizeGroup::Plain;
 
         Plain()
             :
-            QuadTemplate<pex::Identity>{
+            QuadSchema<pex::Identity>{
                 Point(960, 540),
                 Size(300, 200),
                 1.0,
@@ -142,8 +126,8 @@ struct QuadGroupTemplates_
 
 using QuadGroup = pex::Group
 <
-    QuadTemplate,
-    QuadGroupTemplates_
+    QuadSchema,
+    QuadGroupFinisher
 >;
 
 using Quad = typename QuadGroup::Plain;
@@ -159,11 +143,11 @@ DECLARE_EQUALITY_OPERATORS(Quad)
 
 
 
-extern template struct pex::Group<draw::ShearTemplate>;
+extern template struct pex::Group<draw::ShearSchema>;
 
 
 extern template struct pex::Group
 <
-    draw::QuadTemplate,
-    draw::QuadGroupTemplates_
+    draw::QuadSchema,
+    draw::QuadGroupFinisher
 >;

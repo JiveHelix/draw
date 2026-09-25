@@ -8,24 +8,8 @@
 #include <draw/views/pixel_view_settings.h>
 
 
-template<typename T>
-struct UserFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::openFile, "openFile"),
-        fields::Field(&T::fileName, "fileName"),
-        fields::Field(&T::saveSettings, "saveSettings"),
-        fields::Field(&T::loadSettings, "loadSettings"),
-        fields::Field(&T::quit, "quit"),
-        fields::Field(&T::about, "about"),
-        fields::Field(&T::showPixelViewLayout, "showPixelViewLayout"),
-        fields::Field(&T::pixelView, "pixelView"),
-        fields::Field(&T::errors, "errors"));
-};
-
-
 template<template<typename> typename T>
-struct UserTemplate
+struct UserSchema
 {
     T<pex::MakeSignal> openFile;
     T<std::string> fileName;
@@ -37,12 +21,11 @@ struct UserTemplate
     T<draw::PixelViewGroup> pixelView;
     T<std::string> errors;
 
-    static constexpr auto fields = UserFields<UserTemplate>::fields;
     static constexpr auto fieldsTypeName = "User";
 };
 
 
-struct UserCustom
+struct UserFinisher
 {
     template<typename Base>
     struct Model: public Base
@@ -57,7 +40,7 @@ struct UserCustom
 };
 
 
-using UserGroup = pex::Group<UserTemplate, UserCustom>;
+using UserGroup = pex::Group<UserSchema, UserFinisher>;
 using UserControl = typename UserGroup::DefaultControl;
 using UserModel = typename UserGroup::Model;
 

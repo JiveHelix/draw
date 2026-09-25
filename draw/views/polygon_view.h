@@ -28,7 +28,7 @@ class PointsView: public wxListView
 public:
     static constexpr auto observerName = "PointsView";
 
-    using Control = typename pex::ControlSelector<PointsDouble>;
+    using Control = typename pex::ControlTailor<PointsDouble>;
 
     using Converter = pex::Converter<double, wxpex::ViewTraits<10, 0, 1>>;
 

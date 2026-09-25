@@ -12,16 +12,6 @@ namespace draw
 {
 
 
-template<typename T>
-struct CrossFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::center, "center"),
-        fields::Field(&T::size, "size"),
-        fields::Field(&T::rotation, "rotation"));
-};
-
-
 using RotationRange =
     pex::MakeRange<double, pex::Limit<-180>, pex::Limit<180>>;
 
@@ -30,13 +20,12 @@ using SizeRange =
 
 
 template<template<typename> typename T>
-struct CrossTemplate
+struct CrossSchema
 {
     T<tau::Point2dGroup<double>> center;
     T<SizeRange> size;
     T<RotationRange> rotation;
 
-    static constexpr auto fields = CrossFields<CrossTemplate>::fields;
     static constexpr auto fieldsTypeName = "Cross";
 };
 
@@ -66,7 +55,7 @@ struct Cross_: public Base
 };
 
 
-struct CrossCustom
+struct CrossFinisher
 {
     template<typename Base>
     using Plain = Cross_<Base>;
@@ -74,7 +63,7 @@ struct CrossCustom
 
 
 
-using CrossGroup = pex::Group<CrossTemplate, CrossCustom>;
+using CrossGroup = pex::Group<CrossSchema, CrossFinisher>;
 using CrossControl = typename CrossGroup::DefaultControl;
 using Cross = typename CrossGroup::Plain;
 
@@ -90,6 +79,6 @@ DECLARE_EQUALITY_OPERATORS(Cross)
 
 extern template struct pex::Group
     <
-        draw::CrossTemplate,
-        draw::CrossCustom
+        draw::CrossSchema,
+        draw::CrossFinisher
     >;

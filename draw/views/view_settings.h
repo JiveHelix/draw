@@ -4,6 +4,7 @@
 #include <fields/fields.h>
 #include <pex/group.h>
 #include <pex/endpoint.h>
+#include <pex/for_each.h>
 #include <fmt/core.h>
 
 #include <draw/size.h>
@@ -16,38 +17,8 @@ namespace draw
 {
 
 
-template<typename T>
-struct ViewFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::screenPosition, "screenPosition"),
-        fields::Field(&T::imageSize, "imageSize"),
-        fields::Field(&T::viewSize, "viewSize"),
-        fields::Field(&T::windowSize, "windowSize"),
-        fields::Field(&T::virtualSize, "virtualSize"),
-        fields::Field(&T::viewPosition, "viewPosition"),
-        fields::Field(&T::imagePivot, "imagePivot"),
-        fields::Field(&T::scale, "scale"),
-        fields::Field(&T::linkZoom, "linkZoom"),
-        fields::Field(&T::resetZoom, "resetZoom"),
-        fields::Field(&T::fitZoom, "fitZoom"),
-        fields::Field(&T::recenter, "recenter"),
-
-        fields::Field(&T::resetHorizontalZoom, "resetHorizontalZoom"),
-        fields::Field(&T::resetVerticalZoom, "resetVerticalZoom"),
-
-        fields::Field(&T::fitHorizontalZoom, "fitHorizontalZoom"),
-        fields::Field(&T::fitVerticalZoom, "fitVerticalZoom"),
-
-        fields::Field(&T::recenterHorizontal, "recenterHorizontal"),
-        fields::Field(&T::recenterVertical, "recenterVertical"),
-
-        fields::Field(&T::keepCenter, "keepCenter"));
-};
-
-
 template<template<typename> typename T>
-struct ViewTemplate
+struct ViewSettingsSchema
 {
     T<IntPointGroup> screenPosition;
     T<SizeGroup> imageSize;
@@ -69,7 +40,6 @@ struct ViewTemplate
     T<pex::MakeSignal> recenterVertical;
     T<pex::MakeSelect<KeepCenterChoices>> keepCenter;
 
-    static constexpr auto fields = ViewFields<ViewTemplate>::fields;
     static constexpr auto fieldsTypeName = "View";
 };
 
@@ -77,7 +47,7 @@ struct ViewTemplate
 struct ViewBrain
 {
 public:
-    using ModelMembers = ViewTemplate<pex::ModelSelector>;
+    using ModelMembers = ViewSettingsSchema<pex::ModelTailor>;
 
     static constexpr auto observerName = "ViewBrain";
 
@@ -204,11 +174,13 @@ private:
 IntPoint GetMaximumViewPosition(const Size &viewSize, const Size &virtualSize);
 
 
-struct ViewSettingsCustom
+struct ViewSettingsFinisher
 {
     template<typename Base>
     struct Plain: public Base
     {
+        // using Reflector = Base;
+
         static constexpr int defaultWidth = 1920;
         static constexpr int defaultHeight = 1080;
 
@@ -289,6 +261,13 @@ struct ViewSettingsCustom
     {
         using Base::Base;
 
+        Control()
+            :
+            Base{}
+        {
+            PEX_NAME("ViewSettingsControl");
+        }
+
         Control(typename Base::Upstream &upstream)
             :
             Base(upstream)
@@ -305,7 +284,7 @@ struct ViewSettingsCustom
 
 
 using ViewSettingsGroup =
-    pex::Group<ViewTemplate, ViewSettingsCustom>;
+    pex::Group<ViewSettingsSchema, ViewSettingsFinisher>;
 
 
 using ViewSettings = typename ViewSettingsGroup::Plain;

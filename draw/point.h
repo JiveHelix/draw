@@ -32,6 +32,7 @@ struct ValuePoint: public tau::Point2d<T>
 {
     T value;
 
+    // Explicitly specify fields here because we are extending Point2d.
     static constexpr auto fields = std::make_tuple(
         fields::Field(&ValuePoint::x, "x"),
         fields::Field(&ValuePoint::y, "y"),

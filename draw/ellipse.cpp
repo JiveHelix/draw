@@ -7,7 +7,7 @@ namespace draw
 
 Ellipse::Ellipse()
     :
-    EllipseTemplate<pex::Identity>{
+    EllipseSchema<pex::Identity>{
         Point(400.0, 400.0),
         200.0,
         300.0,
@@ -124,6 +124,6 @@ void Ellipse::Draw(DrawContext &context)
 
 template struct pex::Group
 <
-    draw::EllipseTemplate,
-    draw::EllipseCustom
+    draw::EllipseSchema,
+    draw::EllipseFinisher
 >;

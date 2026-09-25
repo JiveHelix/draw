@@ -101,7 +101,8 @@ struct View
     tau::Region<T> target;
     tau::Scale<ScaleType> scale;
 
-
+    // This class is not aggregate.
+    // Explicitly specify fields.
     static constexpr auto fields = std::make_tuple(
         fields::Field(&View::source, "source"),
         fields::Field(&View::target, "target"),

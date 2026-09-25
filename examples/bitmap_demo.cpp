@@ -23,61 +23,36 @@
 using MonoValue = int32_t;
 
 
-
-template<typename T>
-struct DrawingFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::regularPolygon, "regularPolygon"),
-        fields::Field(&T::look, "look"),
-        fields::Field(&T::colorMapSettings, "colorMapSettings"));
-};
-
-
 template<template<typename> typename T>
-struct DrawingTemplate
+struct DrawingSchema
 {
     T<draw::RegularPolygonGroup> regularPolygon;
     T<draw::LookGroup> look;
     T<tau::ColorMapSettingsGroup<MonoValue>> colorMapSettings;
 
-    static constexpr auto fields = DrawingFields<DrawingTemplate>::fields;
     static constexpr auto fieldsTypeName = "DrawingSettings";
 };
 
 
-using DrawingGroup = pex::Group<DrawingTemplate>;
+using DrawingGroup = pex::Group<DrawingSchema>;
 using DrawingModel = typename DrawingGroup::Model;
 using DrawingControl = typename DrawingGroup::DefaultControl;
 using DrawingSettings = typename DrawingGroup::Plain;
 
 
-
-template<typename T>
-struct DemoFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::drawing, "drawing"),
-        fields::Field(&T::requestDrawing, "requestDrawing"),
-        fields::Field(&T::renderCanvas, "renderCanvas"),
-        fields::Field(&T::pixelView, "pixelView"));
-};
-
-
 template<template<typename> typename T>
-struct DemoTemplate
+struct DemoSchema
 {
     T<DrawingGroup> drawing;
     T<pex::MakeSignal> requestDrawing;
     T<draw::CanvasGroup> renderCanvas;
     T<draw::PixelViewGroup> pixelView;
 
-    static constexpr auto fields = DemoFields<DemoTemplate>::fields;
     static constexpr auto fieldsTypeName = "Demo";
 };
 
 
-struct DemoCustom
+struct DemoFinisher
 {
     template<typename Base>
     struct Model: public Base
@@ -134,7 +109,7 @@ struct DemoCustom
 };
 
 
-using DemoGroup = pex::Group<DemoTemplate, DemoCustom>;
+using DemoGroup = pex::Group<DemoSchema, DemoFinisher>;
 using DemoModel = typename DemoGroup::Model;
 using DemoControl = typename DemoGroup::DefaultControl;
 using DemoSettings = typename DemoGroup::Plain;

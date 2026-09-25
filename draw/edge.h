@@ -10,27 +10,17 @@ namespace draw
 {
 
 
-template<typename T>
-struct EdgeFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::start, "start"),
-        fields::Field(&T::end, "end"));
-};
-
-
 template<template<typename> typename T>
-struct EdgeTemplate
+struct EdgeSchema
 {
     T<tau::Point2dGroup<double>> start;
     T<tau::Point2dGroup<double>> end;
 
-    static constexpr auto fields = EdgeFields<EdgeTemplate>::fields;
     static constexpr auto fieldsTypeName = "Edge";
 };
 
 
-struct EdgeCustom
+struct EdgeFinisher
 {
     template<typename Base>
     struct Plain: public Base
@@ -83,7 +73,7 @@ struct EdgeCustom
 
 
 
-using EdgeGroup = pex::Group<EdgeTemplate, EdgeCustom>;
+using EdgeGroup = pex::Group<EdgeSchema, EdgeFinisher>;
 using EdgeControl = typename EdgeGroup::DefaultControl;
 using Edge = typename EdgeGroup::Plain;
 
@@ -99,6 +89,6 @@ DECLARE_EQUALITY_OPERATORS(Edge)
 
 extern template struct pex::Group
     <
-        draw::EdgeTemplate,
-        draw::EdgeCustom
+        draw::EdgeSchema,
+        draw::EdgeFinisher
     >;

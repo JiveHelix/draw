@@ -7,7 +7,7 @@ namespace draw
 
 LinesShapeSettings::LinesShapeSettings()
     :
-    LinesShapeTemplate<pex::Identity>{
+    LinesShapeSchema<pex::Identity>{
         true,
         1000.0,
         {}}
@@ -89,6 +89,6 @@ void LinesShape::Draw(DrawContext &context)
 
 template struct pex::Group
 <
-    draw::LinesShapeTemplate,
+    draw::LinesShapeSchema,
     pex::PlainT<draw::LinesShapeSettings>
 >;

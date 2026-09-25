@@ -35,25 +35,8 @@ using FrequencyRange =
 constexpr size_t initialFunctionCount = 4;
 
 
-template<typename T>
-struct SettingsFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::functionCount, "functionCount"),
-        fields::Field(&T::pointCount, "pointCount"),
-        fields::Field(&T::startFrequency, "startFrequency"),
-        fields::Field(&T::endFrequency, "endFrequency"),
-        fields::Field(&T::amplitude, "amplitude"),
-        fields::Field(&T::isLogarithmic, "isLogarithmic"),
-        fields::Field(&T::curveStyle, "curveStyle"),
-        fields::Field(&T::drawPoints, "drawPoints"),
-        fields::Field(&T::resetPhase, "resetPhase"),
-        fields::Field(&T::resetLook, "resetLook"));
-};
-
-
 template<template<typename> typename T>
-struct SettingsTemplate
+struct SettingsSchema
 {
     T<pex::MakeRange<size_t, pex::Limit<2>, pex::Limit<32>>> functionCount;
     T<pex::MakeRange<size_t, pex::Limit<2>, pex::Limit<2048>>> pointCount;
@@ -66,16 +49,15 @@ struct SettingsTemplate
     T<pex::MakeSignal> resetPhase;
     T<pex::MakeSignal> resetLook;
 
-    static constexpr auto fields = SettingsFields<SettingsTemplate>::fields;
     static constexpr auto fieldsTypeName = "Settings";
 };
 
 
-struct Settings: public SettingsTemplate<pex::Identity>
+struct Settings: public SettingsSchema<pex::Identity>
 {
     Settings()
         :
-        SettingsTemplate<pex::Identity>{
+        SettingsSchema<pex::Identity>{
             initialFunctionCount,
             256,
             1.0,
@@ -91,42 +73,29 @@ struct Settings: public SettingsTemplate<pex::Identity>
     }
 };
 
-using SettingsGroup =
-    pex::Group<SettingsTemplate, pex::PlainT<Settings>>;
+using SettingsGroup = pex::Group<SettingsSchema, pex::PlainT<Settings>>;
 
 using SettingsModel = typename SettingsGroup::Model;
 using SettingsControl = typename SettingsGroup::DefaultControl;
 
 
-template<typename T>
-struct TrigFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::amplitude, "amplitude"),
-        fields::Field(&T::frequency, "frequency"),
-        fields::Field(&T::phase, "phase"),
-        fields::Field(&T::look, "look"));
-};
-
-
 template<template<typename> typename T>
-struct TrigTemplate
+struct TrigSchema
 {
     T<pex::MakeRange<double, pex::Limit<0>, pex::Limit<1000>>> amplitude;
     T<FrequencyRange> frequency;
     T<pex::MakeRange<double, pex::Limit<-180>, pex::Limit<180>>> phase;
     T<draw::LookGroup> look;
 
-    static constexpr auto fields = TrigFields<TrigTemplate>::fields;
     static constexpr auto fieldsTypeName = "TrigSettings";
 };
 
 
-struct TrigSettings: public TrigTemplate<pex::Identity>
+struct TrigSettings: public TrigSchema<pex::Identity>
 {
     TrigSettings()
         :
-        TrigTemplate<pex::Identity>{
+        TrigSchema<pex::Identity>{
             400.0,
             1.0,
             0.0,
@@ -137,29 +106,17 @@ struct TrigSettings: public TrigTemplate<pex::Identity>
 };
 
 
-using TrigGroup =
-    pex::Group<TrigTemplate, pex::PlainT<TrigSettings>>;
-
+using TrigGroup = pex::Group<TrigSchema, pex::PlainT<TrigSettings>>;
 using TrigModel = typename TrigGroup::Model;
 using TrigControl = typename TrigGroup::DefaultControl;
 
 
-template<typename T>
-struct DemoFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::settings, "settings"),
-        fields::Field(&T::functions, "functions"));
-};
-
-
 template<template<typename> typename T>
-struct DemoTemplate
+struct DemoSchema
 {
     T<SettingsGroup> settings;
     T<pex::List<TrigGroup, initialFunctionCount>> functions;
 
-    static constexpr auto fields = DemoFields<DemoTemplate>::fields;
     static constexpr auto fieldsTypeName = "Demo";
 };
 
@@ -171,7 +128,7 @@ using BooleanControl = decltype(SettingsControl::isLogarithmic);
 using SignalControl = pex::control::DefaultSignal;
 
 
-struct DemoCustom
+struct DemoFinisher
 {
     template<typename Base>
     class Model: public Base
@@ -432,7 +389,7 @@ struct DemoCustom
 };
 
 
-using DemoGroup = pex::Group<DemoTemplate, DemoCustom>;
+using DemoGroup = pex::Group<DemoSchema, DemoFinisher>;
 using DemoModel = typename DemoGroup::Model;
 using DemoControl = typename DemoGroup::DefaultControl;
 

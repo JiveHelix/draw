@@ -12,30 +12,20 @@ namespace draw
 {
 
 
-template<typename T>
-struct AffineFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::x, "x"),
-        fields::Field(&T::y, "y"));
-};
-
-
 using PerspectiveRange =
     pex::MakeRange<double, pex::Limit<-90>, pex::Limit<90>>;
 
 template<template<typename> typename T>
-struct PerspectiveTemplate
+struct PerspectiveSchema
 {
     T<PerspectiveRange> x;
     T<PerspectiveRange> y;
 
-    static constexpr auto fields = AffineFields<PerspectiveTemplate>::fields;
     static constexpr auto fieldsTypeName = "Perspective";
 };
 
 
-using PerspectiveGroup = pex::Group<PerspectiveTemplate>;
+using PerspectiveGroup = pex::Group<PerspectiveSchema>;
 
 using Perspective = typename PerspectiveGroup::Plain;
 using PerspectiveModel = typename PerspectiveGroup::Model;
@@ -144,4 +134,4 @@ public:
 
 
 
-extern template struct pex::Group<draw::PerspectiveTemplate>;
+extern template struct pex::Group<draw::PerspectiveSchema>;

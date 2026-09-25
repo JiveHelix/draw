@@ -26,33 +26,19 @@ using BrightnessRanges =
     >;
 
 
-template<typename T>
-struct WaveformColorFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::range, "range"),
-        fields::Field(&T::count, "count"),
-        fields::Field(&T::color, "color"),
-        fields::Field(&T::highlightColor, "highlightColor"));
-};
-
-
 template<template<typename> typename T>
-struct WaveformColorTemplate
+struct WaveformColorSchema
 {
     T<BrightnessRanges::Group> range;
     T<pex::MakeRange<size_t, pex::Limit<1>, pex::Limit<64>>> count;
     T<wxpex::HsvGroup> color;
     T<wxpex::HsvGroup> highlightColor;
 
-    static constexpr auto fields =
-        WaveformColorFields<WaveformColorTemplate>::fields;
-
     static constexpr auto fieldsTypeName = "WaveformColor";
 };
 
 
-struct WaveformColor: public WaveformColorTemplate<pex::Identity>
+struct WaveformColor: public WaveformColorSchema<pex::Identity>
 {
     static constexpr size_t defaultCount = 20;
 
@@ -61,7 +47,7 @@ struct WaveformColor: public WaveformColorTemplate<pex::Identity>
 
     WaveformColor()
         :
-        WaveformColorTemplate<pex::Identity>{
+        WaveformColorSchema<pex::Identity>{
             BrightnessRanges::Settings{},
             defaultCount,
             {{defaultHue, 1.0, 1.0}},
@@ -79,7 +65,7 @@ DECLARE_EQUALITY_OPERATORS(WaveformColor)
 using WaveformColorGroup =
     pex::Group
     <
-        WaveformColorTemplate,
+        WaveformColorSchema,
         pex::PlainT<WaveformColor>
     >;
 
@@ -100,7 +86,7 @@ struct WaveformFields
 
 
 template<template<typename> typename T>
-struct WaveformTemplate
+struct WaveformSchema
 {
     T<bool> enable;
     T<size_t> maximumValue;
@@ -109,12 +95,12 @@ struct WaveformTemplate
     T<pex::MakeRange<double, pex::Limit<1>, pex::Limit<10>>> verticalScale;
     T<WaveformColorGroup> color;
 
-    static constexpr auto fields = WaveformFields<WaveformTemplate>::fields;
+    static constexpr auto fields = WaveformFields<WaveformSchema>::fields;
     static constexpr auto fieldsTypeName = "Waveform";
 };
 
 
-struct WaveformSettings: public WaveformTemplate<pex::Identity>
+struct WaveformSettings: public WaveformSchema<pex::Identity>
 {
     static constexpr size_t defaultMaximumValue = 255;
     static constexpr size_t defaultLevelCount = 256;
@@ -123,7 +109,7 @@ struct WaveformSettings: public WaveformTemplate<pex::Identity>
 
     WaveformSettings()
         :
-        WaveformTemplate<pex::Identity>{
+        WaveformSchema<pex::Identity>{
             true,
             defaultMaximumValue,
             defaultLevelCount,
@@ -141,7 +127,7 @@ DECLARE_EQUALITY_OPERATORS(WaveformSettings)
 
 
 using WaveformGroup =
-    pex::Group<WaveformTemplate, pex::PlainT<WaveformSettings>>;
+    pex::Group<WaveformSchema, pex::PlainT<WaveformSettings>>;
 
 using WaveformModel = typename WaveformGroup::Model;
 using WaveformControl = typename WaveformGroup::DefaultControl;
@@ -152,13 +138,13 @@ using WaveformControl = typename WaveformGroup::DefaultControl;
 
 extern template struct pex::Group
     <
-        draw::WaveformColorTemplate,
+        draw::WaveformColorSchema,
         pex::PlainT<draw::WaveformColor>
     >;
 
 
 extern template struct pex::Group
     <
-        draw::WaveformTemplate,
+        draw::WaveformSchema,
         pex::PlainT<draw::WaveformSettings>
     >;

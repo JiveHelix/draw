@@ -10,31 +10,19 @@
 namespace draw
 {
 
-template<typename T>
-struct LinesShapeFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::infinite, "infinite"),
-        fields::Field(&T::length, "length"),
-        fields::Field(&T::look, "look"));
-};
-
 
 template<template<typename> typename T>
-struct LinesShapeTemplate
+struct LinesShapeSchema
 {
     T<bool> infinite;
     T<pex::MakeRange<double, pex::Limit<0>, pex::Limit<2000>>> length;
     T<LookGroup> look;
 
-    static constexpr auto fields =
-        LinesShapeFields<LinesShapeTemplate>::fields;
-
     static constexpr auto fieldsTypeName = "LinesShape";
 };
 
 
-struct LinesShapeSettings: public LinesShapeTemplate<pex::Identity>
+struct LinesShapeSettings: public LinesShapeSchema<pex::Identity>
 {
     LinesShapeSettings();
 };
@@ -66,7 +54,7 @@ public:
 
 using LinesShapeGroup = pex::Group
 <
-    LinesShapeTemplate,
+    LinesShapeSchema,
     pex::PlainT<LinesShapeSettings>
 >;
 
@@ -79,6 +67,6 @@ using LinesShapeControl = typename LinesShapeGroup::DefaultControl;
 
 extern template struct pex::Group
 <
-    draw::LinesShapeTemplate,
+    draw::LinesShapeSchema,
     pex::PlainT<draw::LinesShapeSettings>
 >;

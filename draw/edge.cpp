@@ -3,6 +3,6 @@
 
 template struct pex::Group
     <
-        draw::EdgeTemplate,
-        draw::EdgeCustom
+        draw::EdgeSchema,
+        draw::EdgeFinisher
     >;

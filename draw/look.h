@@ -11,23 +11,8 @@ namespace draw
 {
 
 
-
-template<typename T>
-struct StrokeFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::enable, "enable"),
-        fields::Field(&T::weight, "weight"),
-        fields::Field(&T::color, "color"),
-        fields::Field(&T::penStyle, "penStyle"),
-        fields::Field(&T::penCap, "penCap"),
-        fields::Field(&T::penJoin, "penJoin"),
-        fields::Field(&T::antialias, "antialias"));
-};
-
-
 template<template<typename> typename T>
-struct StrokeTemplate
+struct StrokeSchema
 {
     using WeightRange =
         pex::MakeRange<double, pex::Limit<0, 1, 10>, pex::Limit<100>>;
@@ -40,16 +25,15 @@ struct StrokeTemplate
     T<wxpex::PenJoinSelect> penJoin;
     T<bool> antialias;
 
-    static constexpr auto fields = StrokeFields<StrokeTemplate>::fields;
     static constexpr auto fieldsTypeName = "Stroke";
 };
 
 
-struct Stroke: public StrokeTemplate<pex::Identity>
+struct Stroke: public StrokeSchema<pex::Identity>
 {
     Stroke()
         :
-        StrokeTemplate<pex::Identity>{
+        StrokeSchema<pex::Identity>{
             true,
             1.0,
             {{0.0, 0.0, 1.0, 1.0}},
@@ -74,7 +58,7 @@ struct Stroke: public StrokeTemplate<pex::Identity>
 
 
 
-using StrokeGroup = pex::Group<StrokeTemplate, pex::PlainT<Stroke>>;
+using StrokeGroup = pex::Group<StrokeSchema, pex::PlainT<Stroke>>;
 
 using StrokeModel = typename StrokeGroup::Model;
 using StrokeControl = typename StrokeGroup::DefaultControl;
@@ -82,33 +66,22 @@ using StrokeControl = typename StrokeGroup::DefaultControl;
 DECLARE_EQUALITY_OPERATORS(Stroke)
 
 
-template<typename T>
-struct FillFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::enable, "enable"),
-        fields::Field(&T::color, "color"),
-        fields::Field(&T::brushStyle, "brushStyle"));
-};
-
-
 template<template<typename> typename T>
-struct FillTemplate
+struct FillSchema
 {
     T<bool> enable;
     T<wxpex::HsvaGroup> color;
     T<wxpex::BrushStyleSelect> brushStyle;
 
-    static constexpr auto fields = FillFields<FillTemplate>::fields;
     static constexpr auto fieldsTypeName = "Fill";
 };
 
 
-struct Fill: public FillTemplate<pex::Identity>
+struct Fill: public FillSchema<pex::Identity>
 {
     Fill()
         :
-        FillTemplate<pex::Identity>{
+        FillSchema<pex::Identity>{
             false,
             {{0.0, 0.0, 0.5, 1.0}},
             wxpex::BrushStyle::solid}
@@ -119,7 +92,7 @@ struct Fill: public FillTemplate<pex::Identity>
 
 
 
-using FillGroup = pex::Group<FillTemplate, pex::PlainT<Fill>>;
+using FillGroup = pex::Group<FillSchema, pex::PlainT<Fill>>;
 
 using FillModel = typename FillGroup::Model;
 using FillControl = typename FillGroup::DefaultControl;
@@ -127,32 +100,21 @@ using FillControl = typename FillGroup::DefaultControl;
 DECLARE_EQUALITY_OPERATORS(Fill)
 
 
-
-template<typename T>
-struct LookFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::stroke, "stroke"),
-        fields::Field(&T::fill, "fill"));
-};
-
-
 template<template<typename> typename T>
-struct LookTemplate
+struct LookSchema
 {
     T<StrokeGroup> stroke;
     T<FillGroup> fill;
 
-    static constexpr auto fields = LookFields<LookTemplate>::fields;
     static constexpr auto fieldsTypeName = "Look";
 };
 
 
-struct Look: public LookTemplate<pex::Identity>
+struct Look: public LookSchema<pex::Identity>
 {
     Look()
         :
-        LookTemplate<pex::Identity>{
+        LookSchema<pex::Identity>{
             Stroke{},
             Fill{}}
     {
@@ -162,7 +124,7 @@ struct Look: public LookTemplate<pex::Identity>
 
 
 
-using LookGroup = pex::Group<LookTemplate, pex::PlainT<Look>>;
+using LookGroup = pex::Group<LookSchema, pex::PlainT<Look>>;
 
 using LookModel = typename LookGroup::Model;
 using LookControl = typename LookGroup::DefaultControl;
@@ -175,6 +137,6 @@ DECLARE_EQUALITY_OPERATORS(Look)
 
 extern template struct pex::Group
     <
-        draw::LookTemplate,
+        draw::LookSchema,
         pex::PlainT<draw::Look>
     >;

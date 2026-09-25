@@ -3,6 +3,6 @@
 
 template struct pex::Group
     <
-        draw::LookTemplate,
+        draw::LookSchema,
         pex::PlainT<draw::Look>
     >;

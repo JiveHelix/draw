@@ -13,17 +13,6 @@ namespace draw
 {
 
 
-template<typename T>
-struct RegularPolygonFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::center, "center"),
-        fields::Field(&T::radius, "radius"),
-        fields::Field(&T::sides, "sides"),
-        fields::Field(&T::rotation_deg, "rotation (deg)"));
-};
-
-
 using CenterGroup = tau::Point2dGroup<double>;
 
 using RotationRange =
@@ -37,25 +26,22 @@ using RadiusRange =
 
 
 template<template<typename> typename T>
-struct RegularPolygonTemplate
+struct RegularPolygonSchema
 {
     T<CenterGroup> center;
     T<RadiusRange> radius;
     T<SidesRange> sides;
     T<RotationRange> rotation_deg;
 
-    static constexpr auto fields =
-        RegularPolygonFields<RegularPolygonTemplate>::fields;
-
     static constexpr auto fieldsTypeName = "RegularPolygon";
 };
 
 
-struct RegularPolygon: public RegularPolygonTemplate<pex::Identity>
+struct RegularPolygon: public RegularPolygonSchema<pex::Identity>
 {
     RegularPolygon()
         :
-        RegularPolygonTemplate<pex::Identity>{
+        RegularPolygonSchema<pex::Identity>{
             tau::Point2d<double>(0.0, 0.0),
             100.0,
             3,
@@ -70,7 +56,7 @@ struct RegularPolygon: public RegularPolygonTemplate<pex::Identity>
         size_t sideCount_,
         double rotation_deg_)
         :
-        RegularPolygonTemplate<pex::Identity>{
+        RegularPolygonSchema<pex::Identity>{
             center_,
             radius_,
             sideCount_,
@@ -99,14 +85,14 @@ private:
 };
 
 
-using SideLengthModel = pex::ModelSelector<double>;
-using SideLengthControl = pex::ControlSelector<double>;
+using SideLengthModel = pex::ModelTailor<double>;
+using SideLengthControl = pex::ControlTailor<double>;
 
 double GetRadius(size_t sides, double sideLength);
 
 double GetSideLength(size_t sides, double radius);
 
-struct RegularPolygonCustom
+struct RegularPolygonFinisher
 {
     using Plain = RegularPolygon;
 
@@ -228,8 +214,8 @@ struct RegularPolygonCustom
 
 using RegularPolygonGroup = pex::Group
 <
-    RegularPolygonTemplate,
-    RegularPolygonCustom
+    RegularPolygonSchema,
+    RegularPolygonFinisher
 >;
 
 using RegularPolygonControl = typename RegularPolygonGroup::DefaultControl;
@@ -246,6 +232,6 @@ DECLARE_EQUALITY_OPERATORS(RegularPolygon)
 
 extern template struct pex::Group
     <
-        draw::RegularPolygonTemplate,
-        draw::RegularPolygonCustom
+        draw::RegularPolygonSchema,
+        draw::RegularPolygonFinisher
     >;

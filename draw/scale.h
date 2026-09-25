@@ -4,7 +4,7 @@
 #include <tau/scale.h>
 #include <pex/group.h>
 #include <pex/range.h>
-#include <pex/selectors.h>
+#include <pex/tailors.h>
 #include <pex/endpoint.h>
 #include <wxpex/slider.h>
 
@@ -43,7 +43,7 @@ using ScaleRange =
 using ScaleGroup =
     pex::Group
     <
-        tau::ScaleTemplate<ScaleRange>::template Template,
+        tau::ScaleSchema<ScaleRange>::template Schema,
         pex::PlainT<Scale>
     >;
 
@@ -56,13 +56,13 @@ using ScaleEndpoint = pex::EndpointGroup<Observer, ScaleControl>;
 
 using LogarithmicScale = pex::control::LogarithmicRange
     <
-        pex::ModelSelector<ScaleRange>,
+        pex::ModelTailor<ScaleRange>,
         2,
         100
     >;
 
 using LinearScale =
-    typename pex::ControlSelector<ScaleRange>::Value;
+    typename pex::ControlTailor<ScaleRange>::Value;
 
 using ScaleSlider =
     wxpex::ValueSliderConvert

@@ -16,34 +16,25 @@ static_assert(pex::IsList<ShapeListMaker>);
 static_assert(pex::ListHasOrder<ShapeListMaker>);
 static_assert(pex::ListHasVirtualGetOrder<ShapeListMaker>);
 
-template<typename T>
-struct ShapeListFields
-{
-    static constexpr auto fields = std::make_tuple(
-        fields::Field(&T::shapes, "shapes"),
-        fields::Field(&T::shapesDisplay, "shapesDisplay"));
-};
-
 
 using OrderedShapes = pex::OrderedListGroup<ShapeListMaker>;
 
 
 
 template<template<typename> typename T>
-struct ShapeListTemplate
+struct ShapeListSchema
 {
     T<OrderedShapes> shapes;
     T<ShapeDisplayListMaker> shapesDisplay;
 
-    static constexpr auto fields = ShapeListFields<ShapeListTemplate>::fields;
     static constexpr auto fieldsTypeName = "ShapeList";
 };
 
 
-using OrderedShapesControl = pex::ControlSelector<OrderedShapes>;
+using OrderedShapesControl = pex::ControlTailor<OrderedShapes>;
 
 
-struct ShapeListCustom
+struct ShapeListFinisher
 {
     template<typename Base>
     class Model: public Base
@@ -121,7 +112,7 @@ struct ShapeListCustom
 };
 
 
-using ShapeListGroup = pex::Group<ShapeListTemplate, ShapeListCustom>;
+using ShapeListGroup = pex::Group<ShapeListSchema, ShapeListFinisher>;
 
 using ShapeListModel = typename ShapeListGroup::Model;
 using ShapeListControl = typename ShapeListGroup::DefaultControl;
